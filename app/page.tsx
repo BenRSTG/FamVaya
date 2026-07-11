@@ -1,0 +1,188 @@
+import Link from "next/link";
+import Image from "next/image";
+import { CheckCircle2, FerrisWheel, Home as HomeIcon, TreePine } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { QuickFamilyCheck } from "@/components/quick-family-check";
+import { AccommodationCard } from "@/components/cards/accommodation-card";
+import { ActivityCard } from "@/components/cards/activity-card";
+import { MicroAdventureCard } from "@/components/cards/micro-adventure-card";
+import { getFeaturedAccommodations } from "@/lib/data/accommodations";
+import { getFeaturedActivities } from "@/lib/data/activities";
+import { getFeaturedMicroAdventures } from "@/lib/data/micro-adventures";
+
+const WORLDS = [
+  {
+    href: "/familienunterkuenfte",
+    icon: HomeIcon,
+    title: "Familienunterkünfte",
+    description: "Für Urlaub, Ferien und längere Auszeiten.",
+  },
+  {
+    href: "/familienaktivitaeten",
+    icon: FerrisWheel,
+    title: "Familienaktivitäten",
+    description:
+      "Für Wochenenden, Kurzurlaube und besondere gemeinsame Erlebnisse.",
+  },
+  {
+    href: "/mikro-familienabenteuer",
+    icon: TreePine,
+    title: "Mikro-Familienabenteuer",
+    description: "Für spontane Tagesausflüge und kleine Abenteuer im Familienalltag.",
+  },
+] as const;
+
+const PROMISES = [
+  "Geprüft auf echte Familientauglichkeit",
+  "Gesamtpreise statt irreführender Einzelpreise",
+  "Fokus auf drei oder mehr Kinder",
+  "Ehrliche Hinweise zu Platz, Kosten und Ausstattung",
+  "Transparente Weiterleitung zu externen Anbietern",
+];
+
+export default async function Home() {
+  const [accommodations, activities, microAdventures] = await Promise.all([
+    getFeaturedAccommodations(3),
+    getFeaturedActivities(3),
+    getFeaturedMicroAdventures(3),
+  ]);
+
+  return (
+    <div className="flex flex-col">
+      {/* Hero */}
+      <section className="flex flex-col items-center gap-8 bg-background px-6 py-16 text-center sm:py-24">
+        <Image
+          src="/brand/famvaya-logo.svg"
+          alt="FamVaya"
+          width={280}
+          height={158}
+          priority
+        />
+        <div className="flex flex-col gap-3">
+          <h1 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+            Abenteuer für die ganze Familie.
+            <br />
+            Wirklich die ganze.
+          </h1>
+          <p className="mx-auto max-w-xl text-base text-muted-foreground sm:text-lg">
+            Entdeckt besondere Unterkünfte, gemeinsame Aktivitäten und kleine
+            Abenteuer – speziell ausgewählt für Familien mit drei oder mehr
+            Kindern.
+          </p>
+        </div>
+        <div className="flex flex-col gap-3 sm:flex-row">
+          <Button
+            size="lg"
+            render={<Link href="/familienunterkuenfte" />}
+            nativeButton={false}
+          >
+            Jetzt entdecken
+          </Button>
+          <Button
+            size="lg"
+            variant="outline"
+            render={<Link href="#empfohlene-inhalte" />}
+            nativeButton={false}
+          >
+            Lass dich inspirieren
+          </Button>
+        </div>
+
+        <QuickFamilyCheck />
+      </section>
+
+      {/* Drei Welten */}
+      <section className="mx-auto w-full max-w-6xl px-4 py-12 sm:px-6">
+        <div className="grid gap-6 sm:grid-cols-3">
+          {WORLDS.map((world) => (
+            <Link
+              key={world.href}
+              href={world.href}
+              className="group flex flex-col gap-4 rounded-2xl border border-border bg-card p-6 shadow-sm transition-shadow hover:shadow-lg"
+            >
+              <div className="flex size-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                <world.icon className="size-6" aria-hidden />
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold text-foreground">
+                  {world.title}
+                </h2>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {world.description}
+                </p>
+              </div>
+              <span className="mt-auto text-sm font-medium text-primary group-hover:underline">
+                Entdecken
+              </span>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* Empfohlene Inhalte */}
+      {accommodations.length > 0 && (
+        <RecommendedSection id="empfohlene-inhalte" title="Besonders geeignet für 3+ Kinder">
+          {accommodations.map((a) => (
+            <AccommodationCard key={a.id} accommodation={a} />
+          ))}
+        </RecommendedSection>
+      )}
+
+      {activities.length > 0 && (
+        <RecommendedSection title="Beliebte Familienaktivitäten">
+          {activities.map((a) => (
+            <ActivityCard key={a.id} activity={a} />
+          ))}
+        </RecommendedSection>
+      )}
+
+      {microAdventures.length > 0 && (
+        <RecommendedSection title="Kleine Abenteuer für den Familienalltag">
+          {microAdventures.map((a) => (
+            <MicroAdventureCard key={a.id} adventure={a} />
+          ))}
+        </RecommendedSection>
+      )}
+
+      {/* FamVaya-Versprechen */}
+      <section className="bg-secondary">
+        <div className="mx-auto max-w-4xl px-4 py-14 sm:px-6">
+          <h2 className="mb-6 text-center text-2xl font-semibold text-foreground">
+            Das FamVaya-Versprechen
+          </h2>
+          <ul className="grid gap-3 sm:grid-cols-2">
+            {PROMISES.map((promise) => (
+              <li
+                key={promise}
+                className="flex items-start gap-2 text-sm text-foreground"
+              >
+                <CheckCircle2
+                  className="mt-0.5 size-4 shrink-0 text-success"
+                  aria-hidden
+                />
+                {promise}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function RecommendedSection({
+  id,
+  title,
+  children,
+}: {
+  id?: string;
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section id={id} className="mx-auto w-full max-w-6xl scroll-mt-20 px-4 py-8 sm:px-6">
+      <h2 className="mb-5 text-xl font-semibold text-foreground">{title}</h2>
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">{children}</div>
+    </section>
+  );
+}

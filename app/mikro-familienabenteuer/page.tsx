@@ -1,0 +1,93 @@
+import type { Metadata } from "next";
+import { MicroAdventureCard } from "@/components/cards/micro-adventure-card";
+import { MicroAdventuresFilterForm } from "@/components/micro-adventures-filter-form";
+import {
+  getMicroAdventureCategories,
+  getPublishedMicroAdventures,
+} from "@/lib/data/micro-adventures";
+import type { MicroAdventureFilters } from "@/lib/types";
+import { toStringParam, type SearchParams } from "@/lib/search-params";
+
+export const metadata: Metadata = {
+  title: "Mikro-Familienabenteuer",
+  description:
+    "Kleine, spontane, oft kostenlose Erlebnisse für den Familienalltag – von der Nachtwanderung bis zur Schatzsuche im Garten.",
+};
+
+const COST_LEVELS = ["free", "low", "medium", "high"] as const;
+const PREPARATION_LEVELS = ["none", "light", "moderate"] as const;
+
+export default async function MicroAdventuresPage({
+  searchParams,
+}: {
+  searchParams: Promise<SearchParams>;
+}) {
+  const params = await searchParams;
+
+  const costLevelRaw = toStringParam(params.costLevel);
+  const preparationLevelRaw = toStringParam(params.preparationLevel);
+  const indoorOutdoorRaw = toStringParam(params.indoorOutdoor);
+
+  const filters: MicroAdventureFilters = {
+    categorySlug: toStringParam(params.category),
+    costLevel: COST_LEVELS.includes(costLevelRaw as (typeof COST_LEVELS)[number])
+      ? (costLevelRaw as MicroAdventureFilters["costLevel"])
+      : undefined,
+    preparationLevel: PREPARATION_LEVELS.includes(
+      preparationLevelRaw as (typeof PREPARATION_LEVELS)[number]
+    )
+      ? (preparationLevelRaw as MicroAdventureFilters["preparationLevel"])
+      : undefined,
+    indoorOutdoor:
+      indoorOutdoorRaw === "indoor" || indoorOutdoorRaw === "outdoor"
+        ? indoorOutdoorRaw
+        : undefined,
+  };
+  const hasActiveFilters = Object.values(filters).some((v) => v != null);
+
+  const [adventures, categories] = await Promise.all([
+    getPublishedMicroAdventures(filters),
+    getMicroAdventureCategories(),
+  ]);
+
+  return (
+    <div className="mx-auto w-full max-w-6xl px-4 py-12 sm:px-6">
+      <div className="mb-10 max-w-2xl">
+        <h1 className="text-3xl font-semibold text-foreground">
+          Mikro-Familienabenteuer
+        </h1>
+        <p className="mt-3 text-muted-foreground">
+          Für spontane Tagesausflüge und kleine Abenteuer im Familienalltag –
+          günstig oder kostenlos, mit oder ohne Vorbereitung.
+        </p>
+      </div>
+
+      <MicroAdventuresFilterForm
+        categories={categories}
+        values={{
+          category: toStringParam(params.category),
+          costLevel: costLevelRaw,
+          preparationLevel: preparationLevelRaw,
+          indoorOutdoor: indoorOutdoorRaw,
+        }}
+        hasActiveFilters={hasActiveFilters}
+      />
+
+      {adventures.length > 0 ? (
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {adventures.map((adventure) => (
+            <MicroAdventureCard key={adventure.id} adventure={adventure} />
+          ))}
+        </div>
+      ) : hasActiveFilters ? (
+        <p className="text-muted-foreground">
+          Keine Mikro-Abenteuer für diese Filter gefunden.
+        </p>
+      ) : (
+        <p className="text-muted-foreground">
+          Aktuell sind noch keine Mikro-Abenteuer veröffentlicht.
+        </p>
+      )}
+    </div>
+  );
+}

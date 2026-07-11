@@ -1,0 +1,180 @@
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import Image from "next/image";
+import { Clock, ExternalLink, Package, Wallet } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { PlaceholderImage } from "@/components/placeholder-image";
+import { getMicroAdventureBySlug } from "@/lib/data/micro-adventures";
+import { formatPrice } from "@/lib/format";
+import { resolveMediaUrl } from "@/lib/media";
+
+const COST_LABEL: Record<string, string> = {
+  free: "Kostenlos",
+  low: "Günstig",
+  medium: "Mittleres Budget",
+  high: "Höheres Budget",
+};
+
+const PREPARATION_LABEL: Record<string, string> = {
+  none: "Spontan umsetzbar",
+  light: "Wenig Vorbereitung nötig",
+  moderate: "Etwas Vorbereitung nötig",
+};
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const adventure = await getMicroAdventureBySlug(slug);
+  if (!adventure) return {};
+
+  return {
+    title: adventure.title,
+    description:
+      adventure.short_description ?? `${adventure.title} – ein FamVaya-Mikro-Abenteuer.`,
+  };
+}
+
+export default async function MicroAdventureDetailPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
+  const adventure = await getMicroAdventureBySlug(slug);
+  if (!adventure) notFound();
+
+  const imageUrl = resolveMediaUrl(adventure.cover_media);
+  const ctaUrl = adventure.affiliate_url ?? adventure.external_url;
+  const goUrl = ctaUrl ? `/go/micro_adventure/${adventure.id}` : null;
+
+  return (
+    <div className="mx-auto w-full max-w-4xl px-4 py-10 sm:px-6">
+      <div className="relative mb-6 h-64 w-full overflow-hidden rounded-2xl sm:h-96">
+        {imageUrl ? (
+          <Image
+            src={imageUrl}
+            alt={adventure.cover_media?.alt_text ?? adventure.title}
+            fill
+            className="object-cover"
+            priority
+          />
+        ) : (
+          <PlaceholderImage kind="micro_adventure" className="h-full w-full" />
+        )}
+      </div>
+
+      {adventure.category && (
+        <p className="mb-2 text-sm text-muted-foreground">{adventure.category.name}</p>
+      )}
+      <h1 className="mb-3 text-3xl font-semibold text-foreground sm:text-4xl">
+        {adventure.title}
+      </h1>
+      {adventure.short_description && (
+        <p className="mb-6 text-lg text-muted-foreground">
+          {adventure.short_description}
+        </p>
+      )}
+
+      <div className="mb-8 flex flex-wrap gap-3">
+        {(adventure.duration_min || adventure.duration_max) && (
+          <Badge icon={Clock}>
+            {adventure.duration_min}
+            {adventure.duration_max && adventure.duration_max !== adventure.duration_min
+              ? ` – ${adventure.duration_max}`
+              : ""}{" "}
+            Min.
+          </Badge>
+        )}
+        {adventure.cost_level && (
+          <Badge icon={Wallet}>
+            {adventure.cost_level === "free" || !adventure.estimated_total_cost
+              ? COST_LABEL[adventure.cost_level]
+              : formatPrice(adventure.estimated_total_cost)}
+          </Badge>
+        )}
+        {adventure.preparation_level && (
+          <Badge>{PREPARATION_LABEL[adventure.preparation_level]}</Badge>
+        )}
+        {adventure.indoor && <Badge>Indoor</Badge>}
+        {adventure.outdoor && <Badge>Outdoor</Badge>}
+      </div>
+
+      {adventure.full_description && (
+        <section className="mb-8">
+          <h2 className="mb-3 text-lg font-semibold text-foreground">
+            Beschreibung
+          </h2>
+          <p className="whitespace-pre-line text-muted-foreground">
+            {adventure.full_description}
+          </p>
+        </section>
+      )}
+
+      {adventure.instructions && (
+        <section className="mb-8">
+          <h2 className="mb-3 text-lg font-semibold text-foreground">
+            Ablauf
+          </h2>
+          <p className="whitespace-pre-line text-muted-foreground">
+            {adventure.instructions}
+          </p>
+        </section>
+      )}
+
+      {adventure.materials.length > 0 && (
+        <section className="mb-8">
+          <h2 className="mb-3 flex items-center gap-2 text-lg font-semibold text-foreground">
+            <Package className="size-5" aria-hidden />
+            Benötigte Materialien
+          </h2>
+          <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+            {adventure.materials.map((material) => (
+              <li
+                key={material}
+                className="rounded-lg bg-secondary px-3 py-2 text-sm text-foreground"
+              >
+                {material}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {goUrl && (
+        <div className="flex flex-col items-start gap-2">
+          <Button
+            size="lg"
+            render={<a href={goUrl} target="_blank" rel="noopener noreferrer" />}
+            nativeButton={false}
+          >
+            Mehr erfahren
+            <ExternalLink aria-hidden />
+          </Button>
+          <p className="text-xs text-muted-foreground">
+            Einige Links sind Affiliate-Links. Wenn ihr darüber bucht oder
+            kauft, erhält FamVaya möglicherweise eine Provision. Für euch
+            entstehen keine zusätzlichen Kosten.
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function Badge({
+  icon: Icon,
+  children,
+}: {
+  icon?: React.ComponentType<{ className?: string }>;
+  children: React.ReactNode;
+}) {
+  return (
+    <span className="flex items-center gap-1.5 rounded-full bg-secondary px-3 py-1.5 text-sm text-foreground">
+      {Icon && <Icon className="size-3.5" aria-hidden />}
+      {children}
+    </span>
+  );
+}

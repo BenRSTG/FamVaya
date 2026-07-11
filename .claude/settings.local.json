@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//Users/benjaminrichtsteiger/Desktop/**)",
+      "Read(//Users/benjaminrichtsteiger/**)",
+      "Bash(curl -fsSL https://nodejs.org/dist/index.json)",
+      "Bash(python3 -c ' *)",
+      "Bash(mkdir -p ~/.local)",
+      "Bash(curl -fSL -o node.tar.gz https://nodejs.org/dist/v24.18.0/node-v24.18.0-darwin-arm64.tar.gz)",
+      "Bash(curl -fSL -o SHASUMS256.txt https://nodejs.org/dist/v24.18.0/SHASUMS256.txt)",
+      "Bash(shasum -a 256 -c -)",
+      "Bash(cd /private/tmp/claude-501/-Users-benjaminrichtsteiger-Desktop-FamVaya/380aed47-95e8-43d2-8beb-7063b76c160d/scratchpad *)",
+      "Bash(git init *)",
+      "Bash(pkill -f \"next dev\")",
+      "mcp__claude-in-chrome__list_connected_browsers",
+      "mcp__claude-in-chrome__tabs_context_mcp",
+      "Bash(git check-ignore *)",
+      "Bash(markitdown \"/Users/benjaminrichtsteiger/Desktop/FamVaya/FamVaya_MVP_Checkliste.xlsx\")",
+      "Bash(pip show *)",
+      "Bash(python3 -c \"import markitdown\")",
+      "Bash(pip3 --version)",
+      "Bash(python3)",
+      "Bash(xxd)",
+      "Bash(node -e ' *)"
+    ]
+  }
+}
