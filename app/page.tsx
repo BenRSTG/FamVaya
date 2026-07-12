@@ -67,8 +67,8 @@ export default async function Home({
         <Image
           src="/brand/famvaya-logo.svg"
           alt="FamVaya"
-          width={280}
-          height={158}
+          width={380}
+          height={214}
           priority
         />
         <div className="flex flex-col gap-3">
