@@ -74,6 +74,9 @@ export async function getPublishedAccommodations(
     const ids = await getContentIdsByTagSlugs("accommodation", filters.tagSlugs);
     query = query.in("id", ids.length > 0 ? ids : ["00000000-0000-0000-0000-000000000000"]);
   }
+  if (filters.ids) {
+    query = query.in("id", filters.ids.length > 0 ? filters.ids : ["00000000-0000-0000-0000-000000000000"]);
+  }
 
   const { data } = await query
     .order("featured", { ascending: false })

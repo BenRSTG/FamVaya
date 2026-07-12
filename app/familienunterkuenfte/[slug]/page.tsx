@@ -5,7 +5,10 @@ import { Bath, Bed, ExternalLink, MapPin, Ruler, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PlaceholderImage } from "@/components/placeholder-image";
 import { FamilyCheckSection } from "@/components/family-check-section";
+import { FavoriteButton } from "@/components/favorite-button";
 import { getAccommodationBySlug } from "@/lib/data/accommodations";
+import { isFavorited } from "@/lib/data/favorites";
+import { getOptionalUser } from "@/lib/auth";
 import { formatPrice } from "@/lib/format";
 import { resolveMediaUrl } from "@/lib/media";
 
@@ -34,6 +37,9 @@ export default async function AccommodationDetailPage({
   const { slug } = await params;
   const accommodation = await getAccommodationBySlug(slug);
   if (!accommodation) notFound();
+
+  const user = await getOptionalUser();
+  const favorited = user ? await isFavorited(user.id, "accommodation", accommodation.id) : false;
 
   const imageUrl = resolveMediaUrl(accommodation.cover_media);
   const location = [accommodation.city, accommodation.country?.name]
@@ -69,9 +75,17 @@ export default async function AccommodationDetailPage({
           <span>· {accommodation.accommodation_type.name}</span>
         )}
       </div>
-      <h1 className="mb-6 text-3xl font-semibold text-foreground sm:text-4xl">
-        {accommodation.title}
-      </h1>
+      <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
+        <h1 className="text-3xl font-semibold text-foreground sm:text-4xl">
+          {accommodation.title}
+        </h1>
+        <FavoriteButton
+          contentType="accommodation"
+          contentId={accommodation.id}
+          initialFavorited={favorited}
+          currentPath={`/familienunterkuenfte/${slug}`}
+        />
+      </div>
 
       {/* Kerninformationen */}
       <div className="mb-8 grid grid-cols-2 gap-4 rounded-2xl border border-border bg-card p-6 sm:grid-cols-4">

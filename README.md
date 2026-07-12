@@ -4,15 +4,14 @@ Inspirations- und Empfehlungsplattform für Familienreisen mit dem Fokus
 „Large Families First" — Familien mit drei oder mehr Kindern. Die vollständige
 Produktspezifikation liegt unter [`files/spec.md`](files/spec.md).
 
-**Aktueller Stand: Phase 0–3 von [`FamVaya_Bauplan_2.md`](FamVaya_Bauplan_2.md) abgeschlossen.**
-Alle drei Hauptbereiche sind mit echten Supabase-Daten durchsuchbar, filterbar
-und verlinkbar; die Startseite lädt kuratierte Inhalte und bietet einen
-Schnellen Familien-Check; zusätzlich gibt es eine globale Volltextsuche mit
-Tippfehlertoleranz und einen mehrstufigen „Lass dich inspirieren"-Finder.
-Noch **nicht** enthalten: Auth, Nutzerkonten, Favoriten, Admin-Bereich,
-Magazin — siehe `FamVaya_Bauplan_2.md` für die vollständige Phasenübersicht.
-Getroffene technische Entscheidungen sind fortlaufend in
-[`DECISIONS.md`](DECISIONS.md) dokumentiert.
+**Aktueller Stand: Phase 0–4 von [`FamVaya_Bauplan_2.md`](FamVaya_Bauplan_2.md) abgeschlossen.**
+Alle drei Hauptbereiche sind durchsuchbar, filterbar und verlinkbar; dazu
+gibt es echte Supabase-Auth (E-Mail/Passwort + Magic Link), ein
+Familienprofil, eine Merkliste mit Freigabe-Link und eine Newsletter-
+Anmeldung. Noch **nicht** enthalten: Admin-Bereich, Magazin — siehe
+`FamVaya_Bauplan_2.md` für die vollständige Phasenübersicht. Getroffene
+technische Entscheidungen sind fortlaufend in [`DECISIONS.md`](DECISIONS.md)
+dokumentiert.
 
 ## Stack
 
@@ -20,35 +19,37 @@ Next.js 16 (App Router) · TypeScript · React 19 · Tailwind CSS v4 · shadcn/u
 (Base UI) · Supabase (Postgres, Auth, Storage, `pg_trgm` Volltextsuche) ·
 Vitest · Lucide Icons.
 
-## Funktionsumfang (Phase 0–3)
+## Funktionsumfang (Phase 0–4)
 
-- **Startseite** (`/`): Hero, Schneller Familien-Check (verlinkt mit
-  vorbefüllten Filtern auf die passende Übersichtsseite), drei Welt-Karten,
-  „Empfohlene Inhalte" (echte Supabase-Queries, `featured`-Flag), FamVaya-Versprechen.
-- **Familienunterkünfte** (`/familienunterkuenfte`): Übersicht mit Filtern
-  (Personen, Kinder, Schlafzimmer, Preis, Typ), Detailseite mit
-  FamVaya-Familiencheck (Großfamilien-Score + Kinder-Eignungscheckliste).
-- **Familienaktivitäten** (`/familienaktivitaeten`): Übersicht mit Filtern
-  (Kategorie, Indoor/Outdoor, Gesamtpreis, Großfamilienrabatt), Detailseite
-  mit Familiencheck.
-- **Mikro-Familienabenteuer** (`/mikro-familienabenteuer`): Übersicht mit
-  Filtern (Kategorie, Budget, Vorbereitung, Indoor/Outdoor), Detailseite mit
-  Materialliste und Ablauf.
-- **Globale Suche** (`/suche`): durchsucht alle drei Bereiche parallel
-  (Postgres Volltextsuche + Trigram-Tippfehlertoleranz), nach Bereich
-  gruppierte Ergebnisse.
+- **Startseite** (`/`): Hero, Schneller Familien-Check, drei Welt-Karten,
+  „Empfohlene Inhalte", FamVaya-Versprechen, Newsletter-Anmeldung.
+- **Familienunterkünfte / -aktivitäten / Mikro-Familienabenteuer**: Übersicht
+  mit bereichsspezifischen Filtern, Detailseite mit FamVaya-Familiencheck
+  (bei Unterkünften/Aktivitäten) und Merken-Button.
+- **Globale Suche** (`/suche`): Postgres-Volltextsuche + Trigram-
+  Tippfehlertoleranz über alle drei Bereiche.
 - **„Lass dich inspirieren"-Finder** (`/lass-dich-inspirieren`): mehrstufiger,
-  regelbasierter Wizard (Familiengröße → Bereich → Zeit → Budget →
-  Interessen) mit begründeten Vorschlägen aus allen drei Bereichen.
-- **Affiliate-Redirect** (`/go/[contentType]/[contentId]`): protokolliert
-  jeden Klick in `outbound_clicks` und leitet dann zum Anbieter weiter
-  (Fallback auf Detail-/Übersichtsseite, falls kein Link hinterlegt ist).
-- Responsive Navigation mit Suchlink, mobilem Menü, sticky Header, minimaler Footer.
+  regelbasierter Wizard mit begründeten Vorschlägen.
+- **Affiliate-Redirect** (`/go/[contentType]/[contentId]`): Klick-Logging +
+  Weiterleitung zum Anbieter.
+- **Auth** (`/anmelden`, `/registrieren`, `/auth/callback`): E-Mail/Passwort
+  und Magic Link über Supabase Auth. Kein Google-OAuth (fehlende externe
+  Credentials, siehe `DECISIONS.md`).
+- **Mein Konto** (`/konto`, geschützt): Familienprofil (Erwachsene/Kinder,
+  Altersgruppen, Wohnort, Budget, Interessen, Haustier, Barrierefreiheit —
+  bewusst ohne vollständige Geburtsdaten der Kinder, Spec §15.1), Abmelden.
+- **Merkliste** (`/merkliste`, geschützt): Merken/Entfernen auf allen drei
+  Detailseiten, eine automatische Standardliste pro Nutzer:in, Freigabe-Link
+  (`/merkliste/geteilt/[token]`, öffentlich, ohne Login einsehbar).
+- **Newsletter**: vereinfachtes Single-Opt-in (kein Resend-Key hinterlegt,
+  siehe `DECISIONS.md`).
+- Responsive Navigation mit Such-, Merkliste- und Konto-Link, mobilem Menü,
+  sticky Header, minimaler Footer.
 
 Bewusst noch nicht gebaut (siehe `DECISIONS.md` für die jeweilige Begründung):
-Merken-/Login-Icons in der Navigation, Karten-Badges aus vollen
-Ausstattungslisten, granularer Familiencheck aus Spec §10.3, Magazin-Suche
-(vorbereitet, aber ohne Inhalte).
+Merken-Buttons auf Card-Listen (nur auf Detailseiten), mehrere benannte
+Merklisten pro Nutzer:in, Double-Opt-in-Newsletter, Google-OAuth, granularer
+Familiencheck aus Spec §10.3, Magazin-Suche (vorbereitet, aber ohne Inhalte).
 
 ## Voraussetzungen
 
@@ -102,8 +103,7 @@ cp .env.example .env.local
 
 Siehe [`.env.example`](.env.example) für alle Variablen. Benötigt für
 `npm run dev`: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`,
-`SUPABASE_SERVICE_ROLE_KEY` (Letzterer wird von `lib/supabase/admin.ts` für
-alle öffentlichen Content-Queries genutzt, siehe „Row Level Security" unten).
+`SUPABASE_SERVICE_ROLE_KEY`.
 
 ## Supabase einrichten
 
@@ -113,17 +113,18 @@ alle öffentlichen Content-Queries genutzt, siehe „Row Level Security" unten).
    `.env.local` eintragen.
 3. Im **SQL Editor** des Supabase-Dashboards nacheinander alle Dateien aus
    `supabase/migrations/` ausführen — **in numerischer Reihenfolge**
-   (`0001_...` bis `0012_...`), da spätere Migrationen auf Tabellen/Funktionen
+   (`0001_...` bis `0013_...`), da spätere Migrationen auf Tabellen/Funktionen
    aus früheren verweisen.
 4. Danach `supabase/seed.sql` ausführen, um die Demo-Inhalte einzuspielen.
+5. Unter **Authentication → URL Configuration**: Site URL auf
+   `http://localhost:3000` setzen, `http://localhost:3000/auth/callback` zu
+   den Redirect URLs hinzufügen — sonst laufen Magic-Link- und
+   Bestätigungs-Links ins Leere.
 
 > ✅ Migrationen und Seed wurden gegen ein echtes Supabase-Projekt ausgeführt
-> und liefen fehlerfrei durch. End-to-end verifiziert: `anon`-Key liefert
-> (RLS ohne Policies) leere Ergebnislisten, `service_role`-Key liest alle
-> Demo-Inhalte korrekt; `/go/`-Route wurde live getestet (Redirect **und**
-> korrekt geloggte Zeile in `outbound_clicks`); `search_all_content()` liefert
-> sowohl exakte als auch tippfehlerbehaftete Treffer korrekt (z. B.
-> "Ferinhaus" → "Ferienhaus", "Tierpak" → "Tierpark").
+> und liefen fehlerfrei durch. End-to-end verifiziert: RLS-Policies (Auth,
+> Familienprofil, Merkliste), `/go/`-Klick-Logging, `search_all_content()`
+> inkl. Tippfehlertoleranz.
 
 ### Warum keine Supabase-CLI / kein Docker?
 
@@ -136,17 +137,22 @@ Tools und lassen sich jederzeit später in die Supabase-CLI-Struktur
 
 ## Row Level Security
 
-Alle Tabellen haben RLS **aktiviert**, aber weiterhin **keine Policies**
-(kommt laut `FamVaya_Bauplan_2.md` erst in Phase 4 zusammen mit Auth). Der
-`anon`-Key liefert deshalb für jede Tabelle eine leere Ergebnisliste. Alle
-öffentlichen Lesezugriffe (Startseite, Übersichts-/Detailseiten, Filter,
-Suche, Finder, `/go/`-Klick-Logging) laufen serverseitig über
-`lib/supabase/admin.ts` (`service_role`-Key, verlässt den Server nie —
-abgesichert mit `import "server-only"`). Die Suchfunktion
-`search_all_content()` ist entsprechend **nicht** an `anon`/`authenticated`
-gegrantet. `lib/supabase/server.ts` (anon-Key + Cookies) bleibt für die
-künftige Auth-Phase vorbereitet, wird aktuell aber nirgends importiert.
-Details in [`DECISIONS.md`](DECISIONS.md).
+Zwei unterschiedliche Zugriffswege, je nach Tabelle:
+
+- **Content-Tabellen** (`accommodations`, `activities`, `micro_adventures`,
+  Referenztabellen, `outbound_clicks`, `search_events` …): RLS aktiviert,
+  weiterhin **keine Policies** (Phase-0-Entscheidung). Zugriff ausschließlich
+  serverseitig über `lib/supabase/admin.ts` (`service_role`-Key, verlässt den
+  Server nie — abgesichert mit `import "server-only"`).
+- **Nutzerbezogene Tabellen** (`users`, `family_profiles`, `favorites`,
+  `favorite_collections`, `newsletter_subscribers`): seit Phase 4 echte
+  RLS-Policies, scoped auf `auth.uid()`. Diese laufen über
+  `lib/supabase/server.ts` (anon-Key + Cookies, session-gebunden) — der
+  Nutzer greift als er/sie selbst zu, nicht als `service_role`.
+  Freigegebene Merklisten sind die eine bewusste Ausnahme: die öffentliche
+  Freigabe-Seite liest gezielt per Token über `service_role`, statt einer
+  RLS-Policy, die Enumeration aller öffentlichen Listen ermöglichen würde
+  (Details in `DECISIONS.md`).
 
 ## Lokale Entwicklung
 
@@ -170,54 +176,61 @@ npm run test
 ```
 
 Vitest mit Unit-Tests für die zentrale Business-Logik aus Spec §34:
-Preisformatierung (`lib/format.test.ts`), Großfamilien-Eignung
-(`lib/family-rating.test.ts`), Kinder-Eignungscheck
-(`lib/family-check.test.ts`), Finder-Begründungstexte
-(`lib/finder-reasons.test.ts`). Keine Component-/E2E-Tests bisher — kommt mit
-Spec §34 ("einige End-to-End-Tests für Kernflüsse") in einer späteren Phase.
+Preisformatierung, Großfamilien-Eignung, Kinder-Eignungscheck,
+Finder-Begründungstexte (`lib/*.test.ts`). Keine Component-/E2E-Tests bisher
+— kommt mit Spec §34 in einer späteren Phase.
 
 ## Deployment
 
 Noch nicht eingerichtet. Zielplattform laut Spec §4 ist Vercel.
 
-## Admin-Nutzer, Medien-Storage, E-Mail-Dienst, Kartenanbieter
+## Admin-Bereich, Medien-Storage, E-Mail-Dienst (Resend), Kartenanbieter
 
-Noch nicht Teil von Phase 0–3 — es gibt weder Admin-Bereich noch Auth-Flow.
-Die zugehörigen Umgebungsvariablen sind in `.env.example` bereits als
-„Phase 2+" (inzwischen genauer: Phase 4/5) vorbereitet.
+Noch nicht Teil von Phase 0–4. Die zugehörigen Umgebungsvariablen sind in
+`.env.example` bereits vorbereitet — `RESEND_API_KEY` würde zusätzlich das
+Newsletter-Double-Opt-in ermöglichen (siehe `DECISIONS.md`).
 
 ## Projektstruktur
 
 ```
 app/
-  page.tsx                          Startseite
+  page.tsx                          Startseite (inkl. Newsletter-Formular)
   familienunterkuenfte/             Übersicht (mit Filtern) + [slug]-Detailseite
   familienaktivitaeten/             Übersicht (mit Filtern) + [slug]-Detailseite
   mikro-familienabenteuer/          Übersicht (mit Filtern) + [slug]-Detailseite
   suche/                            Globale Suche (Volltext + Trigram)
   lass-dich-inspirieren/            Finder-Wizard + Server Action (actions.ts)
   go/[contentType]/[contentId]/     Affiliate-Redirect-Route (Klick-Logging)
+  anmelden/, registrieren/          Auth-Seiten
+  auth/callback/                    Magic-Link-/Bestätigungs-Callback
+  auth/actions.ts                   Auth-Server-Actions (Sign-in/up/out)
+  konto/                            Familienprofil (geschützt) + Server Action
+  merkliste/                        Merkliste (geschützt) + Freigabe-Seite (öffentlich)
   not-found.tsx                     404-Seite
 components/
-  layout/                           SiteHeader (inkl. Suchlink), SiteFooter, MobileNav (shadcn sheet)
+  layout/                           SiteHeader (Suche/Merkliste/Konto-Links), SiteFooter, MobileNav
   cards/                            AccommodationCard, ActivityCard, MicroAdventureCard
   ui/                                shadcn/ui-Komponenten
   *-filter-form.tsx                 Such-/Filterformulare je Bereich (plain <form method="get">)
   quick-family-check.tsx            Schneller Familien-Check (Client Component)
   inspiration-finder.tsx            „Lass dich inspirieren"-Wizard (Client Component)
+  favorite-button.tsx               Merken-Button (Client Component)
   family-check-section.tsx          FamVaya-Familiencheck auf Detailseiten
   search-result-item.tsx            Schlanke Suchergebnis-Darstellung
   placeholder-image.tsx             Fallback für fehlende Bilder
 lib/
-  supabase/                         admin.ts (service_role, alle Content-/Such-Queries) + client.ts/server.ts (Auth-Fundament)
-  data/                             Datenzugriffs-Schicht je Content-Typ + search.ts + shared.ts (geteilte Helper)
+  supabase/                         admin.ts (service_role, Content/Suche) + client.ts/server.ts (Auth, session-gebunden)
+  data/                             Datenzugriffs-Schicht je Content-Typ + search.ts + favorites.ts + shared.ts
+  actions/                          Geteilte Server Actions (favorites.ts, newsletter.ts)
   format.ts, family-rating.ts,
   family-check.ts, finder-reasons.ts Getestete Business-Logik (siehe lib/*.test.ts)
+  auth.ts                           requireUser()/getOptionalUser()-Helper
   content-type.ts                   Geteilte Content-Type-Konstanten (Tabellen-/Pfad-Mapping)
   search-params.ts                  Geteilte searchParams-Parsing-Helfer
   types.ts                          Handgeschriebene DB-Typen
+proxy.ts                            Session-Refresh (Next.js 16 "Proxy", vormals Middleware)
 public/brand/                       FamVaya-Logo (SVG, Originalfarben)
-supabase/migrations/                SQL-Migrationen (0001-0012, in Reihenfolge ausführen)
+supabase/migrations/                SQL-Migrationen (0001-0013, in Reihenfolge ausführen)
 supabase/seed.sql                   Demo-Seed-Daten
 files/                              Produktspezifikation (spec.md) und Phase-0-Kickoff-Prompt
 FamVaya_Bauplan_2.md                Verbindliche Phasen-Roadmap (Phase 0-6)

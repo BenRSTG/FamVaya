@@ -4,7 +4,10 @@ import Image from "next/image";
 import { Clock, ExternalLink, Package, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PlaceholderImage } from "@/components/placeholder-image";
+import { FavoriteButton } from "@/components/favorite-button";
 import { getMicroAdventureBySlug } from "@/lib/data/micro-adventures";
+import { isFavorited } from "@/lib/data/favorites";
+import { getOptionalUser } from "@/lib/auth";
 import { formatPrice } from "@/lib/format";
 import { resolveMediaUrl } from "@/lib/media";
 
@@ -46,6 +49,11 @@ export default async function MicroAdventureDetailPage({
   const adventure = await getMicroAdventureBySlug(slug);
   if (!adventure) notFound();
 
+  const user = await getOptionalUser();
+  const favorited = user
+    ? await isFavorited(user.id, "micro_adventure", adventure.id)
+    : false;
+
   const imageUrl = resolveMediaUrl(adventure.cover_media);
   const ctaUrl = adventure.affiliate_url ?? adventure.external_url;
   const goUrl = ctaUrl ? `/go/micro_adventure/${adventure.id}` : null;
@@ -69,9 +77,17 @@ export default async function MicroAdventureDetailPage({
       {adventure.category && (
         <p className="mb-2 text-sm text-muted-foreground">{adventure.category.name}</p>
       )}
-      <h1 className="mb-3 text-3xl font-semibold text-foreground sm:text-4xl">
-        {adventure.title}
-      </h1>
+      <div className="mb-3 flex flex-wrap items-start justify-between gap-4">
+        <h1 className="text-3xl font-semibold text-foreground sm:text-4xl">
+          {adventure.title}
+        </h1>
+        <FavoriteButton
+          contentType="micro_adventure"
+          contentId={adventure.id}
+          initialFavorited={favorited}
+          currentPath={`/mikro-familienabenteuer/${slug}`}
+        />
+      </div>
       {adventure.short_description && (
         <p className="mb-6 text-lg text-muted-foreground">
           {adventure.short_description}

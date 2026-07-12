@@ -5,7 +5,10 @@ import { Clock, ExternalLink, MapPin, Ticket } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PlaceholderImage } from "@/components/placeholder-image";
 import { FamilyCheckSection } from "@/components/family-check-section";
+import { FavoriteButton } from "@/components/favorite-button";
 import { getActivityBySlug } from "@/lib/data/activities";
+import { isFavorited } from "@/lib/data/favorites";
+import { getOptionalUser } from "@/lib/auth";
 import { formatPrice } from "@/lib/format";
 import { resolveMediaUrl } from "@/lib/media";
 
@@ -33,6 +36,9 @@ export default async function ActivityDetailPage({
   const { slug } = await params;
   const activity = await getActivityBySlug(slug);
   if (!activity) notFound();
+
+  const user = await getOptionalUser();
+  const favorited = user ? await isFavorited(user.id, "activity", activity.id) : false;
 
   const imageUrl = resolveMediaUrl(activity.cover_media);
   const location = [activity.city, activity.country?.name].filter(Boolean).join(", ");
@@ -64,9 +70,17 @@ export default async function ActivityDetailPage({
         )}
         {activity.category && <span>· {activity.category.name}</span>}
       </div>
-      <h1 className="mb-6 text-3xl font-semibold text-foreground sm:text-4xl">
-        {activity.title}
-      </h1>
+      <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
+        <h1 className="text-3xl font-semibold text-foreground sm:text-4xl">
+          {activity.title}
+        </h1>
+        <FavoriteButton
+          contentType="activity"
+          contentId={activity.id}
+          initialFavorited={favorited}
+          currentPath={`/familienaktivitaeten/${slug}`}
+        />
+      </div>
 
       <div className="mb-8 flex flex-wrap gap-3">
         {(activity.duration_min || activity.duration_max) && (

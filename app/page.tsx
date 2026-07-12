@@ -6,9 +6,12 @@ import { QuickFamilyCheck } from "@/components/quick-family-check";
 import { AccommodationCard } from "@/components/cards/accommodation-card";
 import { ActivityCard } from "@/components/cards/activity-card";
 import { MicroAdventureCard } from "@/components/cards/micro-adventure-card";
+import { filterInputClass } from "@/components/filter-field";
 import { getFeaturedAccommodations } from "@/lib/data/accommodations";
 import { getFeaturedActivities } from "@/lib/data/activities";
 import { getFeaturedMicroAdventures } from "@/lib/data/micro-adventures";
+import { subscribeNewsletter } from "@/lib/actions/newsletter";
+import { toStringParam, type SearchParams } from "@/lib/search-params";
 
 const WORLDS = [
   {
@@ -40,7 +43,14 @@ const PROMISES = [
   "Transparente Weiterleitung zu externen Anbietern",
 ];
 
-export default async function Home() {
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: Promise<SearchParams>;
+}) {
+  const params = await searchParams;
+  const newsletterStatus = toStringParam(params.newsletter);
+
   const [accommodations, activities, microAdventures] = await Promise.all([
     getFeaturedAccommodations(3),
     getFeaturedActivities(3),
@@ -164,6 +174,65 @@ export default async function Home() {
               </li>
             ))}
           </ul>
+        </div>
+      </section>
+
+      {/* Newsletter */}
+      <section id="newsletter" className="scroll-mt-20 px-4 py-14 sm:px-6">
+        <div className="mx-auto max-w-xl text-center">
+          <h2 className="mb-2 text-2xl font-semibold text-foreground">
+            Neue Ideen direkt ins Postfach
+          </h2>
+          <p className="mb-6 text-muted-foreground">
+            Neue Familienideen, passende Unterkünfte und besondere Abenteuer
+            direkt ins Postfach.
+          </p>
+
+          {newsletterStatus === "success" && (
+            <p className="mb-4 rounded-lg bg-success/10 px-3 py-2 text-sm text-success">
+              Danke für deine Anmeldung!
+            </p>
+          )}
+          {newsletterStatus === "duplicate" && (
+            <p className="mb-4 rounded-lg bg-accent/40 px-3 py-2 text-sm text-foreground">
+              Diese E-Mail-Adresse ist schon angemeldet.
+            </p>
+          )}
+          {newsletterStatus === "error" && (
+            <p className="mb-4 rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive">
+              Da ist etwas schiefgelaufen — bitte versuch es noch einmal.
+            </p>
+          )}
+
+          <form
+            action={subscribeNewsletter}
+            className="flex flex-wrap items-end justify-center gap-3"
+          >
+            <label className="flex w-56 flex-col gap-1 text-left text-sm">
+              E-Mail
+              <input
+                type="email"
+                name="email"
+                required
+                placeholder="deine@email.de"
+                className={filterInputClass}
+              />
+            </label>
+            <label className="flex w-36 flex-col gap-1 text-left text-sm">
+              Wohnort (optional)
+              <input type="text" name="city" className={filterInputClass} />
+            </label>
+            <label className="flex w-28 flex-col gap-1 text-left text-sm">
+              Kinder (optional)
+              <input
+                type="number"
+                name="children_count"
+                min={0}
+                className={filterInputClass}
+              />
+            </label>
+            <Button type="submit">Anmelden</Button>
+          </form>
         </div>
       </section>
     </div>

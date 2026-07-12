@@ -21,7 +21,9 @@
       "Bash(pip3 --version)",
       "Bash(python3)",
       "Bash(xxd)",
-      "Bash(node -e ' *)"
+      "Bash(node -e ' *)",
+      "Bash(mkdir -p /Users/benjaminrichtsteiger/Desktop/FamVaya/app/anmelden *)",
+      "Bash(git add *)"
     ]
   }
 }

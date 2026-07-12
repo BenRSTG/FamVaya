@@ -429,3 +429,87 @@ Einzelwert auf ein Array umgestellt (`.eq()` → `.in()`); der Finder erlaubt
 bei "spontan" jetzt `['none', 'light']` (nur `'moderate'` gilt als nicht
 spontan machbar). Die Übersichtsseite (`app/mikro-familienabenteuer/page.tsx`)
 übergibt bei ihrem Einzel-Select weiterhin nur ein Array mit einem Element.
+
+## Phase 4: Auth, Familienprofil, Favoriten, Newsletter
+
+### Kein Google-OAuth
+
+Fehlende externe Voraussetzung: Google OAuth bräuchte ein eigenes
+Google-Cloud-Projekt mit Client-ID/Secret, das nicht per Code oder SQL
+angelegt werden kann. Spec nennt Google ohnehin nur als optional. E-Mail/
+Passwort + Magic Link decken die Kernanforderung ab; Google-Login ist ein
+sauberer Nachrüst-Punkt (Supabase unterstützt es direkt), sobald echte
+OAuth-Credentials existieren.
+
+### Newsletter: vereinfachtes Single-Opt-in statt Double-Opt-in
+
+Spec/Bauplan wollen Double-Opt-in (Bestätigungsmail). Ohne hinterlegten
+`RESEND_API_KEY` (siehe `.env.example`, seit Phase 0 als "Phase 2+, noch
+ungenutzt" markiert) kann keine echte Bestätigungsmail verschickt werden —
+ein gebauter Token-Bestätigungs-Flow ohne funktionierenden Mailversand wäre
+für Nutzer:innen nur eine "E-Mail bestätigen"-Meldung, die nie im Postfach
+ankommt. Stattdessen: `newsletter_subscribers.confirmed` wird beim Insert
+sofort auf `true` gesetzt. Sobald ein echter Resend-Key existiert, ist das
+ein reiner Additiv-Umbau (Token-Spalte ergänzen, Bestätigungs-Route bauen,
+`confirmed` erst nach Klick setzen) — keine bestehende Struktur muss dafür
+rückgebaut werden.
+
+### Merkliste: eine Standard-Sammlung statt voller Mehrfach-Sammlungsverwaltung
+
+Das Schema (`favorite_collections`) unterstützt beliebig viele benannte
+Sammlungen pro Nutzer (Spec §15.2 nennt "eigene Listen erstellen" als
+Beispiel). Phase 4 nutzt bewusst nur eine automatisch angelegte Standard-
+Sammlung ("Meine Favoriten") pro Nutzer (`getOrCreateDefaultCollection`) —
+deckt die Bauplan-DoD ("Favorit merken/entfernen, Liste teilen") vollständig
+ab, ohne UI für Anlegen/Umbenennen/Löschen mehrerer Listen zu brauchen.
+Mehrfach-Sammlungen sind ein sauberer, additiver Folge-Schritt (Schema ist
+bereits darauf vorbereitet).
+
+### Freigabe-Link läuft über service_role + Token-Match, nicht über RLS
+
+Bewusst **keine** RLS-Policy `using (is_public = true)` auf
+`favorite_collections` für anonyme Leser. Eine solche Policy würde mit dem
+`anon`-Key eine Auflistung/Enumeration aller öffentlichen Sammlungen aller
+Nutzer:innen ermöglichen (RLS filtert Zeilen, verhindert aber kein
+"SELECT * WHERE is_public"-Durchsuchen). Stattdessen liest
+`app/merkliste/geteilt/[token]/page.tsx` gezielt per exaktem
+`share_token`-Match über `lib/supabase/admin.ts` — der unerratbare UUID-Token
+selbst ist das Zugriffsmerkmal ("security through possession of the link",
+Standardmuster für Freigabe-Links), nicht die Nutzerrolle.
+
+### `handle_new_user()`-Trigger: `security definer` erforderlich
+
+Der Insert in `auth.users` beim Signup läuft unter der internen
+`supabase_auth_admin`-Rolle, die kein Schreibrecht auf `public.users` hat.
+Der Trigger muss deshalb `security definer` sein (läuft mit den Rechten des
+Funktions-Eigentümers), plus `set search_path = public` als Schutz gegen
+search-path-Hijacking-Angriffe auf security-definer-Funktionen (Standard-
+Postgres-Best-Practice).
+
+### `middleware.ts` → `proxy.ts` (Next.js 16)
+
+Next.js 16 benennt "Middleware" in "Proxy" um (identische Funktionalität,
+siehe `node_modules/next/dist/docs/01-app/01-getting-started/16-proxy.md`).
+Die Datei heißt entsprechend `proxy.ts`, die exportierte Funktion `proxy`
+statt `middleware` — sonst identisch zum Standard-Supabase-SSR-Session-Muster.
+
+### Merken-Button nur auf Detailseiten, nicht auf Card-Listen
+
+Siehe Plan-Datei: der korrekte "schon gemerkt"-Anfangszustand pro Card
+müsste sonst auf sechs verschiedenen Seiten (3 Übersichten, Startseite,
+Suche, Finder) serverseitig vorberechnet werden. Auf die drei Detailseiten
+begrenzt (Spec §10.1 nennt den Button dort ohnehin explizit im
+Hero-Bereich) hält den Scope überschaubar, ohne einen falschen
+Anfangszustand (→ falsche Toggle-Richtung beim ersten Klick) zu riskieren.
+Card-Merken-Buttons sind ein sauberer Folge-Schritt.
+
+### Content-Tabellen bleiben beim service_role-Muster
+
+Bauplan_2.md fordert "RLS-Policies jetzt scharf schalten" — umgesetzt für
+alle *neuen*, nutzerbezogenen Tabellen (`users`, `family_profiles`,
+`favorites`, `favorite_collections`, `newsletter_subscribers`). Die
+öffentlichen Content-Tabellen (`accommodations`, `activities`,
+`micro_adventures`, Referenztabellen) bleiben bei der Phase-0-Entscheidung
+"RLS aktiv, keine Policy, nur `service_role`" — das war bereits sicher und
+funktioniert, eine nachträgliche `anon`-Read-Policy dafür ist nicht Teil der
+Phase-4-DoD und würde nur unnötige Fläche für Policy-Fehler öffnen.

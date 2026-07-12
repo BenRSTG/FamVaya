@@ -1,10 +1,13 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Search } from "lucide-react";
+import { Heart, Search, User } from "lucide-react";
 import { NAV_ITEMS } from "@/components/layout/nav-items";
 import { MobileNav } from "@/components/layout/mobile-nav";
+import { getOptionalUser } from "@/lib/auth";
 
-export function SiteHeader() {
+export async function SiteHeader() {
+  const user = await getOptionalUser();
+
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
@@ -37,6 +40,20 @@ export function SiteHeader() {
             className="flex size-9 items-center justify-center rounded-lg text-foreground hover:bg-muted"
           >
             <Search className="size-5" aria-hidden />
+          </Link>
+          <Link
+            href="/merkliste"
+            aria-label="Merkliste"
+            className="flex size-9 items-center justify-center rounded-lg text-foreground hover:bg-muted"
+          >
+            <Heart className="size-5" aria-hidden />
+          </Link>
+          <Link
+            href={user ? "/konto" : "/anmelden"}
+            aria-label={user ? "Konto" : "Anmelden"}
+            className="flex size-9 items-center justify-center rounded-lg text-foreground hover:bg-muted"
+          >
+            <User className="size-5" aria-hidden />
           </Link>
           <MobileNav />
         </div>

@@ -43,6 +43,9 @@ export interface AccommodationFilters {
   typeSlug?: string;
   // Phase 3: vom Inspirationsfinder genutzt (siehe lib/data/shared.ts).
   tagSlugs?: string[];
+  // Phase 4: von der Merkliste/Freigabe-Seite genutzt, um gezielt mehrere
+  // Items nachzuladen (bisher gab es nur "alle" oder "per Slug einzeln").
+  ids?: string[];
 }
 
 // Grundfilter für die Familienaktivitäten-Übersicht (Bauplan_2.md Phase 2 /
@@ -53,6 +56,7 @@ export interface ActivityFilters {
   maxPrice?: number;
   largeFamilyDiscount?: boolean;
   tagSlugs?: string[];
+  ids?: string[];
 }
 
 // Grundfilter für die Mikro-Familienabenteuer-Übersicht (Bauplan_2.md Phase 2
@@ -67,6 +71,7 @@ export interface MicroAdventureFilters {
   // Phase 3: vom Inspirationsfinder genutzt, filtert auf estimated_total_cost.
   maxPrice?: number;
   tagSlugs?: string[];
+  ids?: string[];
 }
 
 export interface Media {
@@ -237,4 +242,28 @@ export interface FinderResults {
   accommodations: { item: Accommodation; reasons: string[] }[];
   activities: { item: Activity; reasons: string[] }[];
   microAdventures: { item: MicroAdventure; reasons: string[] }[];
+}
+
+// Familienprofil (Spec §15.1) — bewusst ohne Lat/Long (bräuchte Geocoding)
+// und ohne vollständige Geburtsdaten der Kinder (nur Altersgruppen-Labels).
+export interface FamilyProfile {
+  user_id: string;
+  adults_count: number;
+  children_count: number;
+  children_age_groups: string[];
+  city: string | null;
+  postal_code: string | null;
+  max_budget: number | null;
+  preferred_distance: number | null;
+  interests: string[];
+  accessibility_needs: string | null;
+  has_pet: boolean;
+}
+
+export interface FavoriteCollection {
+  id: string;
+  user_id: string;
+  name: string;
+  is_public: boolean;
+  share_token: string;
 }

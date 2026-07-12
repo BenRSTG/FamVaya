@@ -98,6 +98,15 @@ export async function getAllTags(): Promise<Tag[]> {
   return data ?? [];
 }
 
+export async function getAllAgeGroups(): Promise<AgeGroup[]> {
+  const supabase = createAdminClient();
+  const { data } = await supabase
+    .from("age_groups")
+    .select("id, name, min_age, max_age")
+    .order("sort_order", { ascending: true });
+  return data ?? [];
+}
+
 // IDs aller Content-Items eines Typs, die MINDESTENS eines der übergebenen
 // Tags tragen (OR-Semantik) — genutzt vom Inspirationsfinder und den
 // Übersichts-Filtern. Zwei Schritte statt eines !inner-Joins, konsistent mit
