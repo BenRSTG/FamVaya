@@ -513,3 +513,131 @@ alle *neuen*, nutzerbezogenen Tabellen (`users`, `family_profiles`,
 "RLS aktiv, keine Policy, nur `service_role`" — das war bereits sicher und
 funktioniert, eine nachträgliche `anon`-Read-Policy dafür ist nicht Teil der
 Phase-4-DoD und würde nur unnötige Fläche für Policy-Fehler öffnen.
+
+## Phase 5: Admin-Bereich & CMS
+
+### Admin-Schreibzugriff weiterhin über service_role, nicht über RLS
+
+Konsistent mit der oben dokumentierten Phase-0/4-Entscheidung: Content-
+Tabellen bekommen weiterhin keine eigenen RLS-Policies. Jede Admin-Server-
+Action ruft zuerst `requireAdminOrEditor()` (`lib/auth.ts`) auf, bevor sie
+`lib/supabase/admin.ts` anfasst — das ist die **einzige** Durchsetzung.
+Bewusster Trade-off: einfacher als "echte" RLS-Verteidigung in der Tiefe,
+aber die Anwendungsebene ist bereits die einzige Instanz, die Content
+überhaupt schreibt (kein Client-seitiger Direktzugriff auf `service_role`
+möglich). Ein Fehler in einer einzelnen Server Action wäre der einzige
+Weg, diesen Schutz zu umgehen.
+
+### Bootstrap-Problem beim ersten Admin-Account
+
+Niemand kann sich selbst zum Admin befördern, solange keiner existiert. Der
+erste Account (`b.richtsteigerrstg@gmail.com`) wurde einmalig per
+Supabase-Admin-API-Skript angelegt (vorbestätigt, Einmal-Passwort), danach
+wurde `role` direkt per `service_role`-Update auf `'admin'` gesetzt (der
+`handle_new_user()`-Trigger legt neue Nutzer:innen standardmäßig mit
+`role='user'` an). Alle weiteren Rollenvergaben laufen über die
+Nutzerverwaltung im Admin-Bereich (`/admin/nutzer`).
+
+### `requireAdmin()` zusätzlich zu `requireAdminOrEditor()`
+
+Für die reine Content-Pflege reicht `requireAdminOrEditor()`. Eine
+Ausnahme: Nutzerrollen ändern (`/admin/nutzer`) ist strenger auf `admin`
+beschränkt (`requireAdmin()`) — sonst könnte sich ein Editor selbst zum
+Admin befördern, ein klassischer Privilege-Escalation-Pfad.
+
+### Kein dediziertes CRUD für Referenzdaten
+
+Kategorien, Regionen, Tags, Ausstattungsmerkmale, Altersgruppen bleiben
+seed-/SQL-gepflegt wie seit Phase 0. Content-Formulare wählen nur aus
+bestehenden Werten aus (Dropdowns/Checkbox-Gruppen). Die Bauplan-DoD
+(Nutzerfluss 4, Spec §33) verlangt das nicht explizit — eine eigene Pflege-
+UI für fünf weitere Tabellen hätte den ohnehin großen Phase-5-Scope
+gesprengt, ohne einen DoD-Punkt abzudecken.
+
+### Regionen-Dropdown flach statt kaskadierend (Land → Region)
+
+Ein Land-Dropdown, das per Client-JS ein Regionen-Dropdown nachlädt, hätte
+den ersten Client Component im Admin-Bereich erzwungen (bisher alle
+Formulare reine Server-Components mit nativen HTML-Forms). Stattdessen: ein
+einziges "Region"-Dropdown mit Label "Land – Region"; `country_id` wird
+serverseitig aus der gewählten `region_id` abgeleitet
+(`getAllRegions()`/`RegionWithCountry`). Bei der aktuellen Seed-Datenmenge
+(2 Länder, 4 Regionen) verliert das nichts an Bedienbarkeit.
+
+### Anbieter: leichtes CRUD, Nutzerverwaltung: nur Rollenänderung
+
+Anbieter bekommen ein einfaches CRUD (Liste, Anlegen, Bearbeiten, kein
+Löschen — Unterkünfte/Aktivitäten referenzieren sie per FK), nötig um
+Content sinnvoll mit echten Anbietern zu verknüpfen. Nutzer:innen entstehen
+ausschließlich über Signup; der Admin-Bereich erlaubt nur eine
+Rollenänderung, kein volles Nutzer-CRUD (Anlegen/Löschen wäre Auth-Umgehung
+bzw. Datenverlust-Risiko ohne klaren Bauplan-Bedarf).
+
+### Bewertungsmoderation: außerhalb Scope
+
+Es gibt noch keine öffentliche Bewertungs-Einreichungs-UI (Spec §16 erlaubt
+das explizit "zunächst optional deaktiviert") — ohne Einreichungen gibt es
+nichts zu moderieren. Ein Moderations-Screen ist ein sauberer Folge-Schritt,
+sobald Einreichungen existieren.
+
+### Medien: ein Titelbild pro Content-Item, kein Multi-Galerie-Management
+
+Die öffentlichen Templates rendern aktuell ohnehin nur ein Titelbild pro
+Unterkunft/Aktivität/Mikro-Abenteuer/Artikel. Ein Galerie-Uploader mit
+Sortierung/Mehrfachbildern wäre Aufwand ohne sichtbaren Nutzen, solange die
+Frontend-Seiten das nicht darstellen. `content_media` unterstützt technisch
+bereits mehrere Bilder (`sort_order`, `is_cover`) — additiv nachrüstbar.
+
+### Magazin-Inhalt: Textarea statt Rich-Text-Editor
+
+Ein WYSIWYG-Editor (z. B. TipTap) hätte eine neue Abhängigkeit plus
+Serialisierungsformat (HTML vs. Markdown vs. JSON) eingeführt. Da Magazin-
+Artikel selbst erst in Phase 6 öffentlich lesbar werden, reicht eine
+einfache Textarea mit Fließtext (`whitespace-pre-line` beim Rendern) für den
+jetzigen Admin-Workflow.
+
+### Medien-Upload als plain Helper statt eigener Server Action
+
+`lib/data/media.ts#uploadMediaFile()` ist bewusst **keine** eigene
+`"use server"`-Action (ursprünglich im Plan als `lib/actions/media.ts`
+skizziert), sondern eine plain async Funktion. Grund: Datei-Upload und
+Content-Speicherung sollen in einem einzigen Formular-Submit passieren
+(ein `<form>` pro Content-Typ, `multipart/form-data`). Eine separate
+Upload-Action hätte einen zweistufigen Upload-dann-Verknüpfen-Flow mit
+eigenem Zwischenzustand erzwungen. Stattdessen ruft jede Content-Server-
+Action (`createAccommodation`, `updateActivity`, …) `uploadMediaFile()`
+intern auf, wenn ein `cover_image`-Datei-Feld gesetzt ist.
+
+### Duplizieren kopiert kein Titelbild
+
+`duplicate*Row()`-Funktionen kopieren Ausstattung/Tags/Altersgruppen, aber
+bewusst **kein** `content_media`/`cover_media_id`. Reihenfolge-Grund:
+verhindert, dass zwei Content-Items dasselbe physische Bild als "ihr"
+Titelbild referenzieren und ein Redakteur beim Bearbeiten der Kopie versehentlich
+das Original-Bild ersetzt (Storage-Datei ist pro `media`-Zeile, nicht pro
+Content-Item). Ein neues Titelbild muss beim Duplikat bewusst neu gesetzt
+werden.
+
+### Vorschau: `?preview=1` auf öffentlichen URLs, kein separates Template
+
+Die drei bestehenden Detailseiten (`/familienunterkuenfte/[slug]` etc.)
+akzeptieren einen `?preview=1`-Query-Parameter; `getAccommodationBySlug()`
+& Pendants bekommen dafür einen optionalen `{ includeUnpublished }`-Parameter.
+Die Sichtbarkeitsprüfung (`canPreview()`) ist rein lesend (kein Redirect wie
+bei `requireUser()`), da ein 404/Redirect für einen eingeloggten Editor beim
+Testen einer Entwurfsseite verwirrender wäre als eine sichtbare
+"Vorschau"-Markierung (`PreviewBanner`). Für Magazin-Artikel existiert noch
+keine öffentliche Seite zum Wiederverwenden (Magazin ist erst Phase 6) —
+dort gibt es stattdessen eine reine Vorschau-Seite unter
+`/admin/magazin/[id]/vorschau`, geschützt durch das ohnehin per
+`requireAdminOrEditor()` gesicherte `/admin`-Layout.
+
+### Automatisches Ablaufdatum: Listen filtern, Detailseite bleibt erreichbar
+
+`expires_at` gibt es laut Schema nur für Unterkünfte/Aktivitäten (Spec §20),
+nicht für Mikro-Abenteuer. Abgelaufene, aber weiterhin `status='published'`
+Einträge werden aus allen Listen-Queries (Startseite, Übersichten, globale
+Suche via `search_all_content()`) gefiltert, tauchen aber unter ihrer
+bestehenden URL weiter auf (SEO-Grund: keine toten Links, keine
+301-Kaskaden) — die Detailseite zeigt anstelle des `/go/`-Buttons einen
+schlichten "Dieses Angebot ist abgelaufen"-Hinweis.

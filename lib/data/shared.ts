@@ -1,10 +1,15 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import type {
   AgeGroup,
+  Amenity,
+  ActivityFeature,
   Category,
   CategoryContentType,
   ContentType,
+  Country,
   Media,
+  Provider,
+  RegionWithCountry,
   Tag,
 } from "@/lib/types";
 
@@ -129,4 +134,114 @@ export async function getContentIdsByTagSlugs(
     .in("tag_id", tagIds);
 
   return [...new Set((data ?? []).map((row) => row.content_id as string))];
+}
+
+// Ab hier: Referenz- und Verknüpfungs-Helper für den Admin-Bereich (Phase 5).
+
+export async function getAllCountries(): Promise<Country[]> {
+  const supabase = createAdminClient();
+  const { data } = await supabase.from("countries").select("id, name, code").order("name");
+  return data ?? [];
+}
+
+export async function getAllRegions(): Promise<RegionWithCountry[]> {
+  const supabase = createAdminClient();
+  const { data } = await supabase
+    .from("regions")
+    .select("id, name, slug, country_id, country:countries(name)")
+    .order("name");
+
+  return (data ?? []).map((row) => ({
+    id: row.id,
+    name: row.name,
+    slug: row.slug,
+    country_id: row.country_id,
+    country_name: (row.country as unknown as { name: string } | null)?.name ?? "",
+  }));
+}
+
+export async function getAllAmenities(): Promise<Amenity[]> {
+  const supabase = createAdminClient();
+  const { data } = await supabase
+    .from("amenities")
+    .select("id, name, slug, group_name")
+    .order("name");
+  return data ?? [];
+}
+
+export async function getAllActivityFeatures(): Promise<ActivityFeature[]> {
+  const supabase = createAdminClient();
+  const { data } = await supabase
+    .from("activity_features")
+    .select("id, name, slug, group_name")
+    .order("name");
+  return data ?? [];
+}
+
+export async function getAllProviders(): Promise<Provider[]> {
+  const supabase = createAdminClient();
+  const { data } = await supabase
+    .from("providers")
+    .select("id, name, slug, description, website, affiliate_network, contact_email, status")
+    .order("name");
+  return data ?? [];
+}
+
+// Ersetzt die verknüpften Tags/Altersgruppen eines Content-Items komplett
+// (delete + insert) — einfacher als ein Diff, im Admin-Formular-Kontext
+// unproblematisch (kleine Mengen, kein Concurrency-Risiko).
+export async function replaceContentTags(
+  contentType: ContentType,
+  contentId: string,
+  tagIds: string[]
+): Promise<void> {
+  const supabase = createAdminClient();
+  await supabase
+    .from("content_tags")
+    .delete()
+    .eq("content_type", contentType)
+    .eq("content_id", contentId);
+  if (tagIds.length > 0) {
+    await supabase
+      .from("content_tags")
+      .insert(tagIds.map((tag_id) => ({ content_type: contentType, content_id: contentId, tag_id })));
+  }
+}
+
+export async function replaceContentAgeGroups(
+  contentType: ContentType,
+  contentId: string,
+  ageGroupIds: string[]
+): Promise<void> {
+  const supabase = createAdminClient();
+  await supabase
+    .from("content_age_groups")
+    .delete()
+    .eq("content_type", contentType)
+    .eq("content_id", contentId);
+  if (ageGroupIds.length > 0) {
+    await supabase.from("content_age_groups").insert(
+      ageGroupIds.map((age_group_id) => ({
+        content_type: contentType,
+        content_id: contentId,
+        age_group_id,
+      }))
+    );
+  }
+}
+
+export async function deleteContentRelations(
+  contentType: ContentType,
+  contentId: string
+): Promise<void> {
+  const supabase = createAdminClient();
+  await Promise.all([
+    supabase.from("content_tags").delete().eq("content_type", contentType).eq("content_id", contentId),
+    supabase
+      .from("content_age_groups")
+      .delete()
+      .eq("content_type", contentType)
+      .eq("content_id", contentId),
+    supabase.from("content_media").delete().eq("content_type", contentType).eq("content_id", contentId),
+  ]);
 }

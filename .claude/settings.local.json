@@ -23,7 +23,8 @@
       "Bash(xxd)",
       "Bash(node -e ' *)",
       "Bash(mkdir -p /Users/benjaminrichtsteiger/Desktop/FamVaya/app/anmelden *)",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)"
     ]
   }
 }

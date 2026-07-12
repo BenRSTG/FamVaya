@@ -153,6 +153,7 @@ export interface Accommodation {
   status: ContentStatus;
   featured: boolean;
   family_rating: number | null;
+  expires_at: string | null;
   accommodation_type: AccommodationType | null;
   country: Country | null;
   region: Region | null;
@@ -185,6 +186,7 @@ export interface Activity {
   status: ContentStatus;
   featured: boolean;
   family_rating: number | null;
+  expires_at: string | null;
   category: { id: string; name: string; slug: string } | null;
   country: Country | null;
   region: Region | null;
@@ -266,4 +268,51 @@ export interface FavoriteCollection {
   name: string;
   is_public: boolean;
   share_token: string;
+}
+
+// Phase 5 (Admin-Bereich) — Referenz-/Verwaltungsdaten, die zuvor nicht
+// öffentlich abgefragt wurden.
+
+export type UserRole = "user" | "editor" | "admin" | "provider";
+
+export interface AdminUser {
+  id: string;
+  email: string;
+  role: UserRole;
+  display_name: string | null;
+  created_at: string;
+}
+
+export interface Provider {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  website: string | null;
+  affiliate_network: string | null;
+  contact_email: string | null;
+  status: "active" | "inactive" | "pending";
+}
+
+// Region-Dropdowns im Admin sind flach (Land + Region in einem Feld) statt
+// kaskadierend, um ohne Client-JS auszukommen (siehe DECISIONS.md).
+export interface RegionWithCountry extends Region {
+  country_id: string;
+  country_name: string;
+}
+
+export interface Article {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string | null;
+  content: string | null;
+  author_id: string | null;
+  category_id: string | null;
+  category: Category | null;
+  cover_media_id: string | null;
+  cover_media: Media | null;
+  status: ContentStatus;
+  published_at: string | null;
+  updated_at: string;
 }

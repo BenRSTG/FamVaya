@@ -8,7 +8,8 @@ import { FamilyCheckSection } from "@/components/family-check-section";
 import { FavoriteButton } from "@/components/favorite-button";
 import { getAccommodationBySlug } from "@/lib/data/accommodations";
 import { isFavorited } from "@/lib/data/favorites";
-import { getOptionalUser } from "@/lib/auth";
+import { canPreview, getOptionalUser } from "@/lib/auth";
+import { PreviewBanner } from "@/components/admin/preview-banner";
 import { formatPrice } from "@/lib/format";
 import { resolveMediaUrl } from "@/lib/media";
 
@@ -31,11 +32,15 @@ export async function generateMetadata({
 
 export default async function AccommodationDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ preview?: string }>;
 }) {
   const { slug } = await params;
-  const accommodation = await getAccommodationBySlug(slug);
+  const { preview } = await searchParams;
+  const includeUnpublished = preview === "1" && (await canPreview());
+  const accommodation = await getAccommodationBySlug(slug, { includeUnpublished });
   if (!accommodation) notFound();
 
   const user = await getOptionalUser();
@@ -45,11 +50,13 @@ export default async function AccommodationDetailPage({
   const location = [accommodation.city, accommodation.country?.name]
     .filter(Boolean)
     .join(", ");
+  const isExpired = accommodation.expires_at != null && new Date(accommodation.expires_at) < new Date();
   const ctaUrl = accommodation.affiliate_url ?? accommodation.external_url;
-  const goUrl = ctaUrl ? `/go/accommodation/${accommodation.id}` : null;
+  const goUrl = ctaUrl && !isExpired ? `/go/accommodation/${accommodation.id}` : null;
 
   return (
     <div className="mx-auto w-full max-w-4xl px-4 py-10 sm:px-6">
+      <PreviewBanner status={accommodation.status} />
       <div className="relative mb-6 h-64 w-full overflow-hidden rounded-2xl sm:h-96">
         {imageUrl ? (
           <Image
@@ -158,6 +165,12 @@ export default async function AccommodationDetailPage({
           Preise und Verfügbarkeit können sich beim Anbieter ändern.
         </p>
       </section>
+
+      {isExpired && ctaUrl && (
+        <p className="rounded-lg border border-border bg-secondary px-4 py-3 text-sm text-muted-foreground">
+          Dieses Angebot ist abgelaufen.
+        </p>
+      )}
 
       {goUrl && (
         <div className="flex flex-col items-start gap-2">

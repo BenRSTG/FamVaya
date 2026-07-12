@@ -4,14 +4,15 @@ Inspirations- und Empfehlungsplattform für Familienreisen mit dem Fokus
 „Large Families First" — Familien mit drei oder mehr Kindern. Die vollständige
 Produktspezifikation liegt unter [`files/spec.md`](files/spec.md).
 
-**Aktueller Stand: Phase 0–4 von [`FamVaya_Bauplan_2.md`](FamVaya_Bauplan_2.md) abgeschlossen.**
+**Aktueller Stand: Phase 0–5 von [`FamVaya_Bauplan_2.md`](FamVaya_Bauplan_2.md) abgeschlossen.**
 Alle drei Hauptbereiche sind durchsuchbar, filterbar und verlinkbar; dazu
 gibt es echte Supabase-Auth (E-Mail/Passwort + Magic Link), ein
-Familienprofil, eine Merkliste mit Freigabe-Link und eine Newsletter-
-Anmeldung. Noch **nicht** enthalten: Admin-Bereich, Magazin — siehe
-`FamVaya_Bauplan_2.md` für die vollständige Phasenübersicht. Getroffene
-technische Entscheidungen sind fortlaufend in [`DECISIONS.md`](DECISIONS.md)
-dokumentiert.
+Familienprofil, eine Merkliste mit Freigabe-Link, eine Newsletter-Anmeldung
+und einen geschützten Admin-Bereich mit CMS für alle Content-Typen
+(inkl. echtem Bild-Upload nach Supabase Storage). Noch **nicht** enthalten:
+öffentliche Magazin-Seiten — siehe `FamVaya_Bauplan_2.md` für die
+vollständige Phasenübersicht. Getroffene technische Entscheidungen sind
+fortlaufend in [`DECISIONS.md`](DECISIONS.md) dokumentiert.
 
 ## Stack
 
@@ -19,7 +20,7 @@ Next.js 16 (App Router) · TypeScript · React 19 · Tailwind CSS v4 · shadcn/u
 (Base UI) · Supabase (Postgres, Auth, Storage, `pg_trgm` Volltextsuche) ·
 Vitest · Lucide Icons.
 
-## Funktionsumfang (Phase 0–4)
+## Funktionsumfang (Phase 0–5)
 
 - **Startseite** (`/`): Hero, Schneller Familien-Check, drei Welt-Karten,
   „Empfohlene Inhalte", FamVaya-Versprechen, Newsletter-Anmeldung.
@@ -45,11 +46,24 @@ Vitest · Lucide Icons.
   siehe `DECISIONS.md`).
 - Responsive Navigation mit Such-, Merkliste- und Konto-Link, mobilem Menü,
   sticky Header, minimaler Footer.
+- **Admin-Bereich** (`/admin`, geschützt für Rollen `admin`/`editor`):
+  Dashboard mit Status-/Nutzungs-Kennzahlen, vollständiges CRUD für
+  Familienunterkünfte, -aktivitäten, Mikro-Familienabenteuer, Magazin-
+  Artikel und Anbieter, echter Bild-Upload nach Supabase Storage
+  (`content-media`-Bucket), Duplizieren, Vorschau unveröffentlichter Inhalte
+  (`?preview=1` auf den öffentlichen Detailseiten bzw.
+  `/admin/magazin/[id]/vorschau`), Nutzerverwaltung (Rollenänderung, nur
+  `admin`), automatisches Ausblenden abgelaufener Angebote
+  (`expires_at`) aus Listen und globaler Suche.
 
 Bewusst noch nicht gebaut (siehe `DECISIONS.md` für die jeweilige Begründung):
 Merken-Buttons auf Card-Listen (nur auf Detailseiten), mehrere benannte
 Merklisten pro Nutzer:in, Double-Opt-in-Newsletter, Google-OAuth, granularer
-Familiencheck aus Spec §10.3, Magazin-Suche (vorbereitet, aber ohne Inhalte).
+Familiencheck aus Spec §10.3, Magazin-Suche (vorbereitet, aber ohne Inhalte),
+öffentliche Magazin-Lesenseiten (Phase 6), CRUD-UI für Referenzdaten
+(Kategorien/Regionen/Tags/Ausstattung/Altersgruppen — bleiben seed-gepflegt),
+Bewertungsmoderation (keine öffentliche Einreichung existiert), Multi-Bild-
+Galerien pro Content-Item.
 
 ## Voraussetzungen
 
@@ -140,10 +154,15 @@ Tools und lassen sich jederzeit später in die Supabase-CLI-Struktur
 Zwei unterschiedliche Zugriffswege, je nach Tabelle:
 
 - **Content-Tabellen** (`accommodations`, `activities`, `micro_adventures`,
-  Referenztabellen, `outbound_clicks`, `search_events` …): RLS aktiviert,
-  weiterhin **keine Policies** (Phase-0-Entscheidung). Zugriff ausschließlich
-  serverseitig über `lib/supabase/admin.ts` (`service_role`-Key, verlässt den
-  Server nie — abgesichert mit `import "server-only"`).
+  `articles`, `providers`, Referenztabellen, `outbound_clicks`,
+  `search_events` …): RLS aktiviert, weiterhin **keine Policies**
+  (Phase-0-Entscheidung, in Phase 5 für Admin-Schreibzugriffe bestätigt).
+  Zugriff ausschließlich serverseitig über `lib/supabase/admin.ts`
+  (`service_role`-Key, verlässt den Server nie — abgesichert mit
+  `import "server-only"`). Admin-Server-Actions (`app/admin/**/actions.ts`)
+  rufen vor jedem Schreibzugriff `requireAdminOrEditor()` bzw. für
+  Nutzerrollen das strengere `requireAdmin()` auf (`lib/auth.ts`) — das ist
+  die einzige Zugriffskontrolle, siehe `DECISIONS.md`.
 - **Nutzerbezogene Tabellen** (`users`, `family_profiles`, `favorites`,
   `favorite_collections`, `newsletter_subscribers`): seit Phase 4 echte
   RLS-Policies, scoped auf `auth.uid()`. Diese laufen über
@@ -184,9 +203,17 @@ Finder-Begründungstexte (`lib/*.test.ts`). Keine Component-/E2E-Tests bisher
 
 Noch nicht eingerichtet. Zielplattform laut Spec §4 ist Vercel.
 
-## Admin-Bereich, Medien-Storage, E-Mail-Dienst (Resend), Kartenanbieter
+## Admin-Bereich
 
-Noch nicht Teil von Phase 0–4. Die zugehörigen Umgebungsvariablen sind in
+`/admin` (geschützt für Rollen `admin`/`editor`, `/admin/nutzer` nur
+`admin`). Erster Admin-Account wird einmalig per Supabase-Admin-API-Skript
+angelegt (Bootstrap-Problem, siehe `DECISIONS.md`), danach über
+`/admin/nutzer` verwaltet. Medien-Uploads landen im öffentlichen
+Supabase-Storage-Bucket `content-media` (`supabase/migrations/0014_admin_storage.sql`).
+
+## E-Mail-Dienst (Resend), Kartenanbieter
+
+Noch nicht angebunden. Die zugehörigen Umgebungsvariablen sind in
 `.env.example` bereits vorbereitet — `RESEND_API_KEY` würde zusätzlich das
 Newsletter-Double-Opt-in ermöglichen (siehe `DECISIONS.md`).
 
@@ -206,11 +233,22 @@ app/
   auth/actions.ts                   Auth-Server-Actions (Sign-in/up/out)
   konto/                            Familienprofil (geschützt) + Server Action
   merkliste/                        Merkliste (geschützt) + Freigabe-Seite (öffentlich)
+  admin/                            Admin-Bereich (geschützt, siehe unten)
   not-found.tsx                     404-Seite
+  admin/layout.tsx                  requireAdminOrEditor() + Sidebar-Navigation
+  admin/page.tsx                    Dashboard (Kennzahlen, zuletzt bearbeitet)
+  admin/unterkuenfte/, aktivitaeten/,
+  admin/mikro-abenteuer/, magazin/,
+  admin/anbieter/                   CRUD je Content-Typ: page.tsx (Liste), neu/, [id]/,
+                                     *-form.tsx (Formular), actions.ts (Server Actions)
+  admin/nutzer/                     Nutzerliste + Rollenänderung (nur requireAdmin())
 components/
   layout/                           SiteHeader (Suche/Merkliste/Konto-Links), SiteFooter, MobileNav
   cards/                            AccommodationCard, ActivityCard, MicroAdventureCard
   ui/                                shadcn/ui-Komponenten
+  admin/                            Geteilte Admin-UI: content-table.tsx, status-badge.tsx,
+                                     status-select.tsx, checkbox-group.tsx, media-picker.tsx,
+                                     form-field.tsx, preview-banner.tsx
   *-filter-form.tsx                 Such-/Filterformulare je Bereich (plain <form method="get">)
   quick-family-check.tsx            Schneller Familien-Check (Client Component)
   inspiration-finder.tsx            „Lass dich inspirieren"-Wizard (Client Component)
@@ -220,17 +258,20 @@ components/
   placeholder-image.tsx             Fallback für fehlende Bilder
 lib/
   supabase/                         admin.ts (service_role, Content/Suche) + client.ts/server.ts (Auth, session-gebunden)
-  data/                             Datenzugriffs-Schicht je Content-Typ + search.ts + favorites.ts + shared.ts
+  data/                             Datenzugriffs-Schicht je Content-Typ + search.ts + favorites.ts +
+                                     shared.ts + admin.ts (Dashboard) + media.ts (Upload) + users.ts + providers.ts
   actions/                          Geteilte Server Actions (favorites.ts, newsletter.ts)
   format.ts, family-rating.ts,
   family-check.ts, finder-reasons.ts Getestete Business-Logik (siehe lib/*.test.ts)
-  auth.ts                           requireUser()/getOptionalUser()-Helper
+  auth.ts                           requireUser()/getOptionalUser()/requireAdminOrEditor()/
+                                     requireAdmin()/canPreview()-Helper
   content-type.ts                   Geteilte Content-Type-Konstanten (Tabellen-/Pfad-Mapping)
+  form-utils.ts                     Geteilte FormData-Parsing-Helfer für Admin-Server-Actions
   search-params.ts                  Geteilte searchParams-Parsing-Helfer
   types.ts                          Handgeschriebene DB-Typen
 proxy.ts                            Session-Refresh (Next.js 16 "Proxy", vormals Middleware)
 public/brand/                       FamVaya-Logo (SVG, Originalfarben)
-supabase/migrations/                SQL-Migrationen (0001-0013, in Reihenfolge ausführen)
+supabase/migrations/                SQL-Migrationen (0001-0015, in Reihenfolge ausführen)
 supabase/seed.sql                   Demo-Seed-Daten
 files/                              Produktspezifikation (spec.md) und Phase-0-Kickoff-Prompt
 FamVaya_Bauplan_2.md                Verbindliche Phasen-Roadmap (Phase 0-6)
