@@ -11,7 +11,9 @@ import { isFavorited } from "@/lib/data/favorites";
 import { canPreview, getOptionalUser } from "@/lib/auth";
 import { formatPrice } from "@/lib/format";
 import { resolveMediaUrl } from "@/lib/media";
+import { getSiteUrl } from "@/lib/site-url";
 import { PreviewBanner } from "@/components/admin/preview-banner";
+import { Breadcrumbs, BreadcrumbJsonLd } from "@/components/breadcrumbs";
 
 export async function generateMetadata({
   params,
@@ -22,10 +24,26 @@ export async function generateMetadata({
   const activity = await getActivityBySlug(slug);
   if (!activity) return {};
 
+  const description =
+    activity.short_description ?? `${activity.title} – eine FamVaya-Familienaktivität.`;
+  const imageUrl = resolveMediaUrl(activity.cover_media);
+
   return {
     title: activity.title,
-    description:
-      activity.short_description ?? `${activity.title} – eine FamVaya-Familienaktivität.`,
+    description,
+    alternates: { canonical: `/familienaktivitaeten/${activity.slug}` },
+    openGraph: {
+      title: activity.title,
+      description,
+      type: "website",
+      images: imageUrl ? [{ url: imageUrl }] : undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: activity.title,
+      description,
+      images: imageUrl ? [imageUrl] : undefined,
+    },
   };
 }
 
@@ -51,8 +69,39 @@ export default async function ActivityDetailPage({
   const ctaUrl = activity.affiliate_url ?? activity.external_url;
   const goUrl = ctaUrl && !isExpired ? `/go/activity/${activity.id}` : null;
 
+  const breadcrumbItems = [
+    { label: "Startseite", href: "/" },
+    { label: "Familienaktivitäten", href: "/familienaktivitaeten" },
+    { label: activity.title },
+  ];
+
+  const touristAttractionJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "TouristAttraction",
+    name: activity.title,
+    description: activity.short_description ?? undefined,
+    image: imageUrl ?? undefined,
+    url: `${getSiteUrl()}/familienaktivitaeten/${activity.slug}`,
+    ...(location
+      ? {
+          address: {
+            "@type": "PostalAddress",
+            addressLocality: activity.city ?? undefined,
+            addressCountry: activity.country?.name ?? undefined,
+          },
+        }
+      : {}),
+  };
+
   return (
     <div className="mx-auto w-full max-w-4xl px-4 py-10 sm:px-6">
+      {/* eslint-disable-next-line react/no-danger */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(touristAttractionJsonLd) }}
+      />
+      <BreadcrumbJsonLd items={breadcrumbItems} />
+      <Breadcrumbs items={breadcrumbItems} />
       <PreviewBanner status={activity.status} />
       <div className="relative mb-6 h-64 w-full overflow-hidden rounded-2xl sm:h-96">
         {imageUrl ? (
@@ -60,6 +109,7 @@ export default async function ActivityDetailPage({
             src={imageUrl}
             alt={activity.cover_media?.alt_text ?? activity.title}
             fill
+            sizes="(min-width: 896px) 896px, 100vw"
             className="object-cover"
             priority
           />

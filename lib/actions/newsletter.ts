@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { trackEvent } from "@/lib/analytics/server";
 
 // Läuft über den session-gebundenen (anon-Key-)Client, nicht über
 // lib/supabase/admin.ts — die neue newsletter_subscribers-Insert-Policy
@@ -34,5 +35,6 @@ export async function subscribeNewsletter(formData: FormData) {
     redirect("/?newsletter=error#newsletter");
   }
 
+  await trackEvent("newsletter_signup");
   redirect("/?newsletter=success#newsletter");
 }

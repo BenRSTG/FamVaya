@@ -6,10 +6,12 @@ import { QuickFamilyCheck } from "@/components/quick-family-check";
 import { AccommodationCard } from "@/components/cards/accommodation-card";
 import { ActivityCard } from "@/components/cards/activity-card";
 import { MicroAdventureCard } from "@/components/cards/micro-adventure-card";
+import { ArticleCard } from "@/components/cards/article-card";
 import { filterInputClass } from "@/components/filter-field";
 import { getFeaturedAccommodations } from "@/lib/data/accommodations";
 import { getFeaturedActivities } from "@/lib/data/activities";
 import { getFeaturedMicroAdventures } from "@/lib/data/micro-adventures";
+import { getFeaturedArticles } from "@/lib/data/articles";
 import { subscribeNewsletter } from "@/lib/actions/newsletter";
 import { toStringParam, type SearchParams } from "@/lib/search-params";
 
@@ -51,10 +53,11 @@ export default async function Home({
   const params = await searchParams;
   const newsletterStatus = toStringParam(params.newsletter);
 
-  const [accommodations, activities, microAdventures] = await Promise.all([
+  const [accommodations, activities, microAdventures, articles] = await Promise.all([
     getFeaturedAccommodations(3),
     getFeaturedActivities(3),
     getFeaturedMicroAdventures(3),
+    getFeaturedArticles(3),
   ]);
 
   return (
@@ -150,6 +153,14 @@ export default async function Home({
         <RecommendedSection title="Kleine Abenteuer für den Familienalltag">
           {microAdventures.map((a) => (
             <MicroAdventureCard key={a.id} adventure={a} />
+          ))}
+        </RecommendedSection>
+      )}
+
+      {articles.length > 0 && (
+        <RecommendedSection title="Aus dem Magazin">
+          {articles.map((a) => (
+            <ArticleCard key={a.id} article={a} />
           ))}
         </RecommendedSection>
       )}

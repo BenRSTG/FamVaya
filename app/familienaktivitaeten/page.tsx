@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { ActivityCard } from "@/components/cards/activity-card";
 import { ActivitiesFilterForm } from "@/components/activities-filter-form";
+import { Pagination, paginate, PAGE_SIZE } from "@/components/pagination";
 import { getActivityCategories, getPublishedActivities } from "@/lib/data/activities";
 import type { ActivityFilters } from "@/lib/types";
 import { toBoolean, toNumber, toStringParam, type SearchParams } from "@/lib/search-params";
@@ -29,11 +30,25 @@ export default async function ActivitiesPage({
     largeFamilyDiscount: toBoolean(params.largeFamilyDiscount) || undefined,
   };
   const hasActiveFilters = Object.values(filters).some((v) => v != null);
+  const page = Math.max(1, toNumber(params.page) ?? 1);
 
   const [activities, categories] = await Promise.all([
     getPublishedActivities(filters),
     getActivityCategories(),
   ]);
+
+  const totalPages = Math.max(1, Math.ceil(activities.length / PAGE_SIZE));
+  const pageItems = paginate(activities, page);
+  const buildHref = (targetPage: number) => {
+    const search = new URLSearchParams();
+    for (const [key, value] of Object.entries(params)) {
+      if (key === "page" || !value) continue;
+      search.set(key, Array.isArray(value) ? value[0] : value);
+    }
+    if (targetPage > 1) search.set("page", String(targetPage));
+    const query = search.toString();
+    return query ? `/familienaktivitaeten?${query}` : "/familienaktivitaeten";
+  };
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-12 sm:px-6">
@@ -58,9 +73,9 @@ export default async function ActivitiesPage({
         hasActiveFilters={hasActiveFilters}
       />
 
-      {activities.length > 0 ? (
+      {pageItems.length > 0 ? (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {activities.map((activity) => (
+          {pageItems.map((activity) => (
             <ActivityCard key={activity.id} activity={activity} />
           ))}
         </div>
@@ -73,6 +88,8 @@ export default async function ActivitiesPage({
           Aktuell sind noch keine Aktivitäten veröffentlicht.
         </p>
       )}
+
+      <Pagination currentPage={page} totalPages={totalPages} buildHref={buildHref} />
     </div>
   );
 }

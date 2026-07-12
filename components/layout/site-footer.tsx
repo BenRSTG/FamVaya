@@ -1,4 +1,6 @@
 import Image from "next/image";
+import Link from "next/link";
+import { CookieSettingsLink } from "@/components/cookie-settings-link";
 
 export function SiteFooter() {
   return (
@@ -13,9 +15,17 @@ export function SiteFooter() {
         <p className="max-w-md text-sm text-muted-foreground">
           Abenteuer für die ganze Familie. Wirklich die ganze.
         </p>
+        <nav className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+          <Link href="/impressum" className="underline-offset-2 hover:underline">
+            Impressum
+          </Link>
+          <Link href="/datenschutz" className="underline-offset-2 hover:underline">
+            Datenschutz
+          </Link>
+          <CookieSettingsLink />
+        </nav>
         <p className="text-xs text-muted-foreground">
-          © {new Date().getFullYear()} FamVaya · Rechtliche Seiten (Impressum,
-          Datenschutz) folgen in einer späteren Phase.
+          © {new Date().getFullYear()} FamVaya
         </p>
       </div>
     </footer>

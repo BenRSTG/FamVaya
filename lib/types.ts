@@ -24,7 +24,7 @@ export interface Category {
 // Rückgabezeile von search_all_content() (Spec §14, Bauplan_2.md Phase 3) —
 // bewusst schlanker als Accommodation/Activity/MicroAdventure, siehe DECISIONS.md.
 export interface SearchResultRow {
-  content_type: ContentType;
+  content_type: ContentType | "article";
   id: string;
   title: string;
   slug: string;
@@ -308,6 +308,7 @@ export interface Article {
   excerpt: string | null;
   content: string | null;
   author_id: string | null;
+  author_name: string | null;
   category_id: string | null;
   category: Category | null;
   cover_media_id: string | null;

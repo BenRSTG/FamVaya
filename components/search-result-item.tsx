@@ -4,7 +4,13 @@ import { OVERVIEW_PATH_BY_CONTENT_TYPE } from "@/lib/content-type";
 import type { SearchResultRow } from "@/lib/types";
 
 export function SearchResultItem({ result }: { result: SearchResultRow }) {
-  const href = `${OVERVIEW_PATH_BY_CONTENT_TYPE[result.content_type]}/${result.slug}`;
+  // Magazinartikel liegen unter /magazin, nicht unter einem der drei
+  // Content-Typ-Übersichtspfade — OVERVIEW_PATH_BY_CONTENT_TYPE kennt sie
+  // bewusst nicht (siehe lib/content-type.ts).
+  const href =
+    result.content_type === "article"
+      ? `/magazin/${result.slug}`
+      : `${OVERVIEW_PATH_BY_CONTENT_TYPE[result.content_type]}/${result.slug}`;
 
   return (
     <Link

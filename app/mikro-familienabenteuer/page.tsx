@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import { MicroAdventureCard } from "@/components/cards/micro-adventure-card";
 import { MicroAdventuresFilterForm } from "@/components/micro-adventures-filter-form";
+import { Pagination, paginate, PAGE_SIZE } from "@/components/pagination";
 import {
   getMicroAdventureCategories,
   getPublishedMicroAdventures,
 } from "@/lib/data/micro-adventures";
 import type { MicroAdventureFilters } from "@/lib/types";
-import { toStringParam, type SearchParams } from "@/lib/search-params";
+import { toNumber, toStringParam, type SearchParams } from "@/lib/search-params";
 
 export const metadata: Metadata = {
   title: "Mikro-Familienabenteuer",
@@ -44,11 +45,25 @@ export default async function MicroAdventuresPage({
         : undefined,
   };
   const hasActiveFilters = Object.values(filters).some((v) => v != null);
+  const page = Math.max(1, toNumber(params.page) ?? 1);
 
   const [adventures, categories] = await Promise.all([
     getPublishedMicroAdventures(filters),
     getMicroAdventureCategories(),
   ]);
+
+  const totalPages = Math.max(1, Math.ceil(adventures.length / PAGE_SIZE));
+  const pageItems = paginate(adventures, page);
+  const buildHref = (targetPage: number) => {
+    const search = new URLSearchParams();
+    for (const [key, value] of Object.entries(params)) {
+      if (key === "page" || !value) continue;
+      search.set(key, Array.isArray(value) ? value[0] : value);
+    }
+    if (targetPage > 1) search.set("page", String(targetPage));
+    const query = search.toString();
+    return query ? `/mikro-familienabenteuer?${query}` : "/mikro-familienabenteuer";
+  };
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-12 sm:px-6">
@@ -73,9 +88,9 @@ export default async function MicroAdventuresPage({
         hasActiveFilters={hasActiveFilters}
       />
 
-      {adventures.length > 0 ? (
+      {pageItems.length > 0 ? (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {adventures.map((adventure) => (
+          {pageItems.map((adventure) => (
             <MicroAdventureCard key={adventure.id} adventure={adventure} />
           ))}
         </div>
@@ -88,6 +103,8 @@ export default async function MicroAdventuresPage({
           Aktuell sind noch keine Mikro-Abenteuer veröffentlicht.
         </p>
       )}
+
+      <Pagination currentPage={page} totalPages={totalPages} buildHref={buildHref} />
     </div>
   );
 }

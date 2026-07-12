@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { trackEvent } from "@/lib/analytics/server";
 
 // Alle Actions laufen über den session-gebundenen Client (anon-Key +
 // Cookies), NICHT über lib/supabase/admin.ts — das ist genau der
@@ -40,6 +41,7 @@ export async function signUpWithPassword(formData: FormData) {
   if (error) {
     redirect(`/registrieren?error=${encodeURIComponent(error.message)}`);
   }
+  await trackEvent("account_created");
   redirect("/registrieren?success=1");
 }
 

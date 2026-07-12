@@ -1,10 +1,11 @@
 import { createAdminClient } from "@/lib/supabase/admin";
-import type { ContentType, SearchResultRow } from "@/lib/types";
+import type { SearchResultRow } from "@/lib/types";
 
 export interface GroupedSearchResults {
   accommodation: SearchResultRow[];
   activity: SearchResultRow[];
   micro_adventure: SearchResultRow[];
+  article: SearchResultRow[];
 }
 
 export async function searchAllContent(
@@ -15,6 +16,7 @@ export async function searchAllContent(
     accommodation: [],
     activity: [],
     micro_adventure: [],
+    article: [],
   };
   if (!trimmed) return empty;
 
@@ -26,7 +28,7 @@ export async function searchAllContent(
   const rows = (data ?? []) as SearchResultRow[];
   const grouped = { ...empty };
   for (const row of rows) {
-    grouped[row.content_type as Exclude<ContentType, never>].push(row);
+    grouped[row.content_type].push(row);
   }
   return grouped;
 }

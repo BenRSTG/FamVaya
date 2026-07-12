@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { AccommodationCard } from "@/components/cards/accommodation-card";
 import { AccommodationsFilterForm } from "@/components/accommodations-filter-form";
+import { Pagination, paginate, PAGE_SIZE } from "@/components/pagination";
 import {
   getAccommodationTypes,
   getPublishedAccommodations,
@@ -29,11 +30,25 @@ export default async function AccommodationsPage({
     typeSlug: toStringParam(params.type),
   };
   const hasActiveFilters = Object.values(filters).some((v) => v != null);
+  const page = Math.max(1, toNumber(params.page) ?? 1);
 
   const [accommodations, accommodationTypes] = await Promise.all([
     getPublishedAccommodations(filters),
     getAccommodationTypes(),
   ]);
+
+  const totalPages = Math.max(1, Math.ceil(accommodations.length / PAGE_SIZE));
+  const pageItems = paginate(accommodations, page);
+  const buildHref = (targetPage: number) => {
+    const search = new URLSearchParams();
+    for (const [key, value] of Object.entries(params)) {
+      if (key === "page" || !value) continue;
+      search.set(key, Array.isArray(value) ? value[0] : value);
+    }
+    if (targetPage > 1) search.set("page", String(targetPage));
+    const query = search.toString();
+    return query ? `/familienunterkuenfte?${query}` : "/familienunterkuenfte";
+  };
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-12 sm:px-6">
@@ -60,9 +75,9 @@ export default async function AccommodationsPage({
         hasActiveFilters={hasActiveFilters}
       />
 
-      {accommodations.length > 0 ? (
+      {pageItems.length > 0 ? (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {accommodations.map((accommodation) => (
+          {pageItems.map((accommodation) => (
             <AccommodationCard key={accommodation.id} accommodation={accommodation} />
           ))}
         </div>
@@ -75,6 +90,8 @@ export default async function AccommodationsPage({
           Aktuell sind noch keine Unterkünfte veröffentlicht.
         </p>
       )}
+
+      <Pagination currentPage={page} totalPages={totalPages} buildHref={buildHref} />
     </div>
   );
 }

@@ -4,23 +4,25 @@ Inspirations- und Empfehlungsplattform für Familienreisen mit dem Fokus
 „Large Families First" — Familien mit drei oder mehr Kindern. Die vollständige
 Produktspezifikation liegt unter [`files/spec.md`](files/spec.md).
 
-**Aktueller Stand: Phase 0–5 von [`FamVaya_Bauplan_2.md`](FamVaya_Bauplan_2.md) abgeschlossen.**
-Alle drei Hauptbereiche sind durchsuchbar, filterbar und verlinkbar; dazu
-gibt es echte Supabase-Auth (E-Mail/Passwort + Magic Link), ein
-Familienprofil, eine Merkliste mit Freigabe-Link, eine Newsletter-Anmeldung
-und einen geschützten Admin-Bereich mit CMS für alle Content-Typen
-(inkl. echtem Bild-Upload nach Supabase Storage). Noch **nicht** enthalten:
-öffentliche Magazin-Seiten — siehe `FamVaya_Bauplan_2.md` für die
-vollständige Phasenübersicht. Getroffene technische Entscheidungen sind
+**Aktueller Stand: Phase 0–6 von [`FamVaya_Bauplan_2.md`](FamVaya_Bauplan_2.md) abgeschlossen — alle sechs Phasen sind umgesetzt.**
+Alle vier Hauptbereiche (Unterkünfte, Aktivitäten, Mikro-Abenteuer, Magazin)
+sind durchsuchbar, filterbar, paginiert und verlinkt; dazu gibt es echte
+Supabase-Auth (E-Mail/Passwort + Magic Link), ein Familienprofil, eine
+Merkliste mit Freigabe-Link, eine Newsletter-Anmeldung, einen geschützten
+Admin-Bereich mit CMS für alle Content-Typen (inkl. echtem Bild-Upload nach
+Supabase Storage), SEO-Grundlagen (Sitemap, robots.txt, Schema.org,
+Breadcrumbs), eine abstrahierte Analytics-Anbindung und DSGVO-Grundlagen
+(Cookie-Consent, Rechts-Platzhalterseiten). Details zur Phasenroadmap in
+`FamVaya_Bauplan_2.md`. Getroffene technische Entscheidungen sind
 fortlaufend in [`DECISIONS.md`](DECISIONS.md) dokumentiert.
 
 ## Stack
 
 Next.js 16 (App Router) · TypeScript · React 19 · Tailwind CSS v4 · shadcn/ui
 (Base UI) · Supabase (Postgres, Auth, Storage, `pg_trgm` Volltextsuche) ·
-Vitest · Lucide Icons.
+Vitest · Lucide Icons · Vercel Analytics.
 
-## Funktionsumfang (Phase 0–5)
+## Funktionsumfang (Phase 0–6)
 
 - **Startseite** (`/`): Hero, Schneller Familien-Check, drei Welt-Karten,
   „Empfohlene Inhalte", FamVaya-Versprechen, Newsletter-Anmeldung.
@@ -51,19 +53,37 @@ Vitest · Lucide Icons.
   Familienunterkünfte, -aktivitäten, Mikro-Familienabenteuer, Magazin-
   Artikel und Anbieter, echter Bild-Upload nach Supabase Storage
   (`content-media`-Bucket), Duplizieren, Vorschau unveröffentlichter Inhalte
-  (`?preview=1` auf den öffentlichen Detailseiten bzw.
-  `/admin/magazin/[id]/vorschau`), Nutzerverwaltung (Rollenänderung, nur
-  `admin`), automatisches Ausblenden abgelaufener Angebote
-  (`expires_at`) aus Listen und globaler Suche.
+  (`?preview=1` auf den öffentlichen Detailseiten), Nutzerverwaltung
+  (Rollenänderung, nur `admin`), automatisches Ausblenden abgelaufener
+  Angebote (`expires_at`) aus Listen und globaler Suche.
+- **Magazin** (`/magazin`, `/magazin/[slug]`): Kategorie-Filter, Pagination,
+  verwandte Artikel (gleiche Kategorie), "Das könnte euch auch
+  interessieren"-Kachel, Teil der globalen Suche.
+- **Pagination**: auf allen vier Übersichtsseiten (Unterkünfte, Aktivitäten,
+  Mikro-Abenteuer, Magazin), rein serverseitig über `<Link>`s (kein
+  Client-JS, crawlbar).
+- **SEO**: `metadataBase`/Open-Graph/Twitter-Card auf allen Detailseiten,
+  `/sitemap.xml`, `/robots.txt`, sichtbare Breadcrumbs + `BreadcrumbList`-
+  JSON-LD, `LodgingBusiness`/`TouristAttraction`/`Article`/`Organization`/
+  `WebSite`+`SearchAction`-Schema.org-Daten (keine erfundenen
+  Bewertungen/Sterne).
+- **Analytics** (`lib/analytics/`): abstrahierte `trackEvent()`-Funktion
+  (Client- und Server-Wrapper), aktuell hinterlegt mit `@vercel/analytics`
+  — Events für Suche, Merken, Weiterleitung, Newsletter, Finder-Abschluss,
+  Kontoerstellung, Merkliste-Freigabe.
+- **DSGVO**: Cookie-Consent-Banner (`famvaya-consent`-Cookie, gilt auch für
+  das cookie-freie Analytics-Tool), `/impressum` und `/datenschutz` als
+  ausdrücklich gekennzeichnete, nicht indexierte Platzhalterseiten.
 
 Bewusst noch nicht gebaut (siehe `DECISIONS.md` für die jeweilige Begründung):
 Merken-Buttons auf Card-Listen (nur auf Detailseiten), mehrere benannte
 Merklisten pro Nutzer:in, Double-Opt-in-Newsletter, Google-OAuth, granularer
-Familiencheck aus Spec §10.3, Magazin-Suche (vorbereitet, aber ohne Inhalte),
-öffentliche Magazin-Lesenseiten (Phase 6), CRUD-UI für Referenzdaten
-(Kategorien/Regionen/Tags/Ausstattung/Altersgruppen — bleiben seed-gepflegt),
-Bewertungsmoderation (keine öffentliche Einreichung existiert), Multi-Bild-
-Galerien pro Content-Item.
+Familiencheck aus Spec §10.3, CRUD-UI für Referenzdaten (Kategorien/Regionen/
+Tags/Ausstattung/Altersgruppen — bleiben seed-gepflegt), Bewertungsmoderation
+(keine öffentliche Einreichung existiert), Multi-Bild-Galerien pro
+Content-Item, inhaltliche Verknüpfung Artikel↔Unterkünfte/Aktivitäten (nur
+generische Kachel), Content-Security-Policy, Playwright-E2E-Tests,
+tatsächliches Vercel-Deployment (nur dokumentiert).
 
 ## Voraussetzungen
 
@@ -127,18 +147,21 @@ Siehe [`.env.example`](.env.example) für alle Variablen. Benötigt für
    `.env.local` eintragen.
 3. Im **SQL Editor** des Supabase-Dashboards nacheinander alle Dateien aus
    `supabase/migrations/` ausführen — **in numerischer Reihenfolge**
-   (`0001_...` bis `0013_...`), da spätere Migrationen auf Tabellen/Funktionen
+   (`0001_...` bis `0016_...`), da spätere Migrationen auf Tabellen/Funktionen
    aus früheren verweisen.
-4. Danach `supabase/seed.sql` ausführen, um die Demo-Inhalte einzuspielen.
+4. Danach `supabase/seed.sql` ausführen, um die Demo-Inhalte einzuspielen
+   (12 Unterkünfte, 12 Aktivitäten, 15 Mikro-Abenteuer, 6 Magazinartikel —
+   Spec-§29-Mindestmengen).
 5. Unter **Authentication → URL Configuration**: Site URL auf
    `http://localhost:3000` setzen, `http://localhost:3000/auth/callback` zu
    den Redirect URLs hinzufügen — sonst laufen Magic-Link- und
    Bestätigungs-Links ins Leere.
 
-> ✅ Migrationen und Seed wurden gegen ein echtes Supabase-Projekt ausgeführt
-> und liefen fehlerfrei durch. End-to-end verifiziert: RLS-Policies (Auth,
-> Familienprofil, Merkliste), `/go/`-Klick-Logging, `search_all_content()`
-> inkl. Tippfehlertoleranz.
+> ✅ Alle 16 Migrationen und `seed.sql` wurden gegen ein echtes
+> Supabase-Projekt ausgeführt und liefen fehlerfrei durch. End-to-end
+> verifiziert: RLS-Policies (Auth, Familienprofil, Merkliste),
+> `/go/`-Klick-Logging, `search_all_content()` inkl. Tippfehlertoleranz und
+> Magazinartikeln (Phase 6).
 
 ### Warum keine Supabase-CLI / kein Docker?
 
@@ -196,12 +219,35 @@ npm run test
 
 Vitest mit Unit-Tests für die zentrale Business-Logik aus Spec §34:
 Preisformatierung, Großfamilien-Eignung, Kinder-Eignungscheck,
-Finder-Begründungstexte (`lib/*.test.ts`). Keine Component-/E2E-Tests bisher
-— kommt mit Spec §34 in einer späteren Phase.
+Finder-Begründungstexte, Formularvalidierung (`lib/form-utils.ts`),
+externe Weiterleitung (`lib/redirect.ts`), Berechtigungsprüfung
+(`lib/roles.ts`) — alle als reine, mockfreie Funktionen (`lib/*.test.ts`).
+Kein Playwright/E2E-Setup (bewusste Scope-Entscheidung, siehe
+`DECISIONS.md`).
 
 ## Deployment
 
-Noch nicht eingerichtet. Zielplattform laut Spec §4 ist Vercel.
+Zielplattform laut Spec §4 ist Vercel. Ein tatsächliches Deployment wurde
+im Rahmen dieses Projekts nicht ausgeführt (siehe `DECISIONS.md`) — so geht's:
+
+1. Repository zu GitHub pushen, dort in [vercel.com](https://vercel.com) als
+   neues Projekt importieren (Framework-Preset "Next.js" wird automatisch
+   erkannt).
+2. Unter **Project Settings → Environment Variables** alle Variablen aus
+   `.env.local` eintragen (siehe „Umgebungsvariablen" oben) —
+   `NEXT_PUBLIC_SITE_URL` auf die endgültige Produktions-Domain setzen.
+3. Migrationen (`supabase/migrations/0001_...` bis `0016_...`) und
+   `supabase/seed.sql` gegen das **Produktions-Supabase-Projekt** ausführen
+   (siehe „Supabase einrichten" oben) — separates Projekt empfohlen, nicht
+   dasselbe wie für die lokale Entwicklung.
+4. In Supabase unter **Authentication → URL Configuration** die Vercel-Domain
+   als Site URL sowie `<domain>/auth/callback` als Redirect-URL eintragen.
+5. Unter **Project Settings → Analytics** in Vercel "Web Analytics"
+   aktivieren, damit die `<Analytics/>`-Komponente (`app/layout.tsx`)
+   tatsächlich Daten sammelt — ohne aktivierte Analytics in den
+   Projekteinstellungen bleibt sie ein no-op.
+6. Build-Command (`next build`) und Start-Command (`next start`) sind
+   Vercel-Standard, keine Anpassung nötig.
 
 ## Admin-Bereich
 
@@ -216,6 +262,24 @@ Supabase-Storage-Bucket `content-media` (`supabase/migrations/0014_admin_storage
 Noch nicht angebunden. Die zugehörigen Umgebungsvariablen sind in
 `.env.example` bereits vorbereitet — `RESEND_API_KEY` würde zusätzlich das
 Newsletter-Double-Opt-in ermöglichen (siehe `DECISIONS.md`).
+
+## Analytics
+
+`lib/analytics/` stellt eine abstrahierte `trackEvent(name, props?)`-Funktion
+bereit (Client-Wrapper `client.ts`, Server-Wrapper `server.ts`), aktuell
+hinterlegt mit `@vercel/analytics` (kostenlos, kein API-Key, cookie-frei).
+`<Analytics/>` im Root-Layout wird erst nach Cookie-Einwilligung gerendert
+(`lib/consent.ts`, siehe „DSGVO-Grundlagen" unten). Ein Anbieterwechsel
+betrifft nur die beiden Wrapper-Dateien, keine Call-Sites.
+
+## DSGVO-Grundlagen
+
+`/impressum` und `/datenschutz` sind ausdrücklich gekennzeichnete,
+nicht-indexierte Platzhalterseiten (keine anwaltlich geprüfte Endfassung,
+siehe `DECISIONS.md`). Das Cookie-Consent-Banner
+(`components/cookie-consent.tsx`) setzt ein einziges technisch notwendiges
+Cookie (`famvaya-consent`) und schaltet erst danach `<Analytics/>` frei;
+"Cookie-Einstellungen" im Footer setzt die Einwilligung zurück.
 
 ## Projektstruktur
 
@@ -233,6 +297,9 @@ app/
   auth/actions.ts                   Auth-Server-Actions (Sign-in/up/out)
   konto/                            Familienprofil (geschützt) + Server Action
   merkliste/                        Merkliste (geschützt) + Freigabe-Seite (öffentlich)
+  magazin/                          Magazin-Übersicht (Kategoriefilter, Pagination) + [slug]-Detailseite
+  impressum/, datenschutz/          Rechts-Platzhalterseiten (nicht indexiert)
+  sitemap.ts, robots.ts             SEO: XML-Sitemap + robots.txt (Next.js-Konventionen)
   admin/                            Admin-Bereich (geschützt, siehe unten)
   not-found.tsx                     404-Seite
   admin/layout.tsx                  requireAdminOrEditor() + Sidebar-Navigation
@@ -244,11 +311,15 @@ app/
   admin/nutzer/                     Nutzerliste + Rollenänderung (nur requireAdmin())
 components/
   layout/                           SiteHeader (Suche/Merkliste/Konto-Links), SiteFooter, MobileNav
-  cards/                            AccommodationCard, ActivityCard, MicroAdventureCard
+  cards/                            AccommodationCard, ActivityCard, MicroAdventureCard, ArticleCard
   ui/                                shadcn/ui-Komponenten
   admin/                            Geteilte Admin-UI: content-table.tsx, status-badge.tsx,
                                      status-select.tsx, checkbox-group.tsx, media-picker.tsx,
                                      form-field.tsx, preview-banner.tsx
+  breadcrumbs.tsx                   Sichtbare Breadcrumbs + BreadcrumbList-JSON-LD
+  pagination.tsx                    Seiten-Navigation (Array-Slice) für die 4 Übersichtsseiten
+  cookie-consent.tsx                DSGVO-Consent-Banner (Client Component)
+  cookie-settings-link.tsx          Footer-Link, setzt Consent zurück
   *-filter-form.tsx                 Such-/Filterformulare je Bereich (plain <form method="get">)
   quick-family-check.tsx            Schneller Familien-Check (Client Component)
   inspiration-finder.tsx            „Lass dich inspirieren"-Wizard (Client Component)
@@ -258,21 +329,27 @@ components/
   placeholder-image.tsx             Fallback für fehlende Bilder
 lib/
   supabase/                         admin.ts (service_role, Content/Suche) + client.ts/server.ts (Auth, session-gebunden)
-  data/                             Datenzugriffs-Schicht je Content-Typ + search.ts + favorites.ts +
-                                     shared.ts + admin.ts (Dashboard) + media.ts (Upload) + users.ts + providers.ts
-  actions/                          Geteilte Server Actions (favorites.ts, newsletter.ts)
+  data/                             Datenzugriffs-Schicht je Content-Typ (inkl. articles.ts, öffentlich
+                                     + Admin) + search.ts + favorites.ts + shared.ts + admin.ts
+                                     (Dashboard) + media.ts (Upload) + users.ts + providers.ts
+  actions/                          Geteilte Server Actions (favorites.ts, newsletter.ts, consent.ts)
+  analytics/                        events.ts (Vokabular) + client.ts + server.ts — trackEvent()-Abstraktion
   format.ts, family-rating.ts,
   family-check.ts, finder-reasons.ts Getestete Business-Logik (siehe lib/*.test.ts)
   auth.ts                           requireUser()/getOptionalUser()/requireAdminOrEditor()/
-                                     requireAdmin()/canPreview()-Helper
+                                     requireAdmin()/canPreview()-Helper (nutzt lib/roles.ts)
+  roles.ts                          Reine Rollen-Prädikate (canAccessAdmin, isAdmin), getestet
+  redirect.ts                       Reine Entscheidungslogik der /go/-Route, getestet
+  consent.ts                        Cookie-Consent lesen (Server Component)
+  site-url.ts                       Geteilter Fallback für NEXT_PUBLIC_SITE_URL
   content-type.ts                   Geteilte Content-Type-Konstanten (Tabellen-/Pfad-Mapping)
-  form-utils.ts                     Geteilte FormData-Parsing-Helfer für Admin-Server-Actions
+  form-utils.ts                     Geteilte FormData-Parsing-Helfer für Admin-Server-Actions, getestet
   search-params.ts                  Geteilte searchParams-Parsing-Helfer
   types.ts                          Handgeschriebene DB-Typen
 proxy.ts                            Session-Refresh (Next.js 16 "Proxy", vormals Middleware)
 public/brand/                       FamVaya-Logo (SVG, Originalfarben)
-supabase/migrations/                SQL-Migrationen (0001-0015, in Reihenfolge ausführen)
-supabase/seed.sql                   Demo-Seed-Daten
+supabase/migrations/                SQL-Migrationen (0001-0016, in Reihenfolge ausführen)
+supabase/seed.sql                   Demo-Seed-Daten (Spec-§29-Mindestmengen)
 files/                              Produktspezifikation (spec.md) und Phase-0-Kickoff-Prompt
 FamVaya_Bauplan_2.md                Verbindliche Phasen-Roadmap (Phase 0-6)
 DECISIONS.md                        Dokumentierte technische Entscheidungen

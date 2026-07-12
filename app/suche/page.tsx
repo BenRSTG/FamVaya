@@ -5,17 +5,19 @@ import { filterInputClass } from "@/components/filter-field";
 import { Button } from "@/components/ui/button";
 import { searchAllContent } from "@/lib/data/search";
 import { toStringParam, type SearchParams } from "@/lib/search-params";
+import { trackEvent } from "@/lib/analytics/server";
 
 export const metadata: Metadata = {
   title: "Suche",
   description:
-    "Durchsuche alle FamVaya-Familienunterkünfte, -aktivitäten und Mikro-Familienabenteuer.",
+    "Durchsuche alle FamVaya-Familienunterkünfte, -aktivitäten, Mikro-Familienabenteuer und Magazinartikel.",
 };
 
 const GROUP_LABELS = {
   accommodation: "Familienunterkünfte",
   activity: "Familienaktivitäten",
   micro_adventure: "Mikro-Familienabenteuer",
+  article: "Magazin",
 } as const;
 
 export default async function SearchPage({
@@ -27,8 +29,12 @@ export default async function SearchPage({
   const query = toStringParam(params.q) ?? "";
 
   const results = query ? await searchAllContent(query) : null;
+  if (query) await trackEvent("search_performed", { query });
   const totalCount = results
-    ? results.accommodation.length + results.activity.length + results.micro_adventure.length
+    ? results.accommodation.length +
+      results.activity.length +
+      results.micro_adventure.length +
+      results.article.length
     : 0;
 
   return (
@@ -56,8 +62,8 @@ export default async function SearchPage({
 
       {!results && (
         <p className="text-muted-foreground">
-          Durchsucht Familienunterkünfte, -aktivitäten und Mikro-Familienabenteuer
-          — auch mit kleinen Tippfehlern.
+          Durchsucht Familienunterkünfte, -aktivitäten, Mikro-Familienabenteuer und
+          das Magazin — auch mit kleinen Tippfehlern.
         </p>
       )}
 

@@ -22,7 +22,7 @@ export default async function EditArticlePage({
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold text-foreground">{article.title}</h1>
-        <Link href={`/admin/magazin/${article.id}/vorschau`} target="_blank" className="text-sm text-primary hover:underline">
+        <Link href={`/magazin/${article.slug}?preview=1`} target="_blank" className="text-sm text-primary hover:underline">
           Vorschau ansehen
         </Link>
       </div>

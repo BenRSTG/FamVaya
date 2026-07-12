@@ -36,6 +36,7 @@ export function AccommodationCard({
             src={imageUrl}
             alt={accommodation.cover_media?.alt_text ?? accommodation.title}
             fill
+            sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
             className="object-cover transition-transform group-hover:scale-105"
           />
         ) : (

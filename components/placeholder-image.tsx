@@ -1,12 +1,13 @@
-import { Home, FerrisWheel, TreePine, ImageOff, type LucideIcon } from "lucide-react";
+import { Home, FerrisWheel, TreePine, Newspaper, ImageOff, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-type PlaceholderKind = "accommodation" | "activity" | "micro_adventure";
+type PlaceholderKind = "accommodation" | "activity" | "micro_adventure" | "article";
 
 const ICON_BY_KIND: Record<PlaceholderKind, LucideIcon> = {
   accommodation: Home,
   activity: FerrisWheel,
   micro_adventure: TreePine,
+  article: Newspaper,
 };
 
 export function PlaceholderImage({

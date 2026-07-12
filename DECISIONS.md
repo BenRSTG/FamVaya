@@ -641,3 +641,153 @@ Suche via `search_all_content()`) gefiltert, tauchen aber unter ihrer
 bestehenden URL weiter auf (SEO-Grund: keine toten Links, keine
 301-Kaskaden) — die Detailseite zeigt anstelle des `/go/`-Buttons einen
 schlichten "Dieses Angebot ist abgelaufen"-Hinweis.
+
+## Phase 6: Magazin, SEO, Analytics, Recht, Härtung
+
+### Magazin: öffentliche Seiten ersetzen die Admin-Vorschau-Route
+
+`app/admin/magazin/[id]/vorschau/page.tsx` (Phase 5) ist entfallen. Sobald
+`/magazin/[slug]` existiert, folgt die Magazin-Vorschau exakt demselben
+`?preview=1`-Muster wie die drei anderen Content-Typen (`canPreview()` +
+`PreviewBanner`) — der "Vorschau ansehen"-Link im Admin zeigt jetzt auf die
+echte öffentliche Seite. Das war im Phase-5-Code-Kommentar bereits so
+angekündigt.
+
+### Verwandte Inhalte im Magazin: Heuristik statt Redakteurspflege
+
+Artikel-Detailseiten zeigen automatisch (a) verwandte Artikel über
+gleiche `category_id` und (b) eine generische "Das könnte euch auch
+interessieren"-Kachel aus den bestehenden `getFeaturedAccommodations()`/
+`getFeaturedActivities()`-Funktionen — unabhängig vom konkreten Artikel.
+Eine echte inhaltliche Verknüpfung (Artikel → passende Unterkünfte über
+gemeinsame Tags) hätte eine Erweiterung des `content_type`-Enums um
+`'article'` gebraucht, was wiederum die polymorphen Verknüpfungstabellen
+(`content_tags`, `content_age_groups`, `content_media`, `outbound_clicks`,
+`search_events`) betroffen hätte — Artikel bekommen bewusst keine
+Tag-Verknüpfung, um dieses Enum unverändert zu lassen (siehe nächster
+Punkt).
+
+### Globale Suche: `search_all_content()`-Rückgabetyp von Enum auf `text`
+
+Migration `0016_articles_search.sql` nimmt Magazinartikel in die Suche auf.
+Da `content_type` (Postgres-Enum) nur `accommodation`/`activity`/
+`micro_adventure` kennt und eine Erweiterung um `'article'` unerwünschte
+Nebenwirkungen auf die polymorphen Tabellen hätte (siehe oben), gibt die
+Funktion die Spalte jetzt als `text` zurück statt als Enum-Typ. Eine
+Rückgabetyp-Änderung erlaubt kein `create or replace` — die Migration macht
+stattdessen `drop function` + `create function`. `lib/types.ts`:
+`SearchResultRow.content_type` ist entsprechend `ContentType | "article"`.
+
+### Pagination ohne Änderung an der Datenschicht
+
+`getPublishedAccommodations()`/`-Activities()`/`-MicroAdventures()` liefern
+weiterhin das volle gefilterte Ergebnis; `components/pagination.tsx`
+schneidet rein auf Seiten-Ebene per Array-Slice (`paginate()`). Diese drei
+Funktionen werden auch von `lib/data/favorites.ts` (Merkliste) und dem
+Finder genutzt — eine Signaturänderung (z. B. `{ items, total }` statt
+`Array`) hätte mehrere funktionierende Call-Sites angefasst, ohne
+messbaren Nutzen bei der aktuellen Datenmenge (12–15 Einträge je Typ).
+`?page=`-Links sind reine `<Link>`s (kein Client-JS), damit sie crawlbar
+bleiben (Spec §25).
+
+### SEO: keine CSP, keine Rel-Prev/Next-Tags, kein FAQPage-Schema
+
+- **Content-Security-Policy**: nicht scharf geschaltet. Eine korrekte CSP
+  müsste Supabase-Storage- und Vercel-Analytics-Domains exakt allowlisten;
+  das ließe sich ohne laufendes Deployment nicht verlässlich verifizieren
+  und hätte im schlimmsten Fall blind Bilder/Analytics blockiert. Nur
+  einfache Header (`X-Content-Type-Options`, `X-Frame-Options`,
+  `Referrer-Policy`, `Permissions-Policy`) in `next.config.ts`.
+- **`rel="prev"/"next"`**: bewusst weggelassen — Google hat dieses Signal
+  2019 offiziell für die eigene Indexierung eingestellt; sauber
+  crawlbare `<Link>`-Pagination plus Canonical pro Seite ist der aktuelle
+  Best-Practice-Ersatz.
+- **`FAQPage`-Schema.org**: entfällt, da es keine FAQ-Inhalte im Produkt
+  gibt, an die es sich anheften ließe.
+- **Rechtsseiten nicht in der Sitemap**: `/impressum` und `/datenschutz`
+  tragen `robots: { index: false }`, solange sie nur strukturierte
+  Platzhalter sind (siehe unten) — eine Sitemap-Aufnahme wäre
+  widersprüchlich zu "nicht indexieren".
+
+### Analytics: `@vercel/analytics` hinter abstrahierter `trackEvent()`
+
+Spec §27 verlangt eine "abstrahierte Event-Funktion, sodass der Anbieter
+später austauschbar bleibt" — konkret umgesetzt mit `@vercel/analytics`
+(kostenlos, kein API-Key, cookie-frei), da es ohne Zusatzkosten sofort
+funktioniert und zur Zielplattform Vercel (Spec §4) passt. Zwei dünne
+Wrapper mit identischer Signatur `trackEvent(name, props?)`:
+`lib/analytics/client.ts` (Client Components) und
+`lib/analytics/server.ts` (Server Actions/Route Handler) — beide importieren
+aus dem gemeinsamen `lib/analytics/events.ts`-Vokabular. Ein Wechsel des
+Anbieters würde nur diese zwei Dateien betreffen, keine Call-Sites.
+Bewusst nicht jedes Spec-§27-Beispielereignis verdrahtet: `content_opened`
+und `filter_applied` wurden ausgelassen, weil `<Analytics/>` Pageviews
+ohnehin automatisch trackt und beides sonst redundant zu jedem Seitenaufruf
+wäre.
+
+### Cookie-Consent gilt auch für ein cookie-freies Analytics-Tool
+
+`@vercel/analytics` selbst setzt keine Cookies. Die Bauplan-Vorgabe "nur
+notwendige Cookies vor Einwilligung" wird trotzdem konservativ ausgelegt:
+`<Analytics/>` wird im Root-Layout erst gerendert, wenn das
+`famvaya-consent`-Cookie (`lib/consent.ts`) auf `"accepted"` steht. Das
+Banner (`components/cookie-consent.tsx`) setzt dieses eine technisch
+notwendige Cookie über eine Server Action; "Cookie-Einstellungen" im
+Footer löscht es wieder und zeigt das Banner erneut.
+
+### Rechtsseiten als ausdrücklich gekennzeichnete Platzhalter
+
+`/impressum` und `/datenschutz` sind laut Spec bewusst **keine**
+anwaltlich geprüften Endfassungen, sondern strukturierte Platzhalter mit
+Lückentext (`[Firmenname]` etc.) — jede Seite trägt einen sichtbaren
+Hinweisbanner, der das explizit sagt, plus `robots: { index: false }`.
+
+### Tests: Vitest statt Playwright für Redirect/Berechtigungen/Formulare
+
+Spec §34 verlangt Tests für "externe Weiterleitung", "Berechtigungsprüfung"
+und "Formularvalidierung". Statt neuer E2E-Tooling (Playwright +
+Browser-Installation) wurde die jeweilige Entscheidungslogik in reine,
+mockfreie Funktionen extrahiert und mit Vitest getestet — gleiche
+Konvention wie die vier bestehenden `lib/*.test.ts`:
+- `lib/redirect.ts` (`resolveRedirectTarget()`) — aus der `/go/`-Route
+  herausgezogen, die Route ruft die Funktion jetzt nur noch auf.
+- `lib/roles.ts` (`canAccessAdmin()`, `isAdmin()`) — aus
+  `requireAdminOrEditor()`/`requireAdmin()`/`canPreview()` herausgezogen,
+  `lib/auth.ts` nutzt sie jetzt statt dreifach duplizierter
+  Rollen-Vergleiche.
+- `lib/form-utils.test.ts` — deckt die in Phase 5 gebauten, bis dahin
+  ungetesteten Formular-Parsing-Helfer ab.
+Ein echtes Playwright-Setup bleibt ein sauberer Folge-Schritt, ist aber
+kein neuer Pflichtbestandteil des Projekts (Grundsatz seit Phase 0:
+minimale Tooling-Fläche, siehe Node-ohne-Homebrew- und
+Docker-freie-Supabase-Entscheidungen oben).
+
+### Seed-Daten auf Spec-§29-Mindestmengen aufgefüllt
+
+`supabase/seed.sql` enthielt bis Phase 6 nur den reduzierten Phase-0-Umfang
+(3/3/3/0). Ergänzt auf 12 Unterkünfte, 12 Aktivitäten, 15 Mikro-Abenteuer
+und 6 Magazinartikel (Titel wörtlich aus Spec §17 übernommen) — nötig,
+damit die in dieser Phase gebaute Pagination überhaupt sichtbar wird. Neue
+Inhalte nutzen bewusst dieselben Länder/Regionen/Typen/Kategorien wie
+Phase 0 statt neuer Geografie — Ziel war Content-**Menge**, nicht neue
+Referenzdaten-Vielfalt. `author_id` bleibt bei allen sechs Artikeln `NULL`
+(kein fester Seed-Nutzer verfügbar, da echte Nutzer nur per Auth-Flow
+entstehen) — die Magazin-Detailseite blendet die Autorenzeile aus, wenn
+kein Autor gesetzt ist.
+
+### Kein echtes Deployment
+
+"Deployment auf Vercel dokumentiert" (Bauplan-DoD) wurde als
+README-Anleitung umgesetzt (Env-Vars, Migrationsreihenfolge,
+Analytics-Dashboard-Hinweis), nicht als tatsächlich ausgeführter
+`vercel deploy` — das wäre ein Produktions-Push auf eine geteilte
+Plattform ohne expliziten separaten Auftrag.
+
+### Lighthouse/WCAG: Code-Härtung statt automatisierter Prüfung
+
+Umgesetzt: Skip-Link, `sizes`-Prop auf allen Grid-/Hero-Bildern (verhindert
+überdimensionierte Downloads), einfache Sicherheits-Header, vorhandene
+`aria-label` auf Icon-only-Buttons verifiziert. Keine automatisierte
+Lighthouse-/axe-Prüfung — bräuchte entweder neue Tooling-Abhängigkeit oder
+eine laufende Deployment-URL, beides außerhalb des bisherigen
+Projekt-Rahmens.

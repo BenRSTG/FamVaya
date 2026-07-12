@@ -5,17 +5,14 @@ import {
   OVERVIEW_PATH_BY_CONTENT_TYPE,
   TABLE_BY_CONTENT_TYPE,
 } from "@/lib/content-type";
+import { resolveRedirectTarget, type RedirectRow } from "@/lib/redirect";
+import { trackEvent } from "@/lib/analytics/server";
 
 // Affiliate-Redirect-Route (Spec §23): Klick protokollieren, dann zum
 // Anbieter weiterleiten. service_role-Client nötig, da outbound_clicks
-// RLS aktiv ohne Policies hat (siehe DECISIONS.md).
-
-interface RedirectTargetRow {
-  slug: string;
-  affiliate_url: string | null;
-  external_url: string | null;
-  provider_id?: string | null;
-}
+// RLS aktiv ohne Policies hat (siehe DECISIONS.md). Die Entscheidungslogik
+// (Ziel-URL/Logging) steckt in lib/redirect.ts, damit sie ohne Route-
+// Handler-Mocking testbar ist (siehe lib/redirect.test.ts).
 
 export async function GET(
   request: NextRequest,
@@ -45,22 +42,25 @@ export async function GET(
     return NextResponse.redirect(overviewUrl);
   }
 
-  const typedRow = row as unknown as RedirectTargetRow;
-  const targetUrl = typedRow.affiliate_url ?? typedRow.external_url;
+  const typedRow = row as unknown as RedirectRow;
+  const decision = resolveRedirectTarget(typedRow);
 
-  if (!targetUrl) {
+  if (!decision.targetUrl) {
     // Kein externer Link hinterlegt -> zurück zur Detailseite statt totem Link.
     return NextResponse.redirect(
       new URL(`${OVERVIEW_PATH_BY_CONTENT_TYPE[contentType]}/${typedRow.slug}`, request.url)
     );
   }
 
-  await supabase.from("outbound_clicks").insert({
-    content_type: contentType,
-    content_id: contentId,
-    provider_id: hasProvider ? (typedRow.provider_id ?? null) : null,
-    target_url: targetUrl,
-  });
+  if (decision.shouldLog) {
+    await supabase.from("outbound_clicks").insert({
+      content_type: contentType,
+      content_id: contentId,
+      provider_id: hasProvider ? (typedRow.provider_id ?? null) : null,
+      target_url: decision.targetUrl,
+    });
+    await trackEvent("outbound_redirect", { contentType, contentId });
+  }
 
-  return NextResponse.redirect(targetUrl, { status: 307 });
+  return NextResponse.redirect(decision.targetUrl, { status: 307 });
 }

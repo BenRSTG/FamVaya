@@ -10,8 +10,10 @@ import { getAccommodationBySlug } from "@/lib/data/accommodations";
 import { isFavorited } from "@/lib/data/favorites";
 import { canPreview, getOptionalUser } from "@/lib/auth";
 import { PreviewBanner } from "@/components/admin/preview-banner";
+import { Breadcrumbs, BreadcrumbJsonLd } from "@/components/breadcrumbs";
 import { formatPrice } from "@/lib/format";
 import { resolveMediaUrl } from "@/lib/media";
+import { getSiteUrl } from "@/lib/site-url";
 
 export async function generateMetadata({
   params,
@@ -22,11 +24,27 @@ export async function generateMetadata({
   const accommodation = await getAccommodationBySlug(slug);
   if (!accommodation) return {};
 
+  const description =
+    accommodation.short_description ??
+    `${accommodation.title} – eine FamVaya-Familienunterkunft.`;
+  const imageUrl = resolveMediaUrl(accommodation.cover_media);
+
   return {
     title: accommodation.title,
-    description:
-      accommodation.short_description ??
-      `${accommodation.title} – eine FamVaya-Familienunterkunft.`,
+    description,
+    alternates: { canonical: `/familienunterkuenfte/${accommodation.slug}` },
+    openGraph: {
+      title: accommodation.title,
+      description,
+      type: "website",
+      images: imageUrl ? [{ url: imageUrl }] : undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: accommodation.title,
+      description,
+      images: imageUrl ? [imageUrl] : undefined,
+    },
   };
 }
 
@@ -54,8 +72,36 @@ export default async function AccommodationDetailPage({
   const ctaUrl = accommodation.affiliate_url ?? accommodation.external_url;
   const goUrl = ctaUrl && !isExpired ? `/go/accommodation/${accommodation.id}` : null;
 
+  const breadcrumbItems = [
+    { label: "Startseite", href: "/" },
+    { label: "Familienunterkünfte", href: "/familienunterkuenfte" },
+    { label: accommodation.title },
+  ];
+
+  const lodgingJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "LodgingBusiness",
+    name: accommodation.title,
+    description: accommodation.short_description ?? undefined,
+    image: imageUrl ?? undefined,
+    url: `${getSiteUrl()}/familienunterkuenfte/${accommodation.slug}`,
+    ...(location
+      ? {
+          address: {
+            "@type": "PostalAddress",
+            addressLocality: accommodation.city ?? undefined,
+            addressCountry: accommodation.country?.name ?? undefined,
+          },
+        }
+      : {}),
+  };
+
   return (
     <div className="mx-auto w-full max-w-4xl px-4 py-10 sm:px-6">
+      {/* eslint-disable-next-line react/no-danger */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(lodgingJsonLd) }} />
+      <BreadcrumbJsonLd items={breadcrumbItems} />
+      <Breadcrumbs items={breadcrumbItems} />
       <PreviewBanner status={accommodation.status} />
       <div className="relative mb-6 h-64 w-full overflow-hidden rounded-2xl sm:h-96">
         {imageUrl ? (
@@ -63,6 +109,7 @@ export default async function AccommodationDetailPage({
             src={imageUrl}
             alt={accommodation.cover_media?.alt_text ?? accommodation.title}
             fill
+            sizes="(min-width: 896px) 896px, 100vw"
             className="object-cover"
             priority
           />

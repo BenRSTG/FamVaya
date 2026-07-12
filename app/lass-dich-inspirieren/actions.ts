@@ -4,6 +4,7 @@ import { getPublishedAccommodations } from "@/lib/data/accommodations";
 import { getPublishedActivities } from "@/lib/data/activities";
 import { getPublishedMicroAdventures } from "@/lib/data/micro-adventures";
 import { buildFinderReasons } from "@/lib/finder-reasons";
+import { trackEvent } from "@/lib/analytics/server";
 import type { FinderInput, FinderResults } from "@/lib/types";
 
 // Regelbasiertes Matching (Bauplan_2.md Phase 3): bildet die Wizard-Eingaben
@@ -48,6 +49,8 @@ export async function findMatches(input: FinderInput): Promise<FinderResults> {
         })
       : Promise.resolve([]),
   ]);
+
+  await trackEvent("finder_completed", { area: input.area });
 
   return {
     accommodations: accommodations.slice(0, RESULT_LIMIT).map((item) => ({

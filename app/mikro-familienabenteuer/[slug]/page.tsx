@@ -10,7 +10,9 @@ import { isFavorited } from "@/lib/data/favorites";
 import { canPreview, getOptionalUser } from "@/lib/auth";
 import { formatPrice } from "@/lib/format";
 import { resolveMediaUrl } from "@/lib/media";
+import { getSiteUrl } from "@/lib/site-url";
 import { PreviewBanner } from "@/components/admin/preview-banner";
+import { Breadcrumbs, BreadcrumbJsonLd } from "@/components/breadcrumbs";
 
 const COST_LABEL: Record<string, string> = {
   free: "Kostenlos",
@@ -34,10 +36,26 @@ export async function generateMetadata({
   const adventure = await getMicroAdventureBySlug(slug);
   if (!adventure) return {};
 
+  const description =
+    adventure.short_description ?? `${adventure.title} – ein FamVaya-Mikro-Abenteuer.`;
+  const imageUrl = resolveMediaUrl(adventure.cover_media);
+
   return {
     title: adventure.title,
-    description:
-      adventure.short_description ?? `${adventure.title} – ein FamVaya-Mikro-Abenteuer.`,
+    description,
+    alternates: { canonical: `/mikro-familienabenteuer/${adventure.slug}` },
+    openGraph: {
+      title: adventure.title,
+      description,
+      type: "website",
+      images: imageUrl ? [{ url: imageUrl }] : undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: adventure.title,
+      description,
+      images: imageUrl ? [imageUrl] : undefined,
+    },
   };
 }
 
@@ -63,8 +81,30 @@ export default async function MicroAdventureDetailPage({
   const ctaUrl = adventure.affiliate_url ?? adventure.external_url;
   const goUrl = ctaUrl ? `/go/micro_adventure/${adventure.id}` : null;
 
+  const breadcrumbItems = [
+    { label: "Startseite", href: "/" },
+    { label: "Mikro-Familienabenteuer", href: "/mikro-familienabenteuer" },
+    { label: adventure.title },
+  ];
+
+  const touristAttractionJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "TouristAttraction",
+    name: adventure.title,
+    description: adventure.short_description ?? undefined,
+    image: imageUrl ?? undefined,
+    url: `${getSiteUrl()}/mikro-familienabenteuer/${adventure.slug}`,
+  };
+
   return (
     <div className="mx-auto w-full max-w-4xl px-4 py-10 sm:px-6">
+      {/* eslint-disable-next-line react/no-danger */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(touristAttractionJsonLd) }}
+      />
+      <BreadcrumbJsonLd items={breadcrumbItems} />
+      <Breadcrumbs items={breadcrumbItems} />
       <PreviewBanner status={adventure.status} />
       <div className="relative mb-6 h-64 w-full overflow-hidden rounded-2xl sm:h-96">
         {imageUrl ? (
@@ -72,6 +112,7 @@ export default async function MicroAdventureDetailPage({
             src={imageUrl}
             alt={adventure.cover_media?.alt_text ?? adventure.title}
             fill
+            sizes="(min-width: 896px) 896px, 100vw"
             className="object-cover"
             priority
           />

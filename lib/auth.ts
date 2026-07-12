@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { canAccessAdmin, isAdmin } from "@/lib/roles";
 import type { User } from "@supabase/supabase-js";
 
 // Für geschützte Server Components (/konto, /merkliste): redirect statt Fehler.
@@ -41,7 +42,7 @@ export async function requireAdminOrEditor(next?: string): Promise<User> {
     .eq("id", user.id)
     .maybeSingle();
 
-  if (profile?.role !== "admin" && profile?.role !== "editor") {
+  if (!canAccessAdmin(profile?.role)) {
     redirect("/");
   }
 
@@ -61,7 +62,7 @@ export async function canPreview(): Promise<boolean> {
     .eq("id", user.id)
     .maybeSingle();
 
-  return profile?.role === "admin" || profile?.role === "editor";
+  return canAccessAdmin(profile?.role);
 }
 
 // Strenger als requireAdminOrEditor(): für Aktionen, bei denen ein Editor zu
@@ -77,7 +78,7 @@ export async function requireAdmin(next?: string): Promise<User> {
     .eq("id", user.id)
     .maybeSingle();
 
-  if (profile?.role !== "admin") {
+  if (!isAdmin(profile?.role)) {
     redirect("/");
   }
 
