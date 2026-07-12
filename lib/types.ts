@@ -21,6 +21,18 @@ export interface Category {
   slug: string;
 }
 
+// Rückgabezeile von search_all_content() (Spec §14, Bauplan_2.md Phase 3) —
+// bewusst schlanker als Accommodation/Activity/MicroAdventure, siehe DECISIONS.md.
+export interface SearchResultRow {
+  content_type: ContentType;
+  id: string;
+  title: string;
+  slug: string;
+  short_description: string | null;
+  city: string | null;
+  rank: number;
+}
+
 // Grundfilter für die Familienunterkünfte-Übersicht (Bauplan_2.md Phase 1 /
 // Spec §8.1-Teilmenge). Alle Felder optional — undefined bedeutet "kein Filter".
 export interface AccommodationFilters {
@@ -29,6 +41,8 @@ export interface AccommodationFilters {
   minBedrooms?: number;
   maxPrice?: number;
   typeSlug?: string;
+  // Phase 3: vom Inspirationsfinder genutzt (siehe lib/data/shared.ts).
+  tagSlugs?: string[];
 }
 
 // Grundfilter für die Familienaktivitäten-Übersicht (Bauplan_2.md Phase 2 /
@@ -38,6 +52,7 @@ export interface ActivityFilters {
   indoorOutdoor?: "indoor" | "outdoor";
   maxPrice?: number;
   largeFamilyDiscount?: boolean;
+  tagSlugs?: string[];
 }
 
 // Grundfilter für die Mikro-Familienabenteuer-Übersicht (Bauplan_2.md Phase 2
@@ -45,8 +60,13 @@ export interface ActivityFilters {
 export interface MicroAdventureFilters {
   categorySlug?: string;
   costLevel?: "free" | "low" | "medium" | "high";
-  preparationLevel?: "none" | "light" | "moderate";
+  // Array statt Einzelwert: der Finder erlaubt bei "spontan" sowohl 'none'
+  // als auch 'light' (siehe DECISIONS.md — 'none' allein war zu eng).
+  preparationLevel?: ("none" | "light" | "moderate")[];
   indoorOutdoor?: "indoor" | "outdoor";
+  // Phase 3: vom Inspirationsfinder genutzt, filtert auf estimated_total_cost.
+  maxPrice?: number;
+  tagSlugs?: string[];
 }
 
 export interface Media {
@@ -196,4 +216,25 @@ export interface MicroAdventure {
   age_groups: AgeGroup[];
   tags: Tag[];
   cover_media: Media | null;
+}
+
+// „Lass dich inspirieren"-Finder (Spec §13, Bauplan_2.md Phase 3 —
+// vereinfacht/regelbasiert, siehe DECISIONS.md).
+
+export type FinderArea = "unterkunft" | "aktivitaet" | "mikroabenteuer" | "unentschlossen";
+
+export interface FinderInput {
+  adults: number;
+  children: number;
+  area: FinderArea;
+  spontaneous: boolean;
+  /** undefined = "egal", 0 = "kostenlos" */
+  maxBudget?: number;
+  interestTags: Tag[];
+}
+
+export interface FinderResults {
+  accommodations: { item: Accommodation; reasons: string[] }[];
+  activities: { item: Activity; reasons: string[] }[];
+  microAdventures: { item: MicroAdventure; reasons: string[] }[];
 }

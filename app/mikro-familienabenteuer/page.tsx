@@ -36,7 +36,7 @@ export default async function MicroAdventuresPage({
     preparationLevel: PREPARATION_LEVELS.includes(
       preparationLevelRaw as (typeof PREPARATION_LEVELS)[number]
     )
-      ? (preparationLevelRaw as MicroAdventureFilters["preparationLevel"])
+      ? [preparationLevelRaw as (typeof PREPARATION_LEVELS)[number]]
       : undefined,
     indoorOutdoor:
       indoorOutdoorRaw === "indoor" || indoorOutdoorRaw === "outdoor"

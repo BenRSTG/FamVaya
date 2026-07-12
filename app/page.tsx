@@ -81,7 +81,7 @@ export default async function Home() {
           <Button
             size="lg"
             variant="outline"
-            render={<Link href="#empfohlene-inhalte" />}
+            render={<Link href="/lass-dich-inspirieren" />}
             nativeButton={false}
           >
             Lass dich inspirieren

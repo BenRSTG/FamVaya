@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import { Search } from "lucide-react";
 import { NAV_ITEMS } from "@/components/layout/nav-items";
 import { MobileNav } from "@/components/layout/mobile-nav";
 
@@ -29,7 +30,16 @@ export function SiteHeader() {
           ))}
         </nav>
 
-        <MobileNav />
+        <div className="flex items-center gap-2">
+          <Link
+            href="/suche"
+            aria-label="Suche"
+            className="flex size-9 items-center justify-center rounded-lg text-foreground hover:bg-muted"
+          >
+            <Search className="size-5" aria-hidden />
+          </Link>
+          <MobileNav />
+        </div>
       </div>
     </header>
   );

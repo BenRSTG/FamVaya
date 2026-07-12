@@ -3,6 +3,7 @@ import type { Activity, ActivityFilters, Category } from "@/lib/types";
 import {
   getAgeGroupsForContent,
   getCategoriesByContentType,
+  getContentIdsByTagSlugs,
   getCoverImageForContent,
   getCoverImagesForContents,
   getTagsForContent,
@@ -67,6 +68,10 @@ export async function getPublishedActivities(
     const categories = await getActivityCategories();
     const category = categories.find((c) => c.slug === filters.categorySlug);
     query = query.eq("category_id", category?.id ?? "00000000-0000-0000-0000-000000000000");
+  }
+  if (filters.tagSlugs && filters.tagSlugs.length > 0) {
+    const ids = await getContentIdsByTagSlugs("activity", filters.tagSlugs);
+    query = query.in("id", ids.length > 0 ? ids : ["00000000-0000-0000-0000-000000000000"]);
   }
 
   const { data } = await query

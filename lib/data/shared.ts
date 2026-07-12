@@ -91,3 +91,33 @@ export async function getTagsForContent(
 
   return (data ?? []).map((row) => row.tag as unknown as Tag);
 }
+
+export async function getAllTags(): Promise<Tag[]> {
+  const supabase = createAdminClient();
+  const { data } = await supabase.from("tags").select("id, name, slug").order("name");
+  return data ?? [];
+}
+
+// IDs aller Content-Items eines Typs, die MINDESTENS eines der übergebenen
+// Tags tragen (OR-Semantik) — genutzt vom Inspirationsfinder und den
+// Übersichts-Filtern. Zwei Schritte statt eines !inner-Joins, konsistent mit
+// dem bestehenden Slug-Auflösungs-Muster (z. B. accommodation_type_id).
+export async function getContentIdsByTagSlugs(
+  contentType: ContentType,
+  tagSlugs: string[]
+): Promise<string[]> {
+  if (tagSlugs.length === 0) return [];
+  const supabase = createAdminClient();
+
+  const { data: tags } = await supabase.from("tags").select("id").in("slug", tagSlugs);
+  const tagIds = (tags ?? []).map((t) => t.id);
+  if (tagIds.length === 0) return [];
+
+  const { data } = await supabase
+    .from("content_tags")
+    .select("content_id")
+    .eq("content_type", contentType)
+    .in("tag_id", tagIds);
+
+  return [...new Set((data ?? []).map((row) => row.content_id as string))];
+}

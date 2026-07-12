@@ -2,6 +2,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import type { Accommodation, AccommodationFilters, AccommodationType } from "@/lib/types";
 import {
   getAgeGroupsForContent,
+  getContentIdsByTagSlugs,
   getCoverImageForContent,
   getCoverImagesForContents,
   getTagsForContent,
@@ -68,6 +69,10 @@ export async function getPublishedAccommodations(
     const type = types.find((t) => t.slug === filters.typeSlug);
     // Unbekannter Slug -> garantiert 0 Treffer statt Filter zu ignorieren.
     query = query.eq("accommodation_type_id", type?.id ?? "00000000-0000-0000-0000-000000000000");
+  }
+  if (filters.tagSlugs && filters.tagSlugs.length > 0) {
+    const ids = await getContentIdsByTagSlugs("accommodation", filters.tagSlugs);
+    query = query.in("id", ids.length > 0 ? ids : ["00000000-0000-0000-0000-000000000000"]);
   }
 
   const { data } = await query

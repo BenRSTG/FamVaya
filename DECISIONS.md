@@ -332,3 +332,100 @@ abbildbar. Gegenüber Spec §7.2 vereinfacht: keine dynamische Pro-Kind-
 Altersliste, nur Gesamtzahl Erwachsene/Kinder. Bereich „Aktivität"/„Mikro-
 Abenteuer" verlinkt ohne vorbefüllte Filter, da dort kein Kapazitäts-Feld
 existiert, das sich aus Erwachsenen-/Kinderzahl ableiten ließe.
+
+## Phase 3: Globale Suche + „Lass dich inspirieren"-Finder
+
+### `pg_trgm` erst jetzt aktiviert
+
+In Phase 0 bewusst zurückgestellt ("deferred to the later search phase").
+Migration `0011_search.sql` aktiviert die Extension und ergänzt je
+`accommodations`/`activities`/`micro_adventures` eine generierte
+`search_vector`-Spalte (`to_tsvector('german', ...)`, gewichtet Titel > Ort >
+Kurz- > Vollbeschreibung) plus GIN-Volltext- und GIN-Trigram-Index auf
+`title`.
+
+### Bugfix in `0012`: `word_similarity`/`<%` statt `similarity`/`%`
+
+Beim ersten Live-Test schlug die Tippfehlertoleranz fehl: `title % search_query`
+nutzt `similarity()`, die den **kompletten** (oft mehrteiligen) Titel gegen
+das kurze Suchwort vergleicht — der Score lag dadurch fast immer unter dem
+Default-Threshold (0.3), selbst bei einem einzelnen Buchstabendreher
+("Ferinhaus" statt "Ferienhaus" lieferte 0 Treffer). Fix: `word_similarity()`/
+`<%` sucht die beste Teilwort-Übereinstimmung *innerhalb* des Titels statt
+den ganzen String zu vergleichen — danach lieferten sowohl "Ferinhaus" als
+auch "Tierpak" die erwarteten Treffer. `0011` bleibt unverändert als
+Protokoll dessen, was tatsächlich ausgeführt wurde; `0012` ist der separate
+Bugfix-Migration-Eintrag (kein nachträgliches Bearbeiten bereits gelaufener
+Migrationen).
+
+### `search_all_content()`: eine Postgres-Funktion statt Client-seitigem UNION
+
+`UNION ALL` über die drei Content-Tabellen liegt als SQL-Funktion in der DB
+(`language sql stable`, kein `security definer`, kein `grant ... to anon`) —
+aufgerufen wird sie ausschließlich über `lib/supabase/admin.ts`, konsistent
+zur bisherigen Sicherheitslinie (RLS ohne Policies, alle öffentlichen Reads
+laufen über `service_role`). Ein vierter UNION-Arm für `articles`
+(Magazin-Suche, Spec §14) wurde **nicht** vorbereitet: `content_type` ist ein
+3-wertiges Enum, `'article'` würde eine Enum-Erweiterung erfordern — da
+`articles` aktuell ohnehin leer ist (Magazin kommt erst Phase 6), wird das
+dann nachgezogen statt jetzt eine ungenutzte Erweiterung anzulegen.
+
+### Suchergebnisse: schlanke Darstellung statt volle Card-Komponenten
+
+`search_all_content()` liefert bewusst nur `title, slug, short_description,
+city` (kein Preis/Rating/Bild) — eine volle `AccommodationCard`-Darstellung
+pro Treffer hätte einen zusätzlichen Full-Query pro Ergebnis gekostet.
+Stattdessen ein schlankes `components/search-result-item.tsx`. Der
+Inspirationsfinder (siehe unten) nutzt dagegen die vollen Card-Komponenten,
+weil er ohnehin über die bestehenden `getPublished*`-Funktionen läuft, die
+alle Felder liefern.
+
+### `getContentIdsByTagSlugs`: zwei Queries statt `!inner`-Join
+
+Tag-Filterung (Interessen-Schritt im Finder, potenziell später auch in den
+Übersichts-Filtern) löst Tag-Slugs zunächst zu IDs auf und filtert dann
+`content_tags` danach — statt eines PostgREST-`!inner`-Joins mit
+Punkt-Notation, um das bereits etablierte, robustere
+Zwei-Schritte-Auflösungsmuster (siehe `typeSlug`/`categorySlug`) konsistent
+weiterzuführen. OR-Semantik: mindestens ein ausgewähltes Tag muss passen.
+
+### Finder-Vereinfachungen gegenüber Spec §13 (siehe auch Plan-Datei)
+
+- Schritt „Zeit" ist ein einfacher Spontan/Flexibel-Umschalter statt der
+  sechs Zeit-Optionen aus der Spec — mappt auf `preparation_level`, nur bei
+  Mikro-Abenteuern wirksam (einzige Tabelle mit diesem Feld).
+- Schritt „Interessen" nutzt die tatsächlich in der DB vorhandenen Tags
+  (`Familienfreundlich`, `Großfamilie`, `Schlechtwetter-geeignet`, `Outdoor`,
+  `Budgetfreundlich`) statt der festen Spec-Liste (Strand, Wasser, Tiere, …),
+  die im aktuellen Seed nicht abgebildet ist.
+- Begründungstexte (`lib/finder-reasons.ts`, reine Funktion mit Tests) werden
+  aus den aktiv gewählten Kriterien hergeleitet, nicht pro Treffer einzeln
+  gegen die DB zurückverifiziert — z. B. "Passt zu eurem Budget" gilt für
+  alle Treffer der Budget-Suche gleichermaßen.
+- Kein Speichern/Teilen-Button am Ende (Favoriten/Sharing brauchen Auth,
+  Phase 4).
+- `findMatches` (Server Action) ist bewusst als reine
+  `FinderInput -> FinderResults`-Funktion geschnitten, damit sie sich später
+  durch einen KI-gestützten Berater ersetzen lässt, ohne dass Wizard-UI oder
+  Ergebnis-Rendering sich ändern müssen (Bauplan_2.md-Vorgabe).
+
+### Navigation: „Lass dich inspirieren" und Suche jetzt sichtbar
+
+Beide waren in Phase 1/2 bewusst aus Header/Nav ausgeklammert, weil die
+Zielseiten noch nicht existierten (Prinzip: keine toten Links). Jetzt
+ergänzt: Such-Icon im Header (verlinkt `/suche`) und „Lass dich inspirieren"
+in `NAV_ITEMS` (Spec §6 sieht beides in der Hauptnavigation vor). Merkliste/
+Anmelden bleiben weiterhin draußen (Auth existiert erst ab Phase 4).
+
+### Bugfix beim Live-Test: `preparationLevel` als Array statt Einzelwert
+
+Der erste End-to-End-Test von Nutzerfluss 3 (Bereich „Mikro-Abenteuer",
+spontan, unter 50 €, Interesse „Outdoor") lieferte 0 Treffer. Ursache: das
+einzige Outdoor-getaggte Mikro-Abenteuer im Seed ("Nachtwanderung") hat
+`preparation_level='light'`, aber „spontan" filterte hart auf `'none'` —
+kombiniert mit dem Tag-Filter (UND-Verknüpfung) blieb nichts übrig.
+`MicroAdventureFilters.preparationLevel` wurde deshalb von einem
+Einzelwert auf ein Array umgestellt (`.eq()` → `.in()`); der Finder erlaubt
+bei "spontan" jetzt `['none', 'light']` (nur `'moderate'` gilt als nicht
+spontan machbar). Die Übersichtsseite (`app/mikro-familienabenteuer/page.tsx`)
+übergibt bei ihrem Einzel-Select weiterhin nur ein Array mit einem Element.

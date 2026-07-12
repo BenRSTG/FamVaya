@@ -1,26 +1,14 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import type { ContentType } from "@/lib/types";
+import {
+  isContentType,
+  OVERVIEW_PATH_BY_CONTENT_TYPE,
+  TABLE_BY_CONTENT_TYPE,
+} from "@/lib/content-type";
 
 // Affiliate-Redirect-Route (Spec §23): Klick protokollieren, dann zum
 // Anbieter weiterleiten. service_role-Client nötig, da outbound_clicks
 // RLS aktiv ohne Policies hat (siehe DECISIONS.md).
-
-const TABLE_BY_CONTENT_TYPE: Record<ContentType, string> = {
-  accommodation: "accommodations",
-  activity: "activities",
-  micro_adventure: "micro_adventures",
-};
-
-const DETAIL_PATH_BY_CONTENT_TYPE: Record<ContentType, string> = {
-  accommodation: "/familienunterkuenfte",
-  activity: "/familienaktivitaeten",
-  micro_adventure: "/mikro-familienabenteuer",
-};
-
-function isContentType(value: string): value is ContentType {
-  return Object.prototype.hasOwnProperty.call(TABLE_BY_CONTENT_TYPE, value);
-}
 
 interface RedirectTargetRow {
   slug: string;
@@ -52,7 +40,7 @@ export async function GET(
     .eq("id", contentId)
     .maybeSingle();
 
-  const overviewUrl = new URL(DETAIL_PATH_BY_CONTENT_TYPE[contentType], request.url);
+  const overviewUrl = new URL(OVERVIEW_PATH_BY_CONTENT_TYPE[contentType], request.url);
   if (!row) {
     return NextResponse.redirect(overviewUrl);
   }
@@ -63,7 +51,7 @@ export async function GET(
   if (!targetUrl) {
     // Kein externer Link hinterlegt -> zurück zur Detailseite statt totem Link.
     return NextResponse.redirect(
-      new URL(`${DETAIL_PATH_BY_CONTENT_TYPE[contentType]}/${typedRow.slug}`, request.url)
+      new URL(`${OVERVIEW_PATH_BY_CONTENT_TYPE[contentType]}/${typedRow.slug}`, request.url)
     );
   }
 
