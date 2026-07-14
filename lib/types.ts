@@ -154,6 +154,8 @@ export interface Accommodation {
   featured: boolean;
   family_rating: number | null;
   expires_at: string | null;
+  pros: string[];
+  cons: string[];
   accommodation_type: AccommodationType | null;
   country: Country | null;
   region: Region | null;
@@ -187,6 +189,8 @@ export interface Activity {
   featured: boolean;
   family_rating: number | null;
   expires_at: string | null;
+  pros: string[];
+  cons: string[];
   category: { id: string; name: string; slug: string } | null;
   country: Country | null;
   region: Region | null;
@@ -219,6 +223,9 @@ export interface MicroAdventure {
   affiliate_url: string | null;
   status: ContentStatus;
   featured: boolean;
+  family_rating: number | null;
+  pros: string[];
+  cons: string[];
   category: { id: string; name: string; slug: string } | null;
   age_groups: AgeGroup[];
   tags: Tag[];

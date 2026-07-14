@@ -5,6 +5,7 @@ import { Pagination, paginate, PAGE_SIZE } from "@/components/pagination";
 import { getActivityCategories, getPublishedActivities } from "@/lib/data/activities";
 import type { ActivityFilters } from "@/lib/types";
 import { toBoolean, toNumber, toStringParam, type SearchParams } from "@/lib/search-params";
+import { logZeroResultSearch } from "@/lib/data/search-events";
 
 export const metadata: Metadata = {
   title: "Familienaktivitäten",
@@ -36,6 +37,10 @@ export default async function ActivitiesPage({
     getPublishedActivities(filters),
     getActivityCategories(),
   ]);
+
+  if (hasActiveFilters && activities.length === 0) {
+    await logZeroResultSearch({ filters: filters as Record<string, unknown> });
+  }
 
   const totalPages = Math.max(1, Math.ceil(activities.length / PAGE_SIZE));
   const pageItems = paginate(activities, page);
@@ -81,7 +86,8 @@ export default async function ActivitiesPage({
         </div>
       ) : hasActiveFilters ? (
         <p className="text-muted-foreground">
-          Keine Aktivitäten für diese Filter gefunden.
+          Keine Aktivitäten für diese Filter gefunden. Wir merken uns diese
+          Suche, um passende Angebote zu ergänzen.
         </p>
       ) : (
         <p className="text-muted-foreground">

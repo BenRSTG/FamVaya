@@ -200,6 +200,35 @@ export function MicroAdventureForm({
         </FormField>
       </FormSection>
 
+      <FormSection title="Reality Check">
+        <FormField
+          label="Das spricht dafür"
+          htmlFor="pros"
+          hint="kommagetrennt, z. B. „Kostenlos, in 10 Minuten startklar“"
+        >
+          <textarea
+            id="pros"
+            name="pros"
+            rows={2}
+            defaultValue={m?.pros.join(", ") ?? ""}
+            className={filterInputClass + " h-auto py-2"}
+          />
+        </FormField>
+        <FormField
+          label="Das solltet ihr wissen"
+          htmlFor="cons"
+          hint="kommagetrennt, z. B. „Nur bei trockenem Wetter geeignet“"
+        >
+          <textarea
+            id="cons"
+            name="cons"
+            rows={2}
+            defaultValue={m?.cons.join(", ") ?? ""}
+            className={filterInputClass + " h-auto py-2"}
+          />
+        </FormField>
+      </FormSection>
+
       <FormSection title="Links">
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField label="Affiliate-Link" htmlFor="affiliate_url">
@@ -230,6 +259,17 @@ export function MicroAdventureForm({
       <FormSection title="Status & Sichtbarkeit">
         <FormField label="Status" htmlFor="status">
           <StatusSelect defaultValue={m?.status ?? "draft"} />
+        </FormField>
+        <FormField label="FamVaya Family Fit (0–100)" htmlFor="family_rating">
+          <input
+            type="number"
+            id="family_rating"
+            name="family_rating"
+            min={0}
+            max={100}
+            defaultValue={m?.family_rating ?? ""}
+            className={filterInputClass}
+          />
         </FormField>
         <label className="flex items-center gap-2 text-sm text-foreground">
           <input type="checkbox" name="featured" defaultChecked={m?.featured ?? false} className="size-4" />

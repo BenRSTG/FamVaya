@@ -41,9 +41,18 @@ export function FamilyCheckSection({
             {ratingInfo.label}
           </span>
           <span className="text-sm text-muted-foreground">
-            Score: {familyRating}/100
+            FamVaya Family Fit: {familyRating}/100
           </span>
         </div>
+      )}
+
+      {ratingInfo && (
+        <p className="mb-4 text-sm text-muted-foreground">
+          Der Score fließt aus einer redaktionellen Einschätzung von Platz,
+          getrennten Zimmern/Rückzugsmöglichkeiten, familientauglicher
+          Ausstattung, Preis-Leistung und verfügbaren Rabatten für
+          Großfamilien.
+        </p>
       )}
 
       {suitability && (

@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Clock, Sparkles, Wallet } from "lucide-react";
 import { PlaceholderImage } from "@/components/placeholder-image";
+import { FamilyFitBadge } from "@/components/family-fit-badge";
 import { formatPrice } from "@/lib/format";
 import { resolveMediaUrl } from "@/lib/media";
 import type { MicroAdventure } from "@/lib/types";
@@ -46,6 +47,10 @@ export function MicroAdventureCard({ adventure }: { adventure: MicroAdventure })
             Spontan umsetzbar
           </span>
         )}
+        <FamilyFitBadge
+          score={adventure.family_rating}
+          className="absolute right-3 top-3"
+        />
       </div>
 
       <div className="flex flex-1 flex-col gap-3 p-4">

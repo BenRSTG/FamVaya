@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { searchAllContent } from "@/lib/data/search";
 import { toStringParam, type SearchParams } from "@/lib/search-params";
 import { trackEvent } from "@/lib/analytics/server";
+import { logZeroResultSearch } from "@/lib/data/search-events";
 
 export const metadata: Metadata = {
   title: "Suche",
@@ -36,6 +37,10 @@ export default async function SearchPage({
       results.micro_adventure.length +
       results.article.length
     : 0;
+
+  if (query && totalCount === 0) {
+    await logZeroResultSearch({ query });
+  }
 
   return (
     <div className="mx-auto w-full max-w-4xl px-4 py-12 sm:px-6">
@@ -70,6 +75,7 @@ export default async function SearchPage({
       {results && totalCount === 0 && (
         <p className="text-muted-foreground">
           Keine Treffer für „{query}". Versuch es mit einem anderen Begriff.
+          Wir merken uns diese Suche, um passende Angebote zu ergänzen.
         </p>
       )}
 

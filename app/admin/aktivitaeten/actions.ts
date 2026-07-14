@@ -13,7 +13,7 @@ import {
 } from "@/lib/data/activities";
 import { getAllRegions, replaceContentAgeGroups, replaceContentTags } from "@/lib/data/shared";
 import { setCoverImage, uploadMediaFile } from "@/lib/data/media";
-import { checkboxOn, dateOrNull, numberOrNull, requiredString, stringList, stringOrNull } from "@/lib/form-utils";
+import { checkboxOn, commaSeparatedList, dateOrNull, numberOrNull, requiredString, stringList, stringOrNull } from "@/lib/form-utils";
 import type { ContentStatus } from "@/lib/types";
 
 async function parseActivityInput(formData: FormData): Promise<ActivityInput> {
@@ -47,6 +47,8 @@ async function parseActivityInput(formData: FormData): Promise<ActivityInput> {
     featured: checkboxOn(formData, "featured"),
     family_rating: numberOrNull(formData, "family_rating"),
     expires_at: dateOrNull(formData, "expires_at"),
+    pros: commaSeparatedList(formData, "pros"),
+    cons: commaSeparatedList(formData, "cons"),
   };
 }
 

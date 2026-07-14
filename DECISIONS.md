@@ -791,3 +791,80 @@ Umgesetzt: Skip-Link, `sizes`-Prop auf allen Grid-/Hero-Bildern (verhindert
 Lighthouse-/axe-Prüfung — bräuchte entweder neue Tooling-Abhängigkeit oder
 eine laufende Deployment-URL, beides außerhalb des bisherigen
 Projekt-Rahmens.
+
+## Phase 7: Family Matcher, Fit Score, Bilder, Reality Check, Zero-Result-Insights
+
+Basiert auf einem externen "Phase 2 – Vision schärfen"-Dokument (eigene
+Roadmap-Nummerierung, unabhängig von diesem Bauplan) — hier als **Phase 7**
+dieses Repos dokumentiert, um Kollision mit der bereits vergebenen
+"Phase 2"/"Phase 3" oben zu vermeiden.
+
+### Kapazitätsfilterung nur für Unterkünfte
+
+Nur `accommodations` hat Kapazitätsspalten (`max_guests`, `max_children`,
+`bedrooms`); `activities`/`micro_adventures` haben keine. Diese künstlich
+nachzubilden (neue Spalten, die niemand befüllt) wäre eine weitere
+"Demo-Hülle" — genau das, was das Vision-Dokument vermeiden will. Der
+Schnell-Check auf der Startseite leitet für Aktivitäten/Mikro-Abenteuer
+weiterhin ohne Kapazitätsfilter weiter (unverändert). Alle drei Bereiche
+sowie die globale Suche protokollieren jetzt aber konsistent Suchen ohne
+Ergebnis (`search_events`, siehe unten).
+
+### Family Fit Score bleibt manuell editierbar, wurde aber sichtbar gemacht
+
+Das Vision-Dokument erlaubt ausdrücklich eine "einfache gewichtete Formel"
+als Startlösung, macht sie aber nicht zur Pflicht ("kann ... berechnet
+werden"). Eine Formel aus nur drei Feldern (Personen/Zimmer/Preis) wäre
+einer manuellen, recherchierten Einschätzung unterlegen — die passt exakt
+zum "echte kuratierte Angebote"-Prinzip aus Aufgabe 6 (Content-Rollout).
+Stattdessen: `family_rating` existiert jetzt auch auf `micro_adventures`
+(bisher nur `accommodations`/`activities`), und eine neue
+`FamilyFitBadge`-Komponente zeigt den Score auf allen drei Kartentypen
+zusätzlich zur bisherigen Detailseiten-Anzeige — dort jetzt als "FamVaya
+Family Fit" gebrandet plus erklärendem Text zu den Kriterien.
+
+### Nicht ausreichend Platz wird weiterhin ausgeblendet, nicht separat markiert
+
+Die Spec erlaubt beide Varianten ("werden ausgeblendet oder klar
+markiert"). Ein Umbau auf "anzeigen + markieren" hätte die bestehende,
+funktionierende Pagination-/Sortierlogik der drei Übersichtsseiten
+angefasst — unverhältnismäßiger Aufwand für den Nutzen in dieser Phase.
+
+### Reality Check als text[]-Spalten, gleiches Muster wie `materials`
+
+`pros`/`cons` (`text[] not null default '{}'`) auf allen drei
+Content-Typen, manuell im Admin gepflegt (kommagetrennte Textareas,
+gleicher `commaSeparatedList()`-Helper wie bei `materials`/`seasonal_tags`
+seit Phase 0/5). Keine Automatisierung — passt zum Prinzip "klein und
+kuratiert starten" aus Aufgabe 6.
+
+### 22 Stockfotos werden pro Kategorie mehrfach wiederverwendet
+
+45 Einträge (12 Unterkünfte + 12 Aktivitäten + 15 Mikro-Abenteuer + 6
+Artikel), aber nur 22 lizenzfreie Stockfotos lokal vorhanden. Fotos wurden
+per Dateinamen-Keyword einer Kategorie zugeordnet und dann per Round-Robin
+innerhalb der Kategorie mehrfach verwendet, statt teure Einzelbeschaffung
+vorwegzunehmen. Explizit eine Übergangslösung, bis echte Anbieterfotos
+über den Admin-Bereich eingepflegt werden (Aufgabe 6) — entsprechender
+Hinweis steht im README.
+
+### Nur noch ein Supabase-Projekt aktiv (Prod)
+
+Seit Phase 6 gab es Dev- und Prod-Projekt getrennt. Das Dev-Projekt
+(`tigprtokhjzhrtenglgs.supabase.co`) ist inzwischen pausiert, weil der
+kostenlose Supabase-Projektplatz für ein anderes Projekt (Matchletics)
+gebraucht wurde — `npm run dev` funktioniert lokal daher aktuell nicht
+gegen eine echte Datenbank, bis ein neues Dev-Projekt aufgesetzt wird.
+Migration `0017` sowie das Foto-Upload-Skript liefen daher ausschließlich
+gegen Prod.
+
+### Foto-Upload direkt gegen Produktionsdatenbank ausgeführt
+
+Das Umbiegen der `media.storage_path`-Fake-Pfade auf echte Storage-URLs
+erforderte echte Storage-API-Aufrufe (kein SQL-Editor-Weg), wurde also per
+Node-Skript mit dem Prod-`service_role`-Key direkt ausgeführt — nach
+expliziter Nutzer-Bestätigung, da es sich um einen direkten Schreibzugriff
+auf die Produktionsdatenbank außerhalb der Anwendung handelt. Das Skript
+selbst ist bewusst kein Repo-Bestandteil (liegt nur im privaten
+Scratchpad), analog zum bereits etablierten Admin-Bootstrap-Skript-Muster
+aus der Deployment-Phase.

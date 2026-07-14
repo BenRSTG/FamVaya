@@ -5,6 +5,7 @@ import { Clock, ExternalLink, MapPin, Ticket } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PlaceholderImage } from "@/components/placeholder-image";
 import { FamilyCheckSection } from "@/components/family-check-section";
+import { RealityCheck } from "@/components/reality-check";
 import { FavoriteButton } from "@/components/favorite-button";
 import { getActivityBySlug } from "@/lib/data/activities";
 import { isFavorited } from "@/lib/data/favorites";
@@ -162,6 +163,8 @@ export default async function ActivityDetailPage({
       <div className="mb-8">
         <FamilyCheckSection familyRating={activity.family_rating} />
       </div>
+
+      <RealityCheck pros={activity.pros} cons={activity.cons} />
 
       {activity.full_description && (
         <section className="mb-8">

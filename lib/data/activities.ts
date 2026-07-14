@@ -30,6 +30,7 @@ const DETAIL_SELECT = `
   adult_price, child_price, example_total_price, family_ticket,
   large_family_discount, booking_required,
   affiliate_url, external_url, status, featured, family_rating, expires_at,
+  pros, cons,
   category:categories(id, name, slug),
   country:countries(id, name, code),
   region:regions(id, name, slug)
@@ -164,6 +165,8 @@ export interface ActivityInput {
   featured: boolean;
   family_rating: number | null;
   expires_at: string | null;
+  pros: string[];
+  cons: string[];
 }
 
 export interface ActivityFormData extends ActivityInput {
@@ -189,7 +192,8 @@ const ADMIN_FORM_SELECT = `
   duration_min, duration_max, indoor, outdoor, weather_suitable,
   adult_price, child_price, example_total_price, family_ticket,
   large_family_discount, booking_required,
-  affiliate_url, external_url, status, featured, family_rating, expires_at
+  affiliate_url, external_url, status, featured, family_rating, expires_at,
+  pros, cons
 `;
 
 export async function getActivityByIdForAdmin(id: string): Promise<ActivityFormData | null> {

@@ -18,7 +18,7 @@ const LIST_SELECT = `
   duration_min, duration_max, cost_level, estimated_total_cost,
   preparation_level, difficulty_level, indoor, outdoor,
   seasonal_tags, weather_tags, location_optional,
-  status, featured,
+  status, featured, family_rating,
   category:categories(id, name, slug)
 `;
 
@@ -27,7 +27,7 @@ const DETAIL_SELECT = `
   duration_min, duration_max, cost_level, estimated_total_cost,
   preparation_level, difficulty_level, indoor, outdoor,
   seasonal_tags, weather_tags, materials, instructions, location_optional,
-  external_url, affiliate_url, status, featured,
+  external_url, affiliate_url, status, featured, family_rating, pros, cons,
   category:categories(id, name, slug)
 `;
 
@@ -121,8 +121,10 @@ export async function getMicroAdventureBySlug(
 }
 
 // Ab hier: Admin-CRUD (Phase 5), analog lib/data/accommodations.ts. Kein
-// provider_id/expires_at/family_rating — das Schema sieht das für
-// Mikro-Abenteuer bewusst nicht vor (siehe supabase/migrations/0006_*.sql).
+// provider_id/expires_at — das Schema sieht das für Mikro-Abenteuer
+// bewusst nicht vor (siehe supabase/migrations/0006_*.sql). family_rating
+// kam in Phase 7 dazu (0017_fit_score_and_reality_check.sql), damit alle
+// drei Content-Typen dieselbe FamVaya-Family-Fit-Badge unterstützen.
 
 export interface MicroAdventureInput {
   title: string;
@@ -148,6 +150,9 @@ export interface MicroAdventureInput {
   affiliate_url: string | null;
   status: ContentStatus;
   featured: boolean;
+  family_rating: number | null;
+  pros: string[];
+  cons: string[];
 }
 
 export interface MicroAdventureFormData extends MicroAdventureInput {
@@ -171,7 +176,8 @@ const ADMIN_FORM_SELECT = `
   duration_min, duration_max, cost_level, estimated_total_cost,
   preparation_level, difficulty_level, indoor, outdoor,
   seasonal_tags, weather_tags, materials, instructions, safety_notes,
-  location_optional, external_url, affiliate_url, status, featured
+  location_optional, external_url, affiliate_url, status, featured,
+  family_rating, pros, cons
 `;
 
 export async function getMicroAdventureByIdForAdmin(

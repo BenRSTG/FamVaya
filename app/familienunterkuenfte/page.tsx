@@ -8,6 +8,7 @@ import {
 } from "@/lib/data/accommodations";
 import type { AccommodationFilters } from "@/lib/types";
 import { toNumber, toStringParam, type SearchParams } from "@/lib/search-params";
+import { logZeroResultSearch } from "@/lib/data/search-events";
 
 export const metadata: Metadata = {
   title: "Familienunterkünfte",
@@ -36,6 +37,10 @@ export default async function AccommodationsPage({
     getPublishedAccommodations(filters),
     getAccommodationTypes(),
   ]);
+
+  if (hasActiveFilters && accommodations.length === 0) {
+    await logZeroResultSearch({ filters: filters as Record<string, unknown> });
+  }
 
   const totalPages = Math.max(1, Math.ceil(accommodations.length / PAGE_SIZE));
   const pageItems = paginate(accommodations, page);
@@ -83,7 +88,8 @@ export default async function AccommodationsPage({
         </div>
       ) : hasActiveFilters ? (
         <p className="text-muted-foreground">
-          Keine Unterkünfte für diese Filter gefunden.
+          Keine Unterkünfte für diese Filter gefunden. Wir merken uns diese
+          Suche, um passende Angebote zu ergänzen.
         </p>
       ) : (
         <p className="text-muted-foreground">

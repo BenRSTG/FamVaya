@@ -41,6 +41,9 @@ function parseMicroAdventureInput(formData: FormData): MicroAdventureInput {
     affiliate_url: stringOrNull(formData, "affiliate_url"),
     status: requiredString(formData, "status") as ContentStatus,
     featured: checkboxOn(formData, "featured"),
+    family_rating: numberOrNull(formData, "family_rating"),
+    pros: commaSeparatedList(formData, "pros"),
+    cons: commaSeparatedList(formData, "cons"),
   };
 }
 

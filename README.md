@@ -4,7 +4,7 @@ Inspirations- und Empfehlungsplattform für Familienreisen mit dem Fokus
 „Large Families First" — Familien mit drei oder mehr Kindern. Die vollständige
 Produktspezifikation liegt unter [`files/spec.md`](files/spec.md).
 
-**Aktueller Stand: Phase 0–6 von [`FamVaya_Bauplan_2.md`](FamVaya_Bauplan_2.md) abgeschlossen — alle sechs Phasen sind umgesetzt.**
+**Aktueller Stand: Phase 0–6 von [`FamVaya_Bauplan_2.md`](FamVaya_Bauplan_2.md) abgeschlossen, plus Phase 7 (eigene Vision-Roadmap, siehe unten).**
 Alle vier Hauptbereiche (Unterkünfte, Aktivitäten, Mikro-Abenteuer, Magazin)
 sind durchsuchbar, filterbar, paginiert und verlinkt; dazu gibt es echte
 Supabase-Auth (E-Mail/Passwort + Magic Link), ein Familienprofil, eine
@@ -12,9 +12,15 @@ Merkliste mit Freigabe-Link, eine Newsletter-Anmeldung, einen geschützten
 Admin-Bereich mit CMS für alle Content-Typen (inkl. echtem Bild-Upload nach
 Supabase Storage), SEO-Grundlagen (Sitemap, robots.txt, Schema.org,
 Breadcrumbs), eine abstrahierte Analytics-Anbindung und DSGVO-Grundlagen
-(Cookie-Consent, Rechts-Platzhalterseiten). Details zur Phasenroadmap in
+(Cookie-Consent, Rechts-Platzhalterseiten). **Phase 7** ergänzt einen
+sichtbaren "FamVaya Family Fit"-Score auf Karten und Detailseiten, einen
+Reality-Check-Block ("Das spricht dafür" / "Das solltet ihr wissen"),
+echte Fotos statt Platzhaltern, sowie ein Zero-Result-Search-Logging mit
+Admin-Auswertung (`/admin/such-insights`). Details zur Phasenroadmap in
 `FamVaya_Bauplan_2.md`. Getroffene technische Entscheidungen sind
 fortlaufend in [`DECISIONS.md`](DECISIONS.md) dokumentiert.
+**Live: [https://famvaya.com](https://famvaya.com)** (Vercel + Supabase
+Prod, siehe „Deployment" unten).
 
 ## Stack
 
@@ -22,13 +28,26 @@ Next.js 16 (App Router) · TypeScript · React 19 · Tailwind CSS v4 · shadcn/u
 (Base UI) · Supabase (Postgres, Auth, Storage, `pg_trgm` Volltextsuche) ·
 Vitest · Lucide Icons · Vercel Analytics.
 
-## Funktionsumfang (Phase 0–6)
+## Funktionsumfang (Phase 0–7)
 
 - **Startseite** (`/`): Hero, Schneller Familien-Check, drei Welt-Karten,
   „Empfohlene Inhalte", FamVaya-Versprechen, Newsletter-Anmeldung.
 - **Familienunterkünfte / -aktivitäten / Mikro-Familienabenteuer**: Übersicht
   mit bereichsspezifischen Filtern, Detailseite mit FamVaya-Familiencheck
-  (bei Unterkünften/Aktivitäten) und Merken-Button.
+  (auf allen drei Bereichen) und Merken-Button.
+- **FamVaya Family Fit** (Phase 7): Score-Badge (0–100) auf jeder
+  Angebotskarte aller drei Content-Typen sowie auf der Detailseite mit
+  Erklärtext zu den Bewertungskriterien — weiterhin redaktionell/manuell
+  gepflegt (`family_rating`), keine automatisierte Formel (siehe
+  `DECISIONS.md`).
+- **Reality Check** (Phase 7): zweispaltiger "Das spricht dafür" / "Das
+  solltet ihr wissen"-Block auf allen drei Detailseiten-Typen, manuell im
+  Admin gepflegt (`pros`/`cons`).
+- **Zero-Result-Insights** (Phase 7): Suchen und Filter ohne Treffer werden
+  in `search_events` protokolliert und unter `/admin/such-insights`
+  ausgewertet (7-/30-Tage-Zähler + Liste der letzten ergebnislosen
+  Suchen) — Grundlage dafür, welche Angebote als Nächstes beschafft werden
+  sollten.
 - **Globale Suche** (`/suche`): Postgres-Volltextsuche + Trigram-
   Tippfehlertoleranz über alle drei Bereiche.
 - **„Lass dich inspirieren"-Finder** (`/lass-dich-inspirieren`): mehrstufiger,
@@ -147,7 +166,7 @@ Siehe [`.env.example`](.env.example) für alle Variablen. Benötigt für
    `.env.local` eintragen.
 3. Im **SQL Editor** des Supabase-Dashboards nacheinander alle Dateien aus
    `supabase/migrations/` ausführen — **in numerischer Reihenfolge**
-   (`0001_...` bis `0016_...`), da spätere Migrationen auf Tabellen/Funktionen
+   (`0001_...` bis `0017_...`), da spätere Migrationen auf Tabellen/Funktionen
    aus früheren verweisen.
 4. Danach `supabase/seed.sql` ausführen, um die Demo-Inhalte einzuspielen
    (12 Unterkünfte, 12 Aktivitäten, 15 Mikro-Abenteuer, 6 Magazinartikel —
@@ -157,9 +176,9 @@ Siehe [`.env.example`](.env.example) für alle Variablen. Benötigt für
    den Redirect URLs hinzufügen — sonst laufen Magic-Link- und
    Bestätigungs-Links ins Leere.
 
-> ✅ Alle 16 Migrationen und `seed.sql` wurden gegen ein echtes
-> Supabase-Projekt ausgeführt und liefen fehlerfrei durch. End-to-end
-> verifiziert: RLS-Policies (Auth, Familienprofil, Merkliste),
+> ✅ Alle 17 Migrationen und `seed.sql` wurden gegen ein echtes
+> Supabase-Projekt (Produktion) ausgeführt und liefen fehlerfrei durch.
+> End-to-end verifiziert: RLS-Policies (Auth, Familienprofil, Merkliste),
 > `/go/`-Klick-Logging, `search_all_content()` inkl. Tippfehlertoleranz und
 > Magazinartikeln (Phase 6).
 
@@ -227,8 +246,10 @@ Kein Playwright/E2E-Setup (bewusste Scope-Entscheidung, siehe
 
 ## Deployment
 
-Zielplattform laut Spec §4 ist Vercel. Ein tatsächliches Deployment wurde
-im Rahmen dieses Projekts nicht ausgeführt (siehe `DECISIONS.md`) — so geht's:
+Zielplattform laut Spec §4 ist Vercel. **Die Seite ist live deployed:**
+GitHub-Repo → Vercel-Projekt (Production-Domain `famvaya.com`, DNS bei
+Hostinger, MX-Records/E-Mail unverändert) → separates Produktions-
+Supabase-Projekt. So wurde/wird das eingerichtet:
 
 1. Repository zu GitHub pushen, dort in [vercel.com](https://vercel.com) als
    neues Projekt importieren (Framework-Preset "Next.js" wird automatisch
@@ -236,16 +257,42 @@ im Rahmen dieses Projekts nicht ausgeführt (siehe `DECISIONS.md`) — so geht's
 2. Unter **Project Settings → Environment Variables** alle Variablen aus
    `.env.local` eintragen (siehe „Umgebungsvariablen" oben) —
    `NEXT_PUBLIC_SITE_URL` auf die endgültige Produktions-Domain setzen.
-3. Migrationen (`supabase/migrations/0001_...` bis `0016_...`) und
+3. Migrationen (`supabase/migrations/0001_...` bis `0017_...`) und
    `supabase/seed.sql` gegen das **Produktions-Supabase-Projekt** ausführen
    (siehe „Supabase einrichten" oben) — separates Projekt empfohlen, nicht
    dasselbe wie für die lokale Entwicklung.
-4. In Supabase unter **Authentication → URL Configuration** die Vercel-Domain
-   als Site URL sowie `<domain>/auth/callback` als Redirect-URL eintragen.
+4. In Supabase unter **Authentication → URL Configuration** die
+   Produktions-Domain als Site URL sowie `<domain>/auth/callback` als
+   Redirect-URL eintragen.
 5. Unter **Project Settings → Analytics** in Vercel "Web Analytics"
    aktivieren, damit die `<Analytics/>`-Komponente (`app/layout.tsx`)
    tatsächlich Daten sammelt — ohne aktivierte Analytics in den
    Projekteinstellungen bleibt sie ein no-op.
+6. Custom Domain unter **Project Settings → Domains** hinzufügen, die von
+   Vercel angezeigten DNS-Records (A-Record für die nackte Domain,
+   CNAME für `www`) beim DNS-Provider eintragen, ohne bestehende
+   MX-Records (E-Mail) anzufassen.
+
+> ⚠️ Aktuell existiert nur noch das Produktions-Supabase-Projekt — das
+> separate Dev-Projekt wurde pausiert, um den kostenlosen Projektplatz für
+> ein anderes Vorhaben freizugeben (siehe `DECISIONS.md`, Phase 7).
+> `npm run dev` funktioniert daher lokal erst wieder mit einem neuen
+> Dev-Projekt (neues Projekt anlegen, Migrationen 0001–0017 + `seed.sql`
+> ausführen, `.env.local` aktualisieren).
+
+### Platzhalterfotos hochladen
+
+`supabase/seed.sql` referenziert Demo-Bilder unter Fake-Pfaden
+(`demo/accommodations/....jpg` etc.), die nie automatisch hochgeladen
+werden — frische Seed-Datenbanken zeigen dafür "Kein Foto hinterlegt". Ein
+lokales, nicht ins Repo eingechecktes Node-Skript lädt stattdessen
+lizenzfreie Stockfotos in den `content-media`-Bucket hoch und biegt die
+`media.storage_path`-Werte auf die echten Storage-URLs um (Fotos werden
+nach Dateinamen-Keyword grob kategorisiert und pro Kategorie
+mehrfach wiederverwendet, siehe `DECISIONS.md`). Das ist eine
+Übergangslösung bis echte Anbieterfotos über den Admin-Bereich
+eingepflegt werden — perspektivisch sollte jedes Angebot ein eigenes,
+lizenziertes Foto bekommen.
 6. Build-Command (`next build`) und Start-Command (`next start`) sind
    Vercel-Standard, keine Anpassung nötig.
 
@@ -309,6 +356,7 @@ app/
   admin/anbieter/                   CRUD je Content-Typ: page.tsx (Liste), neu/, [id]/,
                                      *-form.tsx (Formular), actions.ts (Server Actions)
   admin/nutzer/                     Nutzerliste + Rollenänderung (nur requireAdmin())
+  admin/such-insights/               Zero-Result-Search-Auswertung (Phase 7)
 components/
   layout/                           SiteHeader (Suche/Merkliste/Konto-Links), SiteFooter, MobileNav
   cards/                            AccommodationCard, ActivityCard, MicroAdventureCard, ArticleCard
@@ -325,13 +373,16 @@ components/
   inspiration-finder.tsx            „Lass dich inspirieren"-Wizard (Client Component)
   favorite-button.tsx               Merken-Button (Client Component)
   family-check-section.tsx          FamVaya-Familiencheck auf Detailseiten
+  family-fit-badge.tsx              Kompaktes Family-Fit-Score-Badge (Karten, Phase 7)
+  reality-check.tsx                 "Das spricht dafür" / "Das solltet ihr wissen" (Phase 7)
   search-result-item.tsx            Schlanke Suchergebnis-Darstellung
   placeholder-image.tsx             Fallback für fehlende Bilder
 lib/
   supabase/                         admin.ts (service_role, Content/Suche) + client.ts/server.ts (Auth, session-gebunden)
   data/                             Datenzugriffs-Schicht je Content-Typ (inkl. articles.ts, öffentlich
                                      + Admin) + search.ts + favorites.ts + shared.ts + admin.ts
-                                     (Dashboard) + media.ts (Upload) + users.ts + providers.ts
+                                     (Dashboard) + media.ts (Upload) + users.ts + providers.ts +
+                                     search-events.ts (Zero-Result-Logging + Auswertung, Phase 7)
   actions/                          Geteilte Server Actions (favorites.ts, newsletter.ts, consent.ts)
   analytics/                        events.ts (Vokabular) + client.ts + server.ts — trackEvent()-Abstraktion
   format.ts, family-rating.ts,
@@ -348,7 +399,7 @@ lib/
   types.ts                          Handgeschriebene DB-Typen
 proxy.ts                            Session-Refresh (Next.js 16 "Proxy", vormals Middleware)
 public/brand/                       FamVaya-Logo (SVG, Originalfarben)
-supabase/migrations/                SQL-Migrationen (0001-0016, in Reihenfolge ausführen)
+supabase/migrations/                SQL-Migrationen (0001-0017, in Reihenfolge ausführen)
 supabase/seed.sql                   Demo-Seed-Daten (Spec-§29-Mindestmengen)
 files/                              Produktspezifikation (spec.md) und Phase-0-Kickoff-Prompt
 FamVaya_Bauplan_2.md                Verbindliche Phasen-Roadmap (Phase 0-6)

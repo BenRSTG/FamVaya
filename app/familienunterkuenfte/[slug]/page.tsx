@@ -5,6 +5,7 @@ import { Bath, Bed, ExternalLink, MapPin, Ruler, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PlaceholderImage } from "@/components/placeholder-image";
 import { FamilyCheckSection } from "@/components/family-check-section";
+import { RealityCheck } from "@/components/reality-check";
 import { FavoriteButton } from "@/components/favorite-button";
 import { getAccommodationBySlug } from "@/lib/data/accommodations";
 import { isFavorited } from "@/lib/data/favorites";
@@ -159,6 +160,8 @@ export default async function AccommodationDetailPage({
           maxChildren={accommodation.max_children}
         />
       </div>
+
+      <RealityCheck pros={accommodation.pros} cons={accommodation.cons} />
 
       {accommodation.full_description && (
         <section className="mb-8">

@@ -8,6 +8,7 @@ import {
 } from "@/lib/data/micro-adventures";
 import type { MicroAdventureFilters } from "@/lib/types";
 import { toNumber, toStringParam, type SearchParams } from "@/lib/search-params";
+import { logZeroResultSearch } from "@/lib/data/search-events";
 
 export const metadata: Metadata = {
   title: "Mikro-Familienabenteuer",
@@ -51,6 +52,10 @@ export default async function MicroAdventuresPage({
     getPublishedMicroAdventures(filters),
     getMicroAdventureCategories(),
   ]);
+
+  if (hasActiveFilters && adventures.length === 0) {
+    await logZeroResultSearch({ filters: filters as Record<string, unknown> });
+  }
 
   const totalPages = Math.max(1, Math.ceil(adventures.length / PAGE_SIZE));
   const pageItems = paginate(adventures, page);
@@ -96,7 +101,8 @@ export default async function MicroAdventuresPage({
         </div>
       ) : hasActiveFilters ? (
         <p className="text-muted-foreground">
-          Keine Mikro-Abenteuer für diese Filter gefunden.
+          Keine Mikro-Abenteuer für diese Filter gefunden. Wir merken uns
+          diese Suche, um passende Angebote zu ergänzen.
         </p>
       ) : (
         <p className="text-muted-foreground">

@@ -27,6 +27,7 @@ const DETAIL_SELECT = `
   max_guests, max_adults, max_children, bedrooms, bathrooms, beds, living_area,
   price_from, price_type, currency, example_family_size, example_total_price,
   affiliate_url, external_url, status, featured, family_rating, expires_at,
+  pros, cons,
   accommodation_type:accommodation_types(id, name, slug),
   country:countries(id, name, code),
   region:regions(id, name, slug)
@@ -176,6 +177,8 @@ export interface AccommodationInput {
   featured: boolean;
   family_rating: number | null;
   expires_at: string | null;
+  pros: string[];
+  cons: string[];
 }
 
 export interface AccommodationFormData extends AccommodationInput {
@@ -200,7 +203,8 @@ const ADMIN_FORM_SELECT = `
   accommodation_type_id, provider_id, region_id, country_id, city, postal_code,
   max_guests, max_adults, max_children, bedrooms, bathrooms, beds, living_area,
   price_from, price_type, currency, example_family_size, example_total_price,
-  affiliate_url, external_url, status, featured, family_rating, expires_at
+  affiliate_url, external_url, status, featured, family_rating, expires_at,
+  pros, cons
 `;
 
 export async function getAccommodationByIdForAdmin(

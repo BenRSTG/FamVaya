@@ -5,6 +5,8 @@ import { Clock, ExternalLink, Package, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PlaceholderImage } from "@/components/placeholder-image";
 import { FavoriteButton } from "@/components/favorite-button";
+import { FamilyCheckSection } from "@/components/family-check-section";
+import { RealityCheck } from "@/components/reality-check";
 import { getMicroAdventureBySlug } from "@/lib/data/micro-adventures";
 import { isFavorited } from "@/lib/data/favorites";
 import { canPreview, getOptionalUser } from "@/lib/auth";
@@ -164,6 +166,12 @@ export default async function MicroAdventureDetailPage({
         {adventure.indoor && <Badge>Indoor</Badge>}
         {adventure.outdoor && <Badge>Outdoor</Badge>}
       </div>
+
+      <div className="mb-8">
+        <FamilyCheckSection familyRating={adventure.family_rating} />
+      </div>
+
+      <RealityCheck pros={adventure.pros} cons={adventure.cons} />
 
       {adventure.full_description && (
         <section className="mb-8">

@@ -241,6 +241,35 @@ export function ActivityForm({
         </FormField>
       </FormSection>
 
+      <FormSection title="Reality Check">
+        <FormField
+          label="Das spricht dafür"
+          htmlFor="pros"
+          hint="kommagetrennt, z. B. „Kinderwagenfreundlich, Familienrabatt“"
+        >
+          <textarea
+            id="pros"
+            name="pros"
+            rows={2}
+            defaultValue={a?.pros.join(", ") ?? ""}
+            className={filterInputClass + " h-auto py-2"}
+          />
+        </FormField>
+        <FormField
+          label="Das solltet ihr wissen"
+          htmlFor="cons"
+          hint="kommagetrennt, z. B. „Lange Wartezeiten am Wochenende“"
+        >
+          <textarea
+            id="cons"
+            name="cons"
+            rows={2}
+            defaultValue={a?.cons.join(", ") ?? ""}
+            className={filterInputClass + " h-auto py-2"}
+          />
+        </FormField>
+      </FormSection>
+
       <FormSection title="Status & Sichtbarkeit">
         <div className="grid gap-4 sm:grid-cols-3">
           <FormField label="Status" htmlFor="status">
