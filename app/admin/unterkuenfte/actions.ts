@@ -43,6 +43,8 @@ async function parseAccommodationInput(formData: FormData): Promise<Accommodatio
     currency: stringOrNull(formData, "currency") ?? "EUR",
     example_family_size: stringOrNull(formData, "example_family_size"),
     example_total_price: numberOrNull(formData, "example_total_price"),
+    example_nights: numberOrNull(formData, "example_nights"),
+    value_tier: (stringOrNull(formData, "value_tier") as AccommodationInput["value_tier"]) ?? null,
     affiliate_url: stringOrNull(formData, "affiliate_url"),
     external_url: stringOrNull(formData, "external_url"),
     status: requiredString(formData, "status") as ContentStatus,

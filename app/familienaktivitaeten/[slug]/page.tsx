@@ -222,8 +222,8 @@ export default async function ActivityDetailPage({
         </p>
       )}
 
-      {goUrl && (
-        <div className="flex flex-col items-start gap-2">
+      <div className="flex flex-col items-start gap-2">
+        {goUrl ? (
           <Button
             size="lg"
             render={<a href={goUrl} target="_blank" rel="noopener noreferrer" />}
@@ -232,13 +232,18 @@ export default async function ActivityDetailPage({
             Zur externen Buchungsseite
             <ExternalLink aria-hidden />
           </Button>
-          <p className="text-xs text-muted-foreground">
-            Einige Links sind Affiliate-Links. Wenn ihr darüber bucht oder
-            kauft, erhält FamVaya möglicherweise eine Provision. Für euch
-            entstehen keine zusätzlichen Kosten.
-          </p>
-        </div>
-      )}
+        ) : (
+          <Button size="lg" disabled title="Demo-Eintrag, noch kein Anbieter verlinkt">
+            Zur externen Buchungsseite
+            <ExternalLink aria-hidden />
+          </Button>
+        )}
+        <p className="text-xs text-muted-foreground">
+          {goUrl
+            ? "Einige Links sind Affiliate-Links. Wenn ihr darüber bucht oder kauft, erhält FamVaya möglicherweise eine Provision. Für euch entstehen keine zusätzlichen Kosten."
+            : "Demo-Eintrag: Für dieses Beispiel ist noch kein echter Anbieter hinterlegt."}
+        </p>
+      </div>
     </div>
   );
 }

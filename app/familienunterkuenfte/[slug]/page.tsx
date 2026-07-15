@@ -15,6 +15,7 @@ import { Breadcrumbs, BreadcrumbJsonLd } from "@/components/breadcrumbs";
 import { formatPrice } from "@/lib/format";
 import { resolveMediaUrl } from "@/lib/media";
 import { getSiteUrl } from "@/lib/site-url";
+import type { Accommodation } from "@/lib/types";
 
 export async function generateMetadata({
   params,
@@ -48,6 +49,13 @@ export async function generateMetadata({
     },
   };
 }
+
+const VALUE_TIER_LABEL: Record<NonNullable<Accommodation["value_tier"]>, string> = {
+  budget: "Außergewöhnlich günstig",
+  fair: "Fair",
+  good_value: "Gutes Preis-Leistungs-Verhältnis",
+  premium: "Premium",
+};
 
 export default async function AccommodationDetailPage({
   params,
@@ -211,6 +219,20 @@ export default async function AccommodationDetailPage({
         ) : (
           <p className="text-muted-foreground">Preis beim Anbieter prüfen</p>
         )}
+        {accommodation.example_total_price && (accommodation.example_nights || accommodation.max_guests) && (
+          <p className="mt-1 text-sm text-muted-foreground">
+            {accommodation.example_nights &&
+              `${formatPrice(accommodation.example_total_price / accommodation.example_nights, accommodation.currency)} / Nacht`}
+            {accommodation.example_nights && accommodation.max_guests && " · "}
+            {accommodation.max_guests &&
+              `${formatPrice(accommodation.example_total_price / accommodation.max_guests, accommodation.currency)} / Person${accommodation.example_nights ? " / Nacht" : ""} bei Vollauslastung (${accommodation.max_guests} Personen)`}
+          </p>
+        )}
+        {accommodation.value_tier && (
+          <span className="mt-2 inline-block rounded-full bg-secondary px-3 py-1 text-xs font-medium text-secondary-foreground">
+            {VALUE_TIER_LABEL[accommodation.value_tier]}
+          </span>
+        )}
         <p className="mt-2 text-xs text-muted-foreground">
           Preise und Verfügbarkeit können sich beim Anbieter ändern.
         </p>
@@ -222,8 +244,8 @@ export default async function AccommodationDetailPage({
         </p>
       )}
 
-      {goUrl && (
-        <div className="flex flex-col items-start gap-2">
+      <div className="flex flex-col items-start gap-2">
+        {goUrl ? (
           <Button
             size="lg"
             render={<a href={goUrl} target="_blank" rel="noopener noreferrer" />}
@@ -232,13 +254,18 @@ export default async function AccommodationDetailPage({
             Unterkunft beim Anbieter ansehen
             <ExternalLink aria-hidden />
           </Button>
-          <p className="text-xs text-muted-foreground">
-            Einige Links sind Affiliate-Links. Wenn ihr darüber bucht oder
-            kauft, erhält FamVaya möglicherweise eine Provision. Für euch
-            entstehen keine zusätzlichen Kosten.
-          </p>
-        </div>
-      )}
+        ) : (
+          <Button size="lg" disabled title="Demo-Eintrag, noch kein Anbieter verlinkt">
+            Unterkunft beim Anbieter ansehen
+            <ExternalLink aria-hidden />
+          </Button>
+        )}
+        <p className="text-xs text-muted-foreground">
+          {goUrl
+            ? "Einige Links sind Affiliate-Links. Wenn ihr darüber bucht oder kauft, erhält FamVaya möglicherweise eine Provision. Für euch entstehen keine zusätzlichen Kosten."
+            : "Demo-Eintrag: Für dieses Beispiel ist noch kein echter Anbieter hinterlegt."}
+        </p>
+      </div>
     </div>
   );
 }

@@ -4,7 +4,7 @@ Inspirations- und Empfehlungsplattform für Familienreisen mit dem Fokus
 „Large Families First" — Familien mit drei oder mehr Kindern. Die vollständige
 Produktspezifikation liegt unter [`files/spec.md`](files/spec.md).
 
-**Aktueller Stand: Phase 0–6 von [`FamVaya_Bauplan_2.md`](FamVaya_Bauplan_2.md) abgeschlossen, plus Phase 7 + 8 (eigene Vision-Roadmap, siehe unten).**
+**Aktueller Stand: Phase 0–6 von [`FamVaya_Bauplan_2.md`](FamVaya_Bauplan_2.md) abgeschlossen, plus Phase 7–9 (eigene Vision-Roadmap, siehe unten).**
 Alle vier Hauptbereiche (Unterkünfte, Aktivitäten, Mikro-Abenteuer, Magazin)
 sind durchsuchbar, filterbar, paginiert und verlinkt; dazu gibt es echte
 Supabase-Auth (E-Mail/Passwort + Magic Link), ein Familienprofil, eine
@@ -18,7 +18,11 @@ Reality-Check-Block ("Das spricht dafür" / "Das solltet ihr wissen"),
 echte Fotos statt Platzhaltern, sowie ein Zero-Result-Search-Logging mit
 Admin-Auswertung (`/admin/such-insights`). **Phase 8** ergänzt eine
 Vergleichsfunktion für bis zu 4 Unterkünfte/Aktivitäten (`/vergleichen`,
-teilbar per URL, kein Login nötig). Details zur Phasenroadmap in
+teilbar per URL, kein Login nötig). **Phase 9** korrigiert eine
+irreführende Kapazitätsanzeige, macht den Anbieter-CTA-Button auf allen
+Detailseiten sichtbar (auch als deaktivierten Demo-Hinweis), ergänzt eine
+Preis-Aufschlüsselung (Preis/Nacht, Preis/Person, Preis-Leistungs-Tier)
+und bereinigt inhaltlich unpassende Demo-Fotos. Details zur Phasenroadmap in
 `FamVaya_Bauplan_2.md`. Getroffene technische Entscheidungen sind
 fortlaufend in [`DECISIONS.md`](DECISIONS.md) dokumentiert.
 **Live: [https://famvaya.com](https://famvaya.com)** (Vercel + Supabase
@@ -30,7 +34,7 @@ Next.js 16 (App Router) · TypeScript · React 19 · Tailwind CSS v4 · shadcn/u
 (Base UI) · Supabase (Postgres, Auth, Storage, `pg_trgm` Volltextsuche) ·
 Vitest · Lucide Icons · Vercel Analytics.
 
-## Funktionsumfang (Phase 0–8)
+## Funktionsumfang (Phase 0–9)
 
 - **Startseite** (`/`): Hero, Schneller Familien-Check, drei Welt-Karten,
   „Empfohlene Inhalte", FamVaya-Versprechen, Newsletter-Anmeldung.
@@ -55,6 +59,11 @@ Vitest · Lucide Icons · Vercel Analytics.
   Family Fit, Reality-Check-Punkte, kostenlose Leistungen/Rabatte).
   Auswahl rein client-seitig (`localStorage`, kein Login nötig), Vergleich
   über einen Query-Parameter teilbar (`?items=accommodation:id,activity:id`).
+- **Preis-Aufschlüsselung** (Unterkünfte, Phase 9): Preis/Nacht und
+  Preis/Person (bei Vollauslastung) neben dem Gesamtpreis, plus manuell
+  gepflegtes Preis-Leistungs-Tier (`value_tier`). Anbieter-CTA-Button ist
+  jetzt auf allen Detailseiten sichtbar — bei Demo-Einträgen ohne echten
+  Link deaktiviert mit Tooltip statt komplett ausgeblendet.
 - **Globale Suche** (`/suche`): Postgres-Volltextsuche + Trigram-
   Tippfehlertoleranz über alle drei Bereiche.
 - **„Lass dich inspirieren"-Finder** (`/lass-dich-inspirieren`): mehrstufiger,
@@ -173,7 +182,7 @@ Siehe [`.env.example`](.env.example) für alle Variablen. Benötigt für
    `.env.local` eintragen.
 3. Im **SQL Editor** des Supabase-Dashboards nacheinander alle Dateien aus
    `supabase/migrations/` ausführen — **in numerischer Reihenfolge**
-   (`0001_...` bis `0017_...`), da spätere Migrationen auf Tabellen/Funktionen
+   (`0001_...` bis `0018_...`), da spätere Migrationen auf Tabellen/Funktionen
    aus früheren verweisen.
 4. Danach `supabase/seed.sql` ausführen, um die Demo-Inhalte einzuspielen
    (12 Unterkünfte, 12 Aktivitäten, 15 Mikro-Abenteuer, 6 Magazinartikel —
@@ -183,7 +192,7 @@ Siehe [`.env.example`](.env.example) für alle Variablen. Benötigt für
    den Redirect URLs hinzufügen — sonst laufen Magic-Link- und
    Bestätigungs-Links ins Leere.
 
-> ✅ Alle 17 Migrationen und `seed.sql` wurden gegen ein echtes
+> ✅ Alle 18 Migrationen und `seed.sql` wurden gegen ein echtes
 > Supabase-Projekt (Produktion) ausgeführt und liefen fehlerfrei durch.
 > End-to-end verifiziert: RLS-Policies (Auth, Familienprofil, Merkliste),
 > `/go/`-Klick-Logging, `search_all_content()` inkl. Tippfehlertoleranz und
@@ -264,7 +273,7 @@ Supabase-Projekt. So wurde/wird das eingerichtet:
 2. Unter **Project Settings → Environment Variables** alle Variablen aus
    `.env.local` eintragen (siehe „Umgebungsvariablen" oben) —
    `NEXT_PUBLIC_SITE_URL` auf die endgültige Produktions-Domain setzen.
-3. Migrationen (`supabase/migrations/0001_...` bis `0017_...`) und
+3. Migrationen (`supabase/migrations/0001_...` bis `0018_...`) und
    `supabase/seed.sql` gegen das **Produktions-Supabase-Projekt** ausführen
    (siehe „Supabase einrichten" oben) — separates Projekt empfohlen, nicht
    dasselbe wie für die lokale Entwicklung.
@@ -284,7 +293,7 @@ Supabase-Projekt. So wurde/wird das eingerichtet:
 > separate Dev-Projekt wurde pausiert, um den kostenlosen Projektplatz für
 > ein anderes Vorhaben freizugeben (siehe `DECISIONS.md`, Phase 7).
 > `npm run dev` funktioniert daher lokal erst wieder mit einem neuen
-> Dev-Projekt (neues Projekt anlegen, Migrationen 0001–0017 + `seed.sql`
+> Dev-Projekt (neues Projekt anlegen, Migrationen 0001–0018 + `seed.sql`
 > ausführen, `.env.local` aktualisieren).
 
 ### Platzhalterfotos hochladen
@@ -411,7 +420,7 @@ lib/
   types.ts                          Handgeschriebene DB-Typen
 proxy.ts                            Session-Refresh (Next.js 16 "Proxy", vormals Middleware)
 public/brand/                       FamVaya-Logo (SVG, Originalfarben)
-supabase/migrations/                SQL-Migrationen (0001-0017, in Reihenfolge ausführen)
+supabase/migrations/                SQL-Migrationen (0001-0018, in Reihenfolge ausführen)
 supabase/seed.sql                   Demo-Seed-Daten (Spec-§29-Mindestmengen)
 files/                              Produktspezifikation (spec.md) und Phase-0-Kickoff-Prompt
 FamVaya_Bauplan_2.md                Verbindliche Phasen-Roadmap (Phase 0-6)

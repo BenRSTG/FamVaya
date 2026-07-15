@@ -148,6 +148,8 @@ export interface Accommodation {
   currency: string;
   example_family_size: string | null;
   example_total_price: number | null;
+  example_nights: number | null;
+  value_tier: "budget" | "fair" | "good_value" | "premium" | null;
   affiliate_url: string | null;
   external_url: string | null;
   status: ContentStatus;

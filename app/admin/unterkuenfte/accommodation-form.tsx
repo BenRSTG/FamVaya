@@ -255,6 +255,34 @@ export function AccommodationForm({
               className={filterInputClass}
             />
           </FormField>
+          <FormField
+            label="Nächte (Beispielrechnung)"
+            htmlFor="example_nights"
+            hint="Für Preis/Nacht — wie viele Nächte deckt der Beispiel-Gesamtpreis ab?"
+          >
+            <input
+              type="number"
+              id="example_nights"
+              name="example_nights"
+              min={1}
+              defaultValue={a?.example_nights ?? ""}
+              className={filterInputClass}
+            />
+          </FormField>
+          <FormField label="Preis-Leistung" htmlFor="value_tier">
+            <select
+              id="value_tier"
+              name="value_tier"
+              defaultValue={a?.value_tier ?? ""}
+              className={filterInputClass}
+            >
+              <option value="">– keine Einordnung –</option>
+              <option value="budget">Außergewöhnlich günstig</option>
+              <option value="fair">Fair</option>
+              <option value="good_value">Gutes Preis-Leistungs-Verhältnis</option>
+              <option value="premium">Premium</option>
+            </select>
+          </FormField>
         </div>
       </FormSection>
 

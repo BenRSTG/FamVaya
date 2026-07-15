@@ -79,10 +79,10 @@ export function AccommodationCard({
           </h3>
         </div>
 
-        {accommodation.example_family_size && (
+        {(accommodation.max_adults != null || accommodation.max_children != null) && (
           <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
             <Users className="size-4 shrink-0" aria-hidden />
-            Geeignet für {accommodation.example_family_size}
+            Für bis zu {accommodation.max_adults ?? "?"} Erwachsene + {accommodation.max_children ?? "?"} Kinder
           </p>
         )}
 

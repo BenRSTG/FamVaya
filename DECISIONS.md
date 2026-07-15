@@ -951,3 +951,83 @@ Dictionaries unter `messages/de.json`/`messages/en.json` o. Ä.;
 `lib/format.ts` `formatPrice()` müsste dann die aktuell fest codierte
 Locale `"de-DE"` durch die aktive Locale ersetzen (heute unkritisch, da
 nur Deutsch aktiv ist und Österreich ebenfalls EUR nutzt).
+
+## Phase 9: Politur & Vertrauen
+
+Basiert auf einem externen "Phase 2.5 – Politur & Vertrauen"-Dokument —
+einem Review der Live-Seite durch ein anderes Claude-Modell ohne Kenntnis
+der bisherigen Entscheidungen dieses Repos. Vor der Umsetzung wurde jeder
+der 6 gemeldeten Punkte live auf famvaya.com und im Code nachgeprüft statt
+blind übernommen — Ergebnis:
+
+- **Bilder auf Karten**: nicht reproduzierbar (Startseite, Kategorie- und
+  Filterseiten zeigten beim Nachprüfen überall echte Fotos, inkl.
+  Netzwerk-Request-Kontrolle) — vermutlich ein veralteter Befund von vor
+  dem Foto-Fix in Phase 7. Keine Änderung vorgenommen.
+- **Reality Check**: Code existierte bereits seit Phase 7
+  (`components/reality-check.tsx`), nur alle Demo-Einträge hatten leere
+  `pros`/`cons`-Arrays. Über ein Datenskript befüllt, kein neuer Code.
+- **Matcher-Filterung, CTA-Button, Preis-Aufschlüsselung, Bild-Mismatch**:
+  echte Probleme, siehe unten.
+
+### "Geeignet für"-Label auf echte Kapazität umgestellt statt Filter "repariert"
+
+Der gemeldete Filter-Bug existierte nicht — `minGuests`/`minChildren`
+wurden korrekt gesetzt, gelesen, gefiltert und im Formular vorausgefüllt
+(nachgewiesen mit `?minGuests=7&minChildren=5` gegen die echte
+Produktionsdatenbank). Das tatsächliche Problem: Die Karten-Zeile
+"Geeignet für X Erwachsene + Y Kinder" nutzte `example_family_size` (ein
+Freitext-Feld ausschließlich für die Preisbeispiel-Zeile gedacht), nicht
+`max_adults`/`max_children` (die tatsächliche, gefilterte Kapazität) —
+bei "[Demo] Familienhotel Nordseestrand" z. B. Label "3 Kinder" bei
+tatsächlich `max_children = 5`. Ergebnis wirkte dadurch "falsch gefiltert",
+obwohl der Filter korrekt arbeitete. Fix: Kartenlabel berechnet sich jetzt
+aus `max_adults`/`max_children`, `example_family_size` bleibt nur in der
+Preiszeile ("Beispielpreis für ...").
+
+### CTA-Button: immer sichtbar, deaktiviert mit Tooltip statt interne Demo-Weiterleitung
+
+Der Button-Code (inkl. `/go/`-Tracking) existierte bereits auf allen drei
+Detailseiten-Typen, wurde aber nur gerendert, wenn `affiliate_url`/
+`external_url` gesetzt war — das traf auf keinen der 12 Demo-Einträge zu,
+der Button war auf der kompletten Live-Seite unsichtbar. Das Dokument
+erlaubt zwei Lösungen (interne Demo-Hinweis-Seite oder deaktivierter
+Button mit Tooltip). Gewählt: immer sichtbar, bei fehlendem Link
+`disabled` + `title="Demo-Eintrag, noch kein Anbieter verlinkt"` — eine
+interne Weiterleitung mit vorgetäuschtem Tracking-Klick hätte echte und
+Demo-Klicks in `outbound_clicks` vermischt. Die Tracking-Infrastruktur ist
+fertig und läuft automatisch an, sobald echte Links im Admin eingetragen
+werden — kein zusätzlicher Code nötig.
+
+### Preis-Aufschlüsselung mit minimalem Schema-Zuwachs
+
+Neue Spalten `example_nights` (für Preis/Nacht) und `value_tier`
+(manuelles Freitext-Tier, gleiches Muster wie `micro_adventures.cost_level`).
+Preis/Person nutzt bewusst das bereits vorhandene `max_guests`
+(Vollauslastung) statt eines weiteren neuen Personenzahl-Felds nur für
+diese eine Beispielrechnung — das Frontend beschriftet diesen Wert explizit
+als "bei Vollauslastung (N Personen)", um nicht denselben
+Anzeige-vs-tatsächliche-Bedeutung-Fehler wie beim "Geeignet für"-Label zu
+wiederholen.
+
+### Bild-Mismatch: Fotozuordnung für Unterkünfte auf tatsächlich passende Gebäudefotos reduziert
+
+Direkte Bildprüfung (nicht nur Dateiname) ergab: Von den vier in Phase 7
+der Kategorie "Unterkunft" zugeordneten Fotos zeigen nur `cottages-7598056`
+(Berg-Chalets) und `barn-2594975` (Hütte am Abend) tatsächlich Gebäude.
+`north-4756774` (Polarlicht-Nachthimmel) und `south-tyrol-3010031`
+(Wandergruppe in den Bergen) sind Landschafts-/Personenfotos ohne jedes
+Gebäude und wurden fälschlich als Unterkunfts-Titelbilder verwendet (z. B.
+bei "Familienhotel Nordseestrand"). Fix: Unterkünfte nutzen jetzt
+ausschließlich die zwei echten Gebäudefotos (nach `accommodation_type`
+gewählt), die beiden freiwerdenden Landschaftsfotos wandern in den
+Aktivitäten-Pool, wo Wander-/Nachthimmel-Motive inhaltlich passen. Mit nur
+zwei Gebäudefotos für 12 Unterkünfte bleibt Mehrfachverwendung nötig
+(unverändert gegenüber der Phase-7-Übergangslösung), aber kein Eintrag
+zeigt mehr ein komplett unpassendes Motiv.
+
+### Reality-Check-Inhalte und Preisfelder direkt gegen Prod geschrieben
+
+Reine Daten-Updates auf bereits bestehende Spalten (kein Schema-Wechsel),
+analog zum Foto-Upload-Skript aus Phase 7 — nach expliziter
+Nutzer-Bestätigung direkt ausgeführt, nicht über den SQL Editor.
