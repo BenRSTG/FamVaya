@@ -3,6 +3,7 @@ import Image from "next/image";
 import { BedDouble, MapPin, Users } from "lucide-react";
 import { PlaceholderImage } from "@/components/placeholder-image";
 import { FamilyFitBadge } from "@/components/family-fit-badge";
+import { CompareToggle } from "@/components/compare/compare-toggle";
 import { formatPrice } from "@/lib/format";
 import { resolveMediaUrl } from "@/lib/media";
 import type { Accommodation } from "@/lib/types";
@@ -51,6 +52,11 @@ export function AccommodationCard({
         <FamilyFitBadge
           score={accommodation.family_rating}
           className="absolute right-3 top-3"
+        />
+        <CompareToggle
+          contentType="accommodation"
+          id={accommodation.id}
+          className="absolute bottom-3 right-3"
         />
       </div>
 

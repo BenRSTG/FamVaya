@@ -4,6 +4,8 @@ import { Analytics } from "@vercel/analytics/next";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { CookieConsentBanner } from "@/components/cookie-consent";
+import { CompareProvider } from "@/components/compare/compare-context";
+import { CompareTray } from "@/components/compare/compare-tray";
 import { getSiteUrl } from "@/lib/site-url";
 import { getConsent } from "@/lib/consent";
 import "./globals.css";
@@ -85,11 +87,14 @@ export default async function RootLayout({
         >
           Zum Inhalt springen
         </a>
-        <SiteHeader />
-        <main id="main-content" className="flex flex-1 flex-col">
-          {children}
-        </main>
-        <SiteFooter />
+        <CompareProvider>
+          <SiteHeader />
+          <main id="main-content" className="flex flex-1 flex-col">
+            {children}
+          </main>
+          <SiteFooter />
+          <CompareTray />
+        </CompareProvider>
         <CookieConsentBanner key={consent ?? "unset"} initialConsent={consent} />
         {consent === "accepted" && <Analytics />}
       </body>

@@ -868,3 +868,86 @@ auf die Produktionsdatenbank außerhalb der Anwendung handelt. Das Skript
 selbst ist bewusst kein Repo-Bestandteil (liegt nur im privaten
 Scratchpad), analog zum bereits etablierten Admin-Bootstrap-Skript-Muster
 aus der Deployment-Phase.
+
+## Phase 8: Vergleichsfunktion + i18n-Grundgerüst
+
+Basiert auf einem externen "Phase 3 – Erweiterung"-Dokument (eigene
+Roadmap-Nummerierung, wie schon das "Phase 2"-Dokument aus Phase 7) — hier
+als **Phase 8** dieses Repos dokumentiert.
+
+### Nur Aufgabe 1 (Vergleich) und Aufgabe 5 (i18n-Grundgerüst) umgesetzt
+
+Das Dokument selbst setzt als Voraussetzung "mindestens 20–30 echte
+kuratierte Angebote im System" — eine Prüfung zeigte 0 echte Einträge
+(alle 80 Content-Zeilen tragen noch das `[Demo]`-Präfix). Aufgabe 2
+(Inspirationsmodus) und 3 (Trip Builder) benennt das Dokument selbst als
+"lohnt sich erst richtig ab ca. 100+ kuratierten Angeboten"; Aufgabe 4
+(Sponsored Listings) soll laut Dokument "auf Eis gelegt werden, bis erste
+Partner-Anfragen real eintreffen" — beides aktuell nicht gegeben. Nur
+Aufgabe 1 ("unabhängig, schneller Nutzwert") und Aufgabe 5 ("technische
+Vorbereitung, kein Zeitdruck") sind nicht an diese Voraussetzungen
+geknüpft und wurden umgesetzt.
+
+### Vergleichsfunktion: neuer globaler Client-Context statt Server-State
+
+Erster React-Context-Provider im Projekt (`components/compare/compare-context.tsx`,
+`CompareProvider`/`useCompare()`) — bisher ausschließlich Server Components
++ einzelne "use client"-Inseln. Der Vergleichs-"Warenkorb" (bis zu 4
+Einträge, `accommodation`/`activity`) ist bewusst rein client-seitig
+(`localStorage`, Key `famvaya-compare`), kein Login, kein neues
+DB-Schema — passt zur Anforderung "technisch am einfachsten". Teilbarkeit
+läuft über einen Query-Parameter (`/vergleichen?items=accommodation:id,activity:id`),
+nicht über eine zusätzliche "Link kopieren"-Funktion, da die URL selbst
+schon der teilbare Link ist. Die reinen Parse-/Serialisierungsfunktionen
+(`lib/compare.ts`) liegen bewusst in einer eigenen Datei ohne
+`"use client"`, damit sie sowohl aus dem Server Component
+`app/vergleichen/page.tsx` als auch aus den Client-Komponenten importiert
+werden können.
+
+### "Entfernung" nicht in der Vergleichstabelle
+
+`latitude`/`longitude` existieren auf `accommodations`/`activities`, sind
+aber nirgends im App-Layer verdrahtet, und es gibt keine
+Standort-Eingabe des Nutzers (kein Geolocation-Feature, keine
+PLZ-Umkreissuche). Eine echte Entfernungsanzeige würde eine neue, hier
+nicht angeforderte Standort-Funktion voraussetzen. Die Tabelle zeigt
+stattdessen Stadt/Land als Kontext-Zeile ("Ort").
+
+### "Kostenlose Leistungen/Rabatte" aus vorhandenen Feldern abgeleitet
+
+Bei Aktivitäten aus `family_ticket`/`large_family_discount` (bereits
+vorhanden). Unterkünfte haben kein strukturiertes Rabatt-Feld — die Zeile
+zeigt dort "–" statt einer erfundenen Angabe, statt ein neues Schema-Feld
+nur für diese eine Tabellenzeile einzuführen.
+
+### Compare-Toggle als dritter Badge-Slot, kein Karten-Umbau
+
+`AccommodationCard`/`ActivityCard` sind komplett in `<Link>` gewrappt
+(kein Präzedenzfall für verschachtelte interaktive Elemente — `FavoriteButton`
+lief bisher nur standalone auf Detailseiten). Der neue `CompareToggle`
+sitzt als dritter `absolute`-positionierter Button (unten rechts über dem
+Bild, neben dem bestehenden Badge oben links und der `FamilyFitBadge`
+oben rechts aus Phase 7) mit `preventDefault()`/`stopPropagation()` im
+Klick-Handler, statt die Karten auf einen komplizierteren
+Teil-Link-Aufbau umzubauen.
+
+### i18n-Grundgerüst: Prüfung + Dokumentation statt Schein-Implementierung
+
+Das Datenmodell (`countries`/`regions`, `country_id`/`region_id`-FKs auf
+allen Content-Tabellen) ist bereits sauber pro Markt trennbar — keine
+Änderung nötig. Der einzige echte Markt-Kopplungspunkt sind die
+Rechts-Platzhalterseiten `/impressum` und `/datenschutz`, die explizit
+deutsches Recht zitieren (§ 5 TMG, § 55 RStV) — vor einem echten
+Österreich-Launch bräuchten diese eine Länder-Variante (z. B.
+`/impressum?land=at` oder eine eigene Route), das Dokument verlangt aber
+ausdrücklich "keine neuen Länder live schalten", daher wird das hier nur
+dokumentiert, nicht gebaut. Bewusst **keine** Dictionary-/
+Übersetzungs-Infrastruktur eingebaut (z. B. `next-intl` + `app/[locale]/`-
+Segmente), die nur für ein einziges aktives Sprachpaar (Deutsch)
+verdrahtet und ungenutzt bliebe — das wäre eine Halb-Implementierung ohne
+echten Nutzen. Empfohlener Weg für später, sobald eine zweite Sprache
+tatsächlich ansteht: `next-intl` mit `app/[locale]/`-Segment-Struktur,
+Dictionaries unter `messages/de.json`/`messages/en.json` o. Ä.;
+`lib/format.ts` `formatPrice()` müsste dann die aktuell fest codierte
+Locale `"de-DE"` durch die aktive Locale ersetzen (heute unkritisch, da
+nur Deutsch aktiv ist und Österreich ebenfalls EUR nutzt).

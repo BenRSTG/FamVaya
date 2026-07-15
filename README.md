@@ -4,7 +4,7 @@ Inspirations- und Empfehlungsplattform für Familienreisen mit dem Fokus
 „Large Families First" — Familien mit drei oder mehr Kindern. Die vollständige
 Produktspezifikation liegt unter [`files/spec.md`](files/spec.md).
 
-**Aktueller Stand: Phase 0–6 von [`FamVaya_Bauplan_2.md`](FamVaya_Bauplan_2.md) abgeschlossen, plus Phase 7 (eigene Vision-Roadmap, siehe unten).**
+**Aktueller Stand: Phase 0–6 von [`FamVaya_Bauplan_2.md`](FamVaya_Bauplan_2.md) abgeschlossen, plus Phase 7 + 8 (eigene Vision-Roadmap, siehe unten).**
 Alle vier Hauptbereiche (Unterkünfte, Aktivitäten, Mikro-Abenteuer, Magazin)
 sind durchsuchbar, filterbar, paginiert und verlinkt; dazu gibt es echte
 Supabase-Auth (E-Mail/Passwort + Magic Link), ein Familienprofil, eine
@@ -16,7 +16,9 @@ Breadcrumbs), eine abstrahierte Analytics-Anbindung und DSGVO-Grundlagen
 sichtbaren "FamVaya Family Fit"-Score auf Karten und Detailseiten, einen
 Reality-Check-Block ("Das spricht dafür" / "Das solltet ihr wissen"),
 echte Fotos statt Platzhaltern, sowie ein Zero-Result-Search-Logging mit
-Admin-Auswertung (`/admin/such-insights`). Details zur Phasenroadmap in
+Admin-Auswertung (`/admin/such-insights`). **Phase 8** ergänzt eine
+Vergleichsfunktion für bis zu 4 Unterkünfte/Aktivitäten (`/vergleichen`,
+teilbar per URL, kein Login nötig). Details zur Phasenroadmap in
 `FamVaya_Bauplan_2.md`. Getroffene technische Entscheidungen sind
 fortlaufend in [`DECISIONS.md`](DECISIONS.md) dokumentiert.
 **Live: [https://famvaya.com](https://famvaya.com)** (Vercel + Supabase
@@ -28,7 +30,7 @@ Next.js 16 (App Router) · TypeScript · React 19 · Tailwind CSS v4 · shadcn/u
 (Base UI) · Supabase (Postgres, Auth, Storage, `pg_trgm` Volltextsuche) ·
 Vitest · Lucide Icons · Vercel Analytics.
 
-## Funktionsumfang (Phase 0–7)
+## Funktionsumfang (Phase 0–8)
 
 - **Startseite** (`/`): Hero, Schneller Familien-Check, drei Welt-Karten,
   „Empfohlene Inhalte", FamVaya-Versprechen, Newsletter-Anmeldung.
@@ -48,6 +50,11 @@ Vitest · Lucide Icons · Vercel Analytics.
   ausgewertet (7-/30-Tage-Zähler + Liste der letzten ergebnislosen
   Suchen) — Grundlage dafür, welche Angebote als Nächstes beschafft werden
   sollten.
+- **Vergleichsfunktion** (`/vergleichen`, Phase 8): bis zu 4 Unterkünfte
+  und/oder Aktivitäten parallel vergleichen (Gesamtpreis, Kapazität,
+  Family Fit, Reality-Check-Punkte, kostenlose Leistungen/Rabatte).
+  Auswahl rein client-seitig (`localStorage`, kein Login nötig), Vergleich
+  über einen Query-Parameter teilbar (`?items=accommodation:id,activity:id`).
 - **Globale Suche** (`/suche`): Postgres-Volltextsuche + Trigram-
   Tippfehlertoleranz über alle drei Bereiche.
 - **„Lass dich inspirieren"-Finder** (`/lass-dich-inspirieren`): mehrstufiger,
@@ -357,9 +364,12 @@ app/
                                      *-form.tsx (Formular), actions.ts (Server Actions)
   admin/nutzer/                     Nutzerliste + Rollenänderung (nur requireAdmin())
   admin/such-insights/               Zero-Result-Search-Auswertung (Phase 7)
+  vergleichen/                       Vergleichsseite (Query-Param ?items=, Phase 8)
 components/
   layout/                           SiteHeader (Suche/Merkliste/Konto-Links), SiteFooter, MobileNav
   cards/                            AccommodationCard, ActivityCard, MicroAdventureCard, ArticleCard
+  compare/                          compare-context.tsx (Provider/Hook), compare-toggle.tsx,
+                                     compare-tray.tsx (globale Bottom-Bar, Phase 8)
   ui/                                shadcn/ui-Komponenten
   admin/                            Geteilte Admin-UI: content-table.tsx, status-badge.tsx,
                                      status-select.tsx, checkbox-group.tsx, media-picker.tsx,
@@ -391,6 +401,8 @@ lib/
                                      requireAdmin()/canPreview()-Helper (nutzt lib/roles.ts)
   roles.ts                          Reine Rollen-Prädikate (canAccessAdmin, isAdmin), getestet
   redirect.ts                       Reine Entscheidungslogik der /go/-Route, getestet
+  compare.ts                        Reine Vergleichs-Typen + Parse-/Serialisierungslogik (Phase 8,
+                                     kein "use client" — von Server- und Client-Code importierbar)
   consent.ts                        Cookie-Consent lesen (Server Component)
   site-url.ts                       Geteilter Fallback für NEXT_PUBLIC_SITE_URL
   content-type.ts                   Geteilte Content-Type-Konstanten (Tabellen-/Pfad-Mapping)

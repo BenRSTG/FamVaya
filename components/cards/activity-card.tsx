@@ -3,6 +3,7 @@ import Image from "next/image";
 import { Clock, Leaf, MapPin, Sun } from "lucide-react";
 import { PlaceholderImage } from "@/components/placeholder-image";
 import { FamilyFitBadge } from "@/components/family-fit-badge";
+import { CompareToggle } from "@/components/compare/compare-toggle";
 import { formatPrice } from "@/lib/format";
 import { resolveMediaUrl } from "@/lib/media";
 import type { Activity } from "@/lib/types";
@@ -44,6 +45,11 @@ export function ActivityCard({ activity }: { activity: Activity }) {
         <FamilyFitBadge
           score={activity.family_rating}
           className="absolute right-3 top-3"
+        />
+        <CompareToggle
+          contentType="activity"
+          id={activity.id}
+          className="absolute bottom-3 right-3"
         />
       </div>
 
