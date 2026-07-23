@@ -20,6 +20,7 @@ export default async function AdminMicroAdventuresPage() {
       <ContentTable
         rows={rows}
         editHref={(id) => `/admin/mikro-abenteuer/${id}`}
+        instagramHref={(id) => `/admin/instagram/neu?type=micro_adventure&id=${id}`}
         duplicateAction={duplicateMicroAdventure}
         deleteAction={deleteMicroAdventure}
       />

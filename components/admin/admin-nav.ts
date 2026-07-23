@@ -7,4 +7,5 @@ export const ADMIN_NAV_ITEMS = [
   { href: "/admin/anbieter", label: "Anbieter" },
   { href: "/admin/nutzer", label: "Nutzer" },
   { href: "/admin/such-insights", label: "Such-Insights" },
+  { href: "/admin/instagram", label: "Instagram" },
 ] as const;

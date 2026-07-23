@@ -12,11 +12,13 @@ export interface AdminListRow {
 export function ContentTable({
   rows,
   editHref,
+  instagramHref,
   duplicateAction,
   deleteAction,
 }: {
   rows: AdminListRow[];
   editHref: (id: string) => string;
+  instagramHref?: (id: string) => string;
   duplicateAction?: (formData: FormData) => void | Promise<void>;
   deleteAction?: (formData: FormData) => void | Promise<void>;
 }) {
@@ -54,6 +56,11 @@ export function ContentTable({
                   <Link href={editHref(row.id)} className="text-primary hover:underline">
                     Bearbeiten
                   </Link>
+                  {instagramHref && (
+                    <Link href={instagramHref(row.id)} className="text-primary hover:underline">
+                      Instagram-Post
+                    </Link>
+                  )}
                   {duplicateAction && (
                     <form action={duplicateAction}>
                       <input type="hidden" name="id" value={row.id} />

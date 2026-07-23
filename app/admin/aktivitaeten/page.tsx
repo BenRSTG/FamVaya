@@ -20,6 +20,7 @@ export default async function AdminActivitiesPage() {
       <ContentTable
         rows={rows}
         editHref={(id) => `/admin/aktivitaeten/${id}`}
+        instagramHref={(id) => `/admin/instagram/neu?type=activity&id=${id}`}
         duplicateAction={duplicateActivity}
         deleteAction={deleteActivity}
       />

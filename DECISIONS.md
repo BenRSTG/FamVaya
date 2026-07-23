@@ -1095,3 +1095,70 @@ Dort gibt es aktuell nur ein Inline-Badge (`estimated_total_cost`/
 `cost_level`), keine dedizierte Preis-Sektion wie bei den anderen beiden
 Typen — nur der Zahlenwert im Badge wird gerundet (`formatPriceEstimate()`),
 der Rest bleibt strukturell unverändert.
+
+## Phase 11: Instagram-Post-Generator
+
+Neuer Admin-Wunsch: aus Inseraten automatisch fertige Instagram-Posts
+erzeugen und direkt veröffentlichen können. Zerfällt in einen sofort
+baubaren Teil (Bild+Text-Generator) und einen Teil mit harter externer
+Abhängigkeit (Direkt-Posting über die Meta/Instagram-Graph-API, die ein
+selbst eingerichtetes Instagram-Business-Konto voraussetzt). Der Nutzer
+hat noch kein Instagram-Business-Konto — auf Nutzerwunsch wird die
+Publish-Anbindung trotzdem jetzt schon gebaut, aber inaktiv gehalten
+(gleiches Muster wie die bestehende Resend-Anbindung).
+
+### Bildgenerierung über `next/og` statt externem Dienst
+
+`ImageResponse` ist seit Next.js 13 fest im Framework enthalten (kein
+neues npm-Paket). Rendert ein JSX-Template serverseitig zu einem
+1080×1080-PNG (Instagram-Quadratformat) — Titelbild als Hintergrund,
+Verlaufs-Overlay unten für Lesbarkeit, Titel/Ort/Richtwert/Family-Fit als
+Text, FamVaya-Wortmarke oben links. Markenfarben aus `app/globals.css`
+sind als feste Hex-Werte dupliziert, da Satori (der Renderer hinter
+`ImageResponse`) weder Tailwind-Klassen noch CSS-Variablen verarbeitet.
+
+### Generierte Bilder nicht über `content_media` verknüpft
+
+`instagram_posts.media_id` zeigt auf eine eigene `media`-Zeile, die
+bewusst **nicht** über `content_media` mit dem Inserat verknüpft wird —
+es ist eine abgeleitete Werbegrafik (Titelbild + Textüberlagerung), kein
+Content-Foto. Sie soll nicht in der Foto-Galerie oder der
+Titelbild-Auswahl des Inserats auftauchen.
+
+### Ein gemeinsames Bild-/Caption-Template für alle vier Content-Typen
+
+`lib/instagram/content-mapping.ts` bildet Unterkunft/Aktivität/
+Mikro-Abenteuer/Magazinartikel auf dieselbe normalisierte Zwischenform ab
+(`PostImageInput`/`PostCaptionInput`), statt vier eigenständige Templates
+zu pflegen. Unterkünfte/Aktivitäten zeigen Richtwert + Ort + Family Fit;
+Mikro-Abenteuer zeigen Kostenniveau statt Preis (meist kostenlose
+DIY-Ideen); Magazinartikel zeigen Kategorie statt Preis/Fit.
+
+### Instagram-Graph-API vorbereitet, aber inaktiv (wie Resend)
+
+`lib/instagram/graph-api.ts` implementiert den echten Zwei-Schritt
+Content-Publishing-Flow (Media-Container anlegen, dann veröffentlichen),
+liest `INSTAGRAM_ACCESS_TOKEN`/`INSTAGRAM_BUSINESS_ACCOUNT_ID` aus der
+Umgebung. Ohne diese Werte bleibt der "Jetzt bei Instagram posten"-Button
+im Admin deaktiviert mit Tooltip — exakt das gleiche UX-Muster wie der
+Anbieter-CTA-Button bei Demo-Einträgen ohne Affiliate-Link (Phase 9).
+Metas Graph-API-Version/Anforderungen ändern sich gelegentlich — bei der
+tatsächlichen Einrichtung sollte der Nutzer die aktuelle Meta-Dokumentation
+gegenprüfen, die hier implementierte Version ist ein bester aktueller
+Stand, keine Garantie.
+
+### Kein echtes Scheduling in dieser Phase
+
+"Direkt schaltbar" wurde als sofortiger Ein-Klick-Publish-Vorgang
+umgesetzt, nicht als Warteschlange mit Zukunftsdatum. Eine echte
+zeitversetzte Veröffentlichung bräuchte eigene Cron-Infrastruktur (z. B.
+Vercel Cron) — ein eigenes, größeres Feature für eine spätere Phase, kein
+Teil des ursprünglichen Wunsches ("direkt ... schaltbar").
+
+### Eigener Admin-Bereich statt Einbettung in die vier CRUD-Formulare
+
+`/admin/instagram` (Übersicht) + `/admin/instagram/neu` (Generieren) +
+`/admin/instagram/[id]` (Vorschau/Bearbeiten/Veröffentlichen) als
+eigenständiger Workflow, erreichbar über einen neuen "Instagram-Post"-Link
+in den vier bestehenden Content-Listen (`ContentTable`). Die bestehenden
+CRUD-Formulare bleiben unangetastet.
