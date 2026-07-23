@@ -4,7 +4,7 @@ import { BedDouble, MapPin, Users } from "lucide-react";
 import { PlaceholderImage } from "@/components/placeholder-image";
 import { FamilyFitBadge } from "@/components/family-fit-badge";
 import { CompareToggle } from "@/components/compare/compare-toggle";
-import { formatPrice } from "@/lib/format";
+import { formatPrice, formatPriceEstimate } from "@/lib/format";
 import { resolveMediaUrl } from "@/lib/media";
 import type { Accommodation } from "@/lib/types";
 
@@ -96,9 +96,9 @@ export function AccommodationCard({
           <div>
             {accommodation.example_total_price ? (
               <>
-                <p className="text-xs text-muted-foreground">Beispielpreis</p>
+                <p className="text-xs text-muted-foreground">Richtwert</p>
                 <p className="text-base font-semibold text-foreground">
-                  {formatPrice(
+                  {formatPriceEstimate(
                     accommodation.example_total_price,
                     accommodation.currency
                   )}

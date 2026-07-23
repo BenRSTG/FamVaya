@@ -4,7 +4,7 @@ import { Clock, Leaf, MapPin, Sun } from "lucide-react";
 import { PlaceholderImage } from "@/components/placeholder-image";
 import { FamilyFitBadge } from "@/components/family-fit-badge";
 import { CompareToggle } from "@/components/compare/compare-toggle";
-import { formatPrice } from "@/lib/format";
+import { formatPriceEstimate } from "@/lib/format";
 import { resolveMediaUrl } from "@/lib/media";
 import type { Activity } from "@/lib/types";
 
@@ -98,9 +98,9 @@ export function ActivityCard({ activity }: { activity: Activity }) {
           <div>
             {activity.example_total_price ? (
               <>
-                <p className="text-xs text-muted-foreground">Beispiel-Gesamtpreis</p>
+                <p className="text-xs text-muted-foreground">Richtwert</p>
                 <p className="text-base font-semibold text-foreground">
-                  {formatPrice(activity.example_total_price)}
+                  {formatPriceEstimate(activity.example_total_price)}
                 </p>
               </>
             ) : (

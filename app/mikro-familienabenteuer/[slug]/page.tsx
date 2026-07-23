@@ -10,7 +10,7 @@ import { RealityCheck } from "@/components/reality-check";
 import { getMicroAdventureBySlug } from "@/lib/data/micro-adventures";
 import { isFavorited } from "@/lib/data/favorites";
 import { canPreview, getOptionalUser } from "@/lib/auth";
-import { formatPrice } from "@/lib/format";
+import { formatPriceEstimate } from "@/lib/format";
 import { resolveMediaUrl } from "@/lib/media";
 import { getSiteUrl } from "@/lib/site-url";
 import { PreviewBanner } from "@/components/admin/preview-banner";
@@ -157,7 +157,7 @@ export default async function MicroAdventureDetailPage({
           <Badge icon={Wallet}>
             {adventure.cost_level === "free" || !adventure.estimated_total_cost
               ? COST_LABEL[adventure.cost_level]
-              : formatPrice(adventure.estimated_total_cost)}
+              : formatPriceEstimate(adventure.estimated_total_cost)}
           </Badge>
         )}
         {adventure.preparation_level && (

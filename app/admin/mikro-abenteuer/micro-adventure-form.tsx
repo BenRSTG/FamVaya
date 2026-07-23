@@ -107,6 +107,19 @@ export function MicroAdventureForm({
               className={filterInputClass}
             />
           </FormField>
+          <FormField
+            label="Preis zuletzt geprüft am"
+            htmlFor="price_checked_at"
+            hint="Erscheint als „Stand: ...“ neben dem Richtwert."
+          >
+            <input
+              type="date"
+              id="price_checked_at"
+              name="price_checked_at"
+              defaultValue={m?.price_checked_at ? m.price_checked_at.slice(0, 10) : ""}
+              className={filterInputClass}
+            />
+          </FormField>
           <FormField label="Vorbereitungsaufwand" htmlFor="preparation_level">
             <select
               id="preparation_level"

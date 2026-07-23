@@ -150,6 +150,7 @@ export interface Accommodation {
   example_total_price: number | null;
   example_nights: number | null;
   value_tier: "budget" | "fair" | "good_value" | "premium" | null;
+  price_checked_at: string | null;
   affiliate_url: string | null;
   external_url: string | null;
   status: ContentStatus;
@@ -185,6 +186,7 @@ export interface Activity {
   family_ticket: boolean;
   large_family_discount: boolean;
   booking_required: boolean;
+  price_checked_at: string | null;
   affiliate_url: string | null;
   external_url: string | null;
   status: ContentStatus;
@@ -221,6 +223,7 @@ export interface MicroAdventure {
   materials: string[];
   instructions: string | null;
   location_optional: boolean;
+  price_checked_at: string | null;
   external_url: string | null;
   affiliate_url: string | null;
   status: ContentStatus;

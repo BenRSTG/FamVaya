@@ -41,6 +41,7 @@ async function parseActivityInput(formData: FormData): Promise<ActivityInput> {
     family_ticket: checkboxOn(formData, "family_ticket"),
     large_family_discount: checkboxOn(formData, "large_family_discount"),
     booking_required: checkboxOn(formData, "booking_required"),
+    price_checked_at: dateOrNull(formData, "price_checked_at"),
     affiliate_url: stringOrNull(formData, "affiliate_url"),
     external_url: stringOrNull(formData, "external_url"),
     status: requiredString(formData, "status") as ContentStatus,

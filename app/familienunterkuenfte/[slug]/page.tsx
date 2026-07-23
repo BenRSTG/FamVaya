@@ -12,7 +12,7 @@ import { isFavorited } from "@/lib/data/favorites";
 import { canPreview, getOptionalUser } from "@/lib/auth";
 import { PreviewBanner } from "@/components/admin/preview-banner";
 import { Breadcrumbs, BreadcrumbJsonLd } from "@/components/breadcrumbs";
-import { formatPrice } from "@/lib/format";
+import { formatPrice, formatPriceEstimate } from "@/lib/format";
 import { resolveMediaUrl } from "@/lib/media";
 import { getSiteUrl } from "@/lib/site-url";
 import type { Accommodation } from "@/lib/types";
@@ -205,10 +205,15 @@ export default async function AccommodationDetailPage({
         <h2 className="mb-3 text-lg font-semibold text-foreground">Preis</h2>
         {accommodation.example_total_price ? (
           <p className="text-foreground">
-            Beispielpreis für {accommodation.example_family_size ?? "eine Familie"}:{" "}
+            Richtwert für {accommodation.example_family_size ?? "eine Familie"}:{" "}
             <strong>
-              {formatPrice(accommodation.example_total_price, accommodation.currency)}
+              {formatPriceEstimate(accommodation.example_total_price, accommodation.currency)}
             </strong>
+            {accommodation.price_checked_at && (
+              <span className="ml-2 text-sm text-muted-foreground">
+                Stand: {new Date(accommodation.price_checked_at).toLocaleDateString("de-DE")}
+              </span>
+            )}
           </p>
         ) : accommodation.price_from ? (
           <p className="text-foreground">
@@ -222,10 +227,10 @@ export default async function AccommodationDetailPage({
         {accommodation.example_total_price && (accommodation.example_nights || accommodation.max_guests) && (
           <p className="mt-1 text-sm text-muted-foreground">
             {accommodation.example_nights &&
-              `${formatPrice(accommodation.example_total_price / accommodation.example_nights, accommodation.currency)} / Nacht`}
+              `${formatPriceEstimate(accommodation.example_total_price / accommodation.example_nights, accommodation.currency)} / Nacht`}
             {accommodation.example_nights && accommodation.max_guests && " · "}
             {accommodation.max_guests &&
-              `${formatPrice(accommodation.example_total_price / accommodation.max_guests, accommodation.currency)} / Person${accommodation.example_nights ? " / Nacht" : ""} bei Vollauslastung (${accommodation.max_guests} Personen)`}
+              `${formatPriceEstimate(accommodation.example_total_price / accommodation.max_guests, accommodation.currency)} / Person${accommodation.example_nights ? " / Nacht" : ""} bei Vollauslastung (${accommodation.max_guests} Personen)`}
           </p>
         )}
         {accommodation.value_tier && (
@@ -234,7 +239,7 @@ export default async function AccommodationDetailPage({
           </span>
         )}
         <p className="mt-2 text-xs text-muted-foreground">
-          Preise und Verfügbarkeit können sich beim Anbieter ändern.
+          Richtwert, kein Fixpreis — Preise und Verfügbarkeit können sich beim Anbieter ändern.
         </p>
       </section>
 
@@ -251,12 +256,12 @@ export default async function AccommodationDetailPage({
             render={<a href={goUrl} target="_blank" rel="noopener noreferrer" />}
             nativeButton={false}
           >
-            Unterkunft beim Anbieter ansehen
+            Preis &amp; Verfügbarkeit beim Anbieter prüfen
             <ExternalLink aria-hidden />
           </Button>
         ) : (
           <Button size="lg" disabled title="Demo-Eintrag, noch kein Anbieter verlinkt">
-            Unterkunft beim Anbieter ansehen
+            Preis &amp; Verfügbarkeit beim Anbieter prüfen
             <ExternalLink aria-hidden />
           </Button>
         )}

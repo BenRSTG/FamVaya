@@ -3,7 +3,7 @@ import Image from "next/image";
 import { Clock, Sparkles, Wallet } from "lucide-react";
 import { PlaceholderImage } from "@/components/placeholder-image";
 import { FamilyFitBadge } from "@/components/family-fit-badge";
-import { formatPrice } from "@/lib/format";
+import { formatPriceEstimate } from "@/lib/format";
 import { resolveMediaUrl } from "@/lib/media";
 import type { MicroAdventure } from "@/lib/types";
 
@@ -78,7 +78,7 @@ export function MicroAdventureCard({ adventure }: { adventure: MicroAdventure })
               <Wallet className="size-4 shrink-0" aria-hidden />
               {adventure.cost_level === "free" || !adventure.estimated_total_cost
                 ? COST_LABEL[adventure.cost_level]
-                : formatPrice(adventure.estimated_total_cost)}
+                : formatPriceEstimate(adventure.estimated_total_cost)}
             </span>
           )}
         </div>

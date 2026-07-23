@@ -27,6 +27,7 @@ const DETAIL_SELECT = `
   duration_min, duration_max, cost_level, estimated_total_cost,
   preparation_level, difficulty_level, indoor, outdoor,
   seasonal_tags, weather_tags, materials, instructions, location_optional,
+  price_checked_at,
   external_url, affiliate_url, status, featured, family_rating, pros, cons,
   category:categories(id, name, slug)
 `;
@@ -146,6 +147,7 @@ export interface MicroAdventureInput {
   instructions: string | null;
   safety_notes: string | null;
   location_optional: boolean;
+  price_checked_at: string | null;
   external_url: string | null;
   affiliate_url: string | null;
   status: ContentStatus;
@@ -176,7 +178,7 @@ const ADMIN_FORM_SELECT = `
   duration_min, duration_max, cost_level, estimated_total_cost,
   preparation_level, difficulty_level, indoor, outdoor,
   seasonal_tags, weather_tags, materials, instructions, safety_notes,
-  location_optional, external_url, affiliate_url, status, featured,
+  location_optional, price_checked_at, external_url, affiliate_url, status, featured,
   family_rating, pros, cons
 `;
 

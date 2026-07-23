@@ -26,7 +26,7 @@ const DETAIL_SELECT = `
   id, title, slug, short_description, full_description, city,
   max_guests, max_adults, max_children, bedrooms, bathrooms, beds, living_area,
   price_from, price_type, currency, example_family_size, example_total_price,
-  example_nights, value_tier,
+  example_nights, value_tier, price_checked_at,
   affiliate_url, external_url, status, featured, family_rating, expires_at,
   pros, cons,
   accommodation_type:accommodation_types(id, name, slug),
@@ -174,6 +174,7 @@ export interface AccommodationInput {
   example_total_price: number | null;
   example_nights: number | null;
   value_tier: "budget" | "fair" | "good_value" | "premium" | null;
+  price_checked_at: string | null;
   affiliate_url: string | null;
   external_url: string | null;
   status: ContentStatus;
@@ -206,7 +207,7 @@ const ADMIN_FORM_SELECT = `
   accommodation_type_id, provider_id, region_id, country_id, city, postal_code,
   max_guests, max_adults, max_children, bedrooms, bathrooms, beds, living_area,
   price_from, price_type, currency, example_family_size, example_total_price,
-  example_nights, value_tier,
+  example_nights, value_tier, price_checked_at,
   affiliate_url, external_url, status, featured, family_rating, expires_at,
   pros, cons
 `;

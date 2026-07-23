@@ -283,6 +283,19 @@ export function AccommodationForm({
               <option value="premium">Premium</option>
             </select>
           </FormField>
+          <FormField
+            label="Preis zuletzt geprüft am"
+            htmlFor="price_checked_at"
+            hint="Erscheint als „Stand: ...“ neben dem Richtwert auf der Detailseite."
+          >
+            <input
+              type="date"
+              id="price_checked_at"
+              name="price_checked_at"
+              defaultValue={a?.price_checked_at ? a.price_checked_at.slice(0, 10) : ""}
+              className={filterInputClass}
+            />
+          </FormField>
         </div>
       </FormSection>
 

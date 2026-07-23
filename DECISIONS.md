@@ -1031,3 +1031,67 @@ zeigt mehr ein komplett unpassendes Motiv.
 Reine Daten-Updates auf bereits bestehende Spalten (kein Schema-Wechsel),
 analog zum Foto-Upload-Skript aus Phase 7 — nach expliziter
 Nutzer-Bestätigung direkt ausgeführt, nicht über den SQL Editor.
+
+## Phase 10: Preisdarstellung als Richtwert
+
+Basiert auf einem externen "Phase 2.5 Fortsetzung + Admin & Reporting"-
+Dokument mit drei Teilen (A: offene Fixes, B: Preisdarstellung, C:
+Admin-Reporting).
+
+### Teil A bereits vollständig gelöst — mit Live-Beleg
+
+Alle drei gemeldeten Punkte wurden vor jeder Codeänderung live auf
+`famvaya.com` nachgeprüft: Der Matcher-Filter funktioniert korrekt
+(`?minGuests=2&minChildren=5` schließt zu kleine Unterkünfte nachweislich
+aus — der noch nicht gepushte Phase-9-Commit behebt zusätzlich die
+zugrunde liegende Label-Verwirrung), Bilder laden auf allen geprüften
+Listenseiten, Reality Check zeigt echten Inhalt. Keine weitere
+Codeänderung für Teil A in dieser Phase.
+
+### Teil C (Admin-Reporting) bewusst auf eine spätere, eigene Phase verschoben
+
+Das Dokument selbst kennzeichnet Teil C als "am umfangreichsten, kann in
+eigenen Etappen laufen". Echtes Besucher-/Verweildauer-Tracking (C1)
+bräuchte eine neue Datenquelle — Vercel Analytics ist von der App aus
+nicht abfragbar, das wäre eine eigene Architekturentscheidung. Wird nicht
+in dieser Phase mitgeplant, um sie nicht künstlich aufzublähen.
+
+### Gerundeter Bereich statt Einzelwert oder Fixpreis
+
+FamVaya ist ein Empfehlungs-, kein Buchungsportal — ein centgenauer Preis
+suggeriert Verbindlichkeit, die es nicht gibt. Neue Funktion
+`formatPriceEstimate()` (`lib/format.ts`) rundet auf eine Schrittweite
+(gestuft nach Betragsgröße) und zeigt einen Bereich (z. B. 1.487 € → "ca.
+1.450–1.550 €") statt eines einzelnen Fixpreises — kommuniziert die
+Unverbindlichkeit deutlicher als nur ein gerundeter Einzelwert. Rein eine
+Anzeige-Funktion: Der gespeicherte Wert bleibt exakt, u. a. weil
+`estimated_total_cost` bei Mikro-Abenteuern auch vom Finder-Filter
+verwendet wird — nur die Darstellung rundet, nicht die Datenbasis.
+
+### Nur illustrative Beispielpreise betroffen, nicht `price_from`/`adult_price`/`child_price`
+
+`price_from` ("ab 199 €") und die Erwachsenen-/Kinderpreise bei
+Aktivitäten sind bereits als Anbieter-Einzelpreise gekennzeichnet, nicht
+das vom Dokument kritisierte "centgenau wirkende" Element (der
+Gesamt-Beispielpreis). Bleiben unverändert bei `formatPrice()`.
+
+### `price_checked_at` als neue, dedizierte Spalte statt `updated_at`
+
+`updated_at` ändert sich bei jeder Bearbeitung (auch z. B. am
+Reality-Check-Text) — das würde ein falsches "Stand:"-Datum für den Preis
+suggerieren. Neue Spalte auf allen drei Content-Typen, manuell im Admin
+gepflegt (gleiches Date-Input-Muster wie `expires_at`).
+
+### CTA-Text-Änderung nur bei Unterkünften und Aktivitäten
+
+Mikro-Abenteuer sind größtenteils kostenlose DIY-Ideen ohne echtes
+Buchungs-/Preiskonzept — "Preis & Verfügbarkeit beim Anbieter prüfen"
+passt inhaltlich nicht zu z. B. "Sterne beobachten im Garten". Der
+bestehende Text "Mehr erfahren" bleibt dort unverändert.
+
+### Mikro-Abenteuer bekommen keine neue Preis-Sektion
+
+Dort gibt es aktuell nur ein Inline-Badge (`estimated_total_cost`/
+`cost_level`), keine dedizierte Preis-Sektion wie bei den anderen beiden
+Typen — nur der Zahlenwert im Badge wird gerundet (`formatPriceEstimate()`),
+der Rest bleibt strukturell unverändert.

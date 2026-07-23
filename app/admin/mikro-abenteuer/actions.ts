@@ -12,7 +12,7 @@ import {
 } from "@/lib/data/micro-adventures";
 import { replaceContentAgeGroups, replaceContentTags } from "@/lib/data/shared";
 import { setCoverImage, uploadMediaFile } from "@/lib/data/media";
-import { checkboxOn, commaSeparatedList, numberOrNull, requiredString, stringList, stringOrNull } from "@/lib/form-utils";
+import { checkboxOn, commaSeparatedList, dateOrNull, numberOrNull, requiredString, stringList, stringOrNull } from "@/lib/form-utils";
 import type { ContentStatus } from "@/lib/types";
 
 function parseMicroAdventureInput(formData: FormData): MicroAdventureInput {
@@ -37,6 +37,7 @@ function parseMicroAdventureInput(formData: FormData): MicroAdventureInput {
     instructions: stringOrNull(formData, "instructions"),
     safety_notes: stringOrNull(formData, "safety_notes"),
     location_optional: checkboxOn(formData, "location_optional"),
+    price_checked_at: dateOrNull(formData, "price_checked_at"),
     external_url: stringOrNull(formData, "external_url"),
     affiliate_url: stringOrNull(formData, "affiliate_url"),
     status: requiredString(formData, "status") as ContentStatus,

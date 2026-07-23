@@ -10,7 +10,7 @@ import { FavoriteButton } from "@/components/favorite-button";
 import { getActivityBySlug } from "@/lib/data/activities";
 import { isFavorited } from "@/lib/data/favorites";
 import { canPreview, getOptionalUser } from "@/lib/auth";
-import { formatPrice } from "@/lib/format";
+import { formatPrice, formatPriceEstimate } from "@/lib/format";
 import { resolveMediaUrl } from "@/lib/media";
 import { getSiteUrl } from "@/lib/site-url";
 import { PreviewBanner } from "@/components/admin/preview-banner";
@@ -204,7 +204,13 @@ export default async function ActivityDetailPage({
           )}
           {activity.example_total_price != null && (
             <p className="mt-1">
-              Beispiel-Gesamtpreis: <strong>{formatPrice(activity.example_total_price)}</strong>
+              Richtwert Gesamtpreis:{" "}
+              <strong>{formatPriceEstimate(activity.example_total_price)}</strong>
+              {activity.price_checked_at && (
+                <span className="ml-2 text-sm text-muted-foreground">
+                  Stand: {new Date(activity.price_checked_at).toLocaleDateString("de-DE")}
+                </span>
+              )}
             </p>
           )}
           {activity.adult_price == null && activity.example_total_price == null && (
@@ -212,7 +218,7 @@ export default async function ActivityDetailPage({
           )}
         </div>
         <p className="mt-2 text-xs text-muted-foreground">
-          Preise und Verfügbarkeit können sich beim Anbieter ändern.
+          Richtwert, kein Fixpreis — Preise und Verfügbarkeit können sich beim Anbieter ändern.
         </p>
       </section>
 
@@ -229,12 +235,12 @@ export default async function ActivityDetailPage({
             render={<a href={goUrl} target="_blank" rel="noopener noreferrer" />}
             nativeButton={false}
           >
-            Zur externen Buchungsseite
+            Preis &amp; Verfügbarkeit beim Anbieter prüfen
             <ExternalLink aria-hidden />
           </Button>
         ) : (
           <Button size="lg" disabled title="Demo-Eintrag, noch kein Anbieter verlinkt">
-            Zur externen Buchungsseite
+            Preis &amp; Verfügbarkeit beim Anbieter prüfen
             <ExternalLink aria-hidden />
           </Button>
         )}
