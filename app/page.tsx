@@ -107,7 +107,7 @@ export default async function Home({
           <Button
             size="lg"
             variant="outline"
-            className="border-white/70 bg-white/10 text-white hover:bg-white/20"
+            className="border-white/70 bg-white/10 text-white hover:border-primary hover:bg-primary hover:text-primary-foreground"
             render={<Link href="/lass-dich-inspirieren" />}
             nativeButton={false}
           >
