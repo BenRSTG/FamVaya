@@ -10,33 +10,31 @@ export async function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur">
-      <div className="mx-auto flex h-20 max-w-6xl items-center justify-between px-4 sm:px-6">
-        <div className="flex min-w-0 items-center gap-5 lg:gap-10">
-          <Link href="/" className="flex shrink-0 items-center">
-            <Image
-              src="/brand/famvaya-wordmark.svg"
-              alt="FamVaya"
-              width={268}
-              height={60}
-              priority
-              className="h-12 w-auto lg:h-[60px]"
-            />
-          </Link>
+      <div className="mx-auto grid h-20 max-w-6xl grid-cols-[auto_1fr_auto] items-center gap-4 px-4 sm:px-6">
+        <Link href="/" className="flex shrink-0 items-center">
+          <Image
+            src="/brand/famvaya-wordmark.svg"
+            alt="FamVaya"
+            width={268}
+            height={60}
+            priority
+            className="h-12 w-auto lg:h-[60px]"
+          />
+        </Link>
 
-          <nav className="hidden items-center gap-6 lg:flex">
-            {DESKTOP_NAV_ITEMS.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="text-sm font-medium text-foreground hover:text-primary"
-              >
-                {item.label}
-              </Link>
-            ))}
-          </nav>
-        </div>
+        <nav className="hidden items-center justify-center gap-6 lg:flex">
+          {DESKTOP_NAV_ITEMS.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="text-sm font-medium text-foreground hover:text-primary"
+            >
+              {item.label}
+            </Link>
+          ))}
+        </nav>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center justify-self-end gap-2">
           <Link
             href="/suche"
             aria-label="Suche"

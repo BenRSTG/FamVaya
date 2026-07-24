@@ -117,7 +117,7 @@ export default async function Home({
 
         <QuickFamilyCheck />
 
-        <ul className="flex flex-wrap items-center justify-center gap-x-8 gap-y-2 text-sm font-medium text-white/90">
+        <ul className="flex flex-wrap items-center justify-center gap-x-8 gap-y-2 text-sm font-medium text-foreground">
           {HERO_HIGHLIGHTS.map((highlight) => (
             <li key={highlight} className="flex items-center gap-2">
               <CheckCircle2 className="size-4 shrink-0" aria-hidden />
