@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { searchAllContent } from "@/lib/data/search";
 import { toStringParam, type SearchParams } from "@/lib/search-params";
 import { trackEvent } from "@/lib/analytics/server";
-import { logZeroResultSearch } from "@/lib/data/search-events";
+import { logZeroResultSearch } from "@/lib/data/events";
 
 export const metadata: Metadata = {
   title: "Suche",
@@ -39,7 +39,7 @@ export default async function SearchPage({
     : 0;
 
   if (query && totalCount === 0) {
-    await logZeroResultSearch({ query });
+    await logZeroResultSearch("/suche", { query });
   }
 
   return (

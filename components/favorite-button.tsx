@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { Heart } from "lucide-react";
 import { toggleFavoriteAction } from "@/lib/actions/favorites";
+import { trackFamvayaEvent } from "@/lib/client-events";
 import type { ContentType } from "@/lib/types";
 
 export function FavoriteButton({
@@ -23,6 +24,9 @@ export function FavoriteButton({
     startTransition(async () => {
       const result = await toggleFavoriteAction(contentType, contentId, currentPath);
       setFavorited(result);
+      if (result) {
+        trackFamvayaEvent("favorite_added", { entityType: contentType, entityId: contentId });
+      }
     });
   }
 

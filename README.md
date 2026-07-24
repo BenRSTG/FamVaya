@@ -4,7 +4,7 @@ Inspirations- und Empfehlungsplattform für Familienreisen mit dem Fokus
 „Large Families First" — Familien mit drei oder mehr Kindern. Die vollständige
 Produktspezifikation liegt unter [`files/spec.md`](files/spec.md).
 
-**Aktueller Stand: Phase 0–6 von [`FamVaya_Bauplan_2.md`](FamVaya_Bauplan_2.md) abgeschlossen, plus Phase 7–12 (eigene Vision-Roadmap, siehe unten).**
+**Aktueller Stand: Phase 0–6 von [`FamVaya_Bauplan_2.md`](FamVaya_Bauplan_2.md) abgeschlossen, plus Phase 7–13 (eigene Vision-Roadmap, siehe unten).**
 Alle vier Hauptbereiche (Unterkünfte, Aktivitäten, Mikro-Abenteuer, Magazin)
 sind durchsuchbar, filterbar, paginiert und verlinkt; dazu gibt es echte
 Supabase-Auth (E-Mail/Passwort + Magic Link), ein Familienprofil, eine
@@ -15,8 +15,9 @@ Breadcrumbs), eine abstrahierte Analytics-Anbindung und DSGVO-Grundlagen
 (Cookie-Consent, Rechts-Platzhalterseiten). **Phase 7** ergänzt einen
 sichtbaren "FamVaya Family Fit"-Score auf Karten und Detailseiten, einen
 Reality-Check-Block ("Das spricht dafür" / "Das solltet ihr wissen"),
-echte Fotos statt Platzhaltern, sowie ein Zero-Result-Search-Logging mit
-Admin-Auswertung (`/admin/such-insights`). **Phase 8** ergänzt eine
+echte Fotos statt Platzhaltern, sowie ein Zero-Result-Search-Logging (die
+Admin-Auswertung lebt seit Phase 13 unter `/admin/reporting/zero-result`).
+**Phase 8** ergänzt eine
 Vergleichsfunktion für bis zu 4 Unterkünfte/Aktivitäten (`/vergleichen`,
 teilbar per URL, kein Login nötig). **Phase 9** korrigiert eine
 irreführende Kapazitätsanzeige, macht den Anbieter-CTA-Button auf allen
@@ -31,12 +32,20 @@ Admin-Bereich (`/admin/instagram`): erzeugt aus jedem Inserat automatisch
 ein fertiges 1080×1080-Bild + Beschreibungstext, direktes Veröffentlichen
 über die Instagram-Graph-API ist vorbereitet, aber inaktiv, bis ein
 eigener Instagram-Business-Zugang eingerichtet ist (siehe „Instagram-
-Anbindung aktivieren" unten). **Phase 12** ergänzt ein first-party
-Besucher- & Nutzungs-Reporting (`/admin/nutzung`): Besucher, Seitenaufrufe,
-Ø Sitzungsdauer (Näherung), Aufrufe nach Bereich, Top-Referrer,
-meistgesehene Seiten, Matcher-Nutzungsstatistik und Newsletter-Anmeldungen
-im Zeitverlauf — ergänzt die seit Phase 6 laufende Vercel Web Analytics,
-ersetzt sie nicht. Details zur Phasenroadmap in
+Anbindung aktivieren" unten). **Phase 12** ergänzte ein erstes
+first-party Besucher-Reporting (`page_views`/`matcher_submissions`),
+das in **Phase 13** zu einem einheitlichen Event-System ausgebaut wurde:
+eine zentrale `events`-Tabelle protokolliert Seitenaufrufe, Matcher-
+Nutzung, Filter, Angebotsaufrufe, Anbieter-Klicks, ergebnislose Suchen,
+Newsletter-Anmeldungen und Merken-Klicks. Der Admin-Bereich
+`/admin/reporting` wertet das in fünf Unterseiten aus — Übersicht
+(Kern-KPIs + Conversion-Rate), Traffic (Herkunft, Geräte, Länder),
+Content-Performance (meistgesehene/-geklickte Angebote, CTR),
+Funnel (Startseite → Matcher → Ergebnisliste → Detailseite →
+Anbieter-Klick, mit Vorwochenvergleich) und Zero-Result-Log — inkl.
+CSV-Export für Übersicht und Content-Performance. Ergänzt weiterhin die
+seit Phase 6 laufende Vercel Web Analytics, ersetzt sie nicht. Details
+zur Phasenroadmap in
 `FamVaya_Bauplan_2.md`. Getroffene technische Entscheidungen sind
 fortlaufend in [`DECISIONS.md`](DECISIONS.md) dokumentiert.
 **Live: [https://famvaya.com](https://famvaya.com)** (Vercel + Supabase
@@ -48,7 +57,7 @@ Next.js 16 (App Router) · TypeScript · React 19 · Tailwind CSS v4 · shadcn/u
 (Base UI) · Supabase (Postgres, Auth, Storage, `pg_trgm` Volltextsuche) ·
 Vitest · Lucide Icons · Vercel Analytics.
 
-## Funktionsumfang (Phase 0–12)
+## Funktionsumfang (Phase 0–13)
 
 - **Startseite** (`/`): Hero, Schneller Familien-Check, drei Welt-Karten,
   „Empfohlene Inhalte", FamVaya-Versprechen, Newsletter-Anmeldung.
@@ -63,11 +72,11 @@ Vitest · Lucide Icons · Vercel Analytics.
 - **Reality Check** (Phase 7): zweispaltiger "Das spricht dafür" / "Das
   solltet ihr wissen"-Block auf allen drei Detailseiten-Typen, manuell im
   Admin gepflegt (`pros`/`cons`).
-- **Zero-Result-Insights** (Phase 7): Suchen und Filter ohne Treffer werden
-  in `search_events` protokolliert und unter `/admin/such-insights`
-  ausgewertet (7-/30-Tage-Zähler + Liste der letzten ergebnislosen
-  Suchen) — Grundlage dafür, welche Angebote als Nächstes beschafft werden
-  sollten.
+- **Zero-Result-Insights** (Phase 7, seit Phase 13 Teil von
+  `/admin/reporting/zero-result`): Suchen und Filter ohne Treffer werden
+  im zentralen `events`-Table protokolliert und ausgewertet (7-/30-Tage-
+  Zähler + Liste der letzten ergebnislosen Suchen) — Grundlage dafür,
+  welche Angebote als Nächstes beschafft werden sollten.
 - **Vergleichsfunktion** (`/vergleichen`, Phase 8): bis zu 4 Unterkünfte
   und/oder Aktivitäten parallel vergleichen (Gesamtpreis, Kapazität,
   Family Fit, Reality-Check-Punkte, kostenlose Leistungen/Rabatte).
@@ -85,14 +94,19 @@ Vitest · Lucide Icons · Vercel Analytics.
   vorbereitet, aber inaktiv, bis ein Instagram-Business-Zugang eingerichtet
   ist (siehe „Instagram-Anbindung aktivieren" unten) — bis dahin lässt sich
   das Bild herunterladen und der Text kopieren.
-- **Nutzungs-Reporting** (`/admin/nutzung`, Phase 12): first-party
-  Besucherstatistik (Besucher, Seitenaufrufe, Ø Sitzungsdauer als Näherung,
-  Aufrufe nach Bereich, Top-Referrer, meistgesehene Seiten), Matcher-
-  Nutzungsstatistik (Konstellationen aus dem Schnellen Familien-Check) und
-  Newsletter-Anmeldungen im Zeitverlauf, mit Zeitraum-Filter (Heute/7/30
-  Tage oder freie Auswahl). Erfassung nur nach Cookie-Zustimmung, Sitzungs-
-  ID über `sessionStorage` (kein zusätzliches Cookie), ergänzt die seit
-  Phase 6 laufende Vercel Web Analytics.
+- **Reporting** (`/admin/reporting`, Phase 12/13): first-party
+  Event-Tracking (`events`-Table) für Seitenaufrufe, Matcher-Nutzung,
+  Filter, Angebotsaufrufe, Anbieter-Klicks, ergebnislose Suchen,
+  Newsletter-Anmeldungen und Merken-Klicks — ausgewertet in fünf
+  Unterseiten: Übersicht (Kern-KPIs + Conversion-Rate), Traffic
+  (Zeitverlauf, Referrer, UTM-Kampagnen, Geräte, Länder),
+  Content-Performance (meistgesehene/-geklickte Angebote inkl. CTR),
+  Funnel (Startseite → Matcher → Ergebnisliste → Detailseite →
+  Anbieter-Klick mit Vorwochenvergleich) und Zero-Result-Log. Zeitraum
+  frei wählbar (Heute/7/30 Tage oder Datumsbereich), CSV-Export für
+  Übersicht und Content-Performance. Erfassung nur nach Cookie-
+  Zustimmung, Sitzungs-ID über `sessionStorage` (kein zusätzliches
+  Cookie), ergänzt die seit Phase 6 laufende Vercel Web Analytics.
 - **Globale Suche** (`/suche`): Postgres-Volltextsuche + Trigram-
   Tippfehlertoleranz über alle drei Bereiche.
 - **„Lass dich inspirieren"-Finder** (`/lass-dich-inspirieren`): mehrstufiger,
@@ -221,7 +235,7 @@ Siehe [`.env.example`](.env.example) für alle Variablen. Benötigt für
    den Redirect URLs hinzufügen — sonst laufen Magic-Link- und
    Bestätigungs-Links ins Leere.
 
-> ✅ Alle 21 Migrationen und `seed.sql` wurden gegen ein echtes
+> ✅ Alle 22 Migrationen und `seed.sql` wurden gegen ein echtes
 > Supabase-Projekt (Produktion) ausgeführt und liefen fehlerfrei durch.
 > End-to-end verifiziert: RLS-Policies (Auth, Familienprofil, Merkliste),
 > `/go/`-Klick-Logging, `search_all_content()` inkl. Tippfehlertoleranz und
@@ -302,7 +316,7 @@ Supabase-Projekt. So wurde/wird das eingerichtet:
 2. Unter **Project Settings → Environment Variables** alle Variablen aus
    `.env.local` eintragen (siehe „Umgebungsvariablen" oben) —
    `NEXT_PUBLIC_SITE_URL` auf die endgültige Produktions-Domain setzen.
-3. Migrationen (`supabase/migrations/0001_...` bis `0021_...`) und
+3. Migrationen (`supabase/migrations/0001_...` bis `0022_...`) und
    `supabase/seed.sql` gegen das **Produktions-Supabase-Projekt** ausführen
    (siehe „Supabase einrichten" oben) — separates Projekt empfohlen, nicht
    dasselbe wie für die lokale Entwicklung.
@@ -322,7 +336,7 @@ Supabase-Projekt. So wurde/wird das eingerichtet:
 > separate Dev-Projekt wurde pausiert, um den kostenlosen Projektplatz für
 > ein anderes Vorhaben freizugeben (siehe `DECISIONS.md`, Phase 7).
 > `npm run dev` funktioniert daher lokal erst wieder mit einem neuen
-> Dev-Projekt (neues Projekt anlegen, Migrationen 0001–0021 + `seed.sql`
+> Dev-Projekt (neues Projekt anlegen, Migrationen 0001–0022 + `seed.sql`
 > ausführen, `.env.local` aktualisieren).
 
 ### Platzhalterfotos hochladen
@@ -417,13 +431,13 @@ app/
   admin/anbieter/                   CRUD je Content-Typ: page.tsx (Liste), neu/, [id]/,
                                      *-form.tsx (Formular), actions.ts (Server Actions)
   admin/nutzer/                     Nutzerliste + Rollenänderung (nur requireAdmin())
-  admin/such-insights/               Zero-Result-Search-Auswertung (Phase 7)
   admin/instagram/                   Instagram-Post-Generator: page.tsx (Übersicht), neu/
                                       (Generieren), [id]/ (Vorschau/Bearbeiten/Publish), actions.ts (Phase 11)
-  admin/nutzung/                     Besucher- & Nutzungs-Reporting: Zeitraum-Filter, KPI-Karten,
-                                      Referrer/Seiten/Matcher-Auswertung (Phase 12)
-  api/track/pageview/, api/track/matcher/  Öffentliche Route Handler für first-party
-                                      Besuchs-/Matcher-Erfassung (Phase 12)
+  admin/reporting/                   Übersicht, traffic/, content/, funnel/, zero-result/
+                                      (je eigene Unterseite), export/ (CSV-Route) — Phase 13
+  api/events/                        Öffentlicher Route Handler für alle first-party
+                                      Client-Events (page_view, matcher_submit, listing_viewed,
+                                      cta_clicked, favorite_added) — Phase 13
   vergleichen/                       Vergleichsseite (Query-Param ?items=, Phase 8)
 components/
   layout/                           SiteHeader (Suche/Merkliste/Konto-Links), SiteFooter, MobileNav
@@ -433,7 +447,11 @@ components/
   ui/                                shadcn/ui-Komponenten
   admin/                            Geteilte Admin-UI: content-table.tsx, status-badge.tsx,
                                      status-select.tsx, checkbox-group.tsx, media-picker.tsx,
-                                     form-field.tsx, preview-banner.tsx
+                                     form-field.tsx, preview-banner.tsx, reporting-tabs.tsx
+                                     (Reiter + Zeitraum-Filter für /admin/reporting, Phase 13)
+  visitor-tracker.tsx               Feuert page_view-Event bei jedem Routenwechsel (Client, Phase 12/13)
+  listing-view-tracker.tsx          Feuert listing_viewed-Event auf Detailseiten (Client, Phase 13)
+  cta-track-link.tsx                Anbieter-CTA-Link, feuert cta_clicked per sendBeacon (Client, Phase 13)
   breadcrumbs.tsx                   Sichtbare Breadcrumbs + BreadcrumbList-JSON-LD
   pagination.tsx                    Seiten-Navigation (Array-Slice) für die 4 Übersichtsseiten
   cookie-consent.tsx                DSGVO-Consent-Banner (Client Component)
@@ -452,9 +470,15 @@ lib/
   data/                             Datenzugriffs-Schicht je Content-Typ (inkl. articles.ts, öffentlich
                                      + Admin) + search.ts + favorites.ts + shared.ts + admin.ts
                                      (Dashboard) + media.ts (Upload) + users.ts + providers.ts +
-                                     search-events.ts (Zero-Result-Logging + Auswertung, Phase 7)
+                                     events.ts (logEvent()/logFilterApplied()/logZeroResultSearch(),
+                                     Phase 13) + reporting.ts (Auswertungs-Queries für
+                                     /admin/reporting, Phase 13)
   actions/                          Geteilte Server Actions (favorites.ts, newsletter.ts, consent.ts)
   analytics/                        events.ts (Vokabular) + client.ts + server.ts — trackEvent()-Abstraktion
+                                     zu Vercel Analytics ("Ebene 1", unverändert seit Phase 6)
+  client-events.ts                  getSessionId()/hasAnalyticsConsent()/trackFamvayaEvent() für
+                                     Client-Komponenten — sendet an /api/events (Phase 13)
+  report-range.ts                   Geteilter Zeitraum-Filter (Preset/from-to) für /admin/reporting (Phase 13)
   format.ts, family-rating.ts,
   family-check.ts, finder-reasons.ts Getestete Business-Logik (siehe lib/*.test.ts)
   auth.ts                           requireUser()/getOptionalUser()/requireAdminOrEditor()/
@@ -473,7 +497,7 @@ lib/
   types.ts                          Handgeschriebene DB-Typen
 proxy.ts                            Session-Refresh (Next.js 16 "Proxy", vormals Middleware)
 public/brand/                       FamVaya-Logo (SVG, Originalfarben)
-supabase/migrations/                SQL-Migrationen (0001-0021, in Reihenfolge ausführen)
+supabase/migrations/                SQL-Migrationen (0001-0022, in Reihenfolge ausführen)
 supabase/seed.sql                   Demo-Seed-Daten (Spec-§29-Mindestmengen)
 files/                              Produktspezifikation (spec.md) und Phase-0-Kickoff-Prompt
 FamVaya_Bauplan_2.md                Verbindliche Phasen-Roadmap (Phase 0-6)

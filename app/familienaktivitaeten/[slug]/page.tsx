@@ -7,6 +7,8 @@ import { PlaceholderImage } from "@/components/placeholder-image";
 import { FamilyCheckSection } from "@/components/family-check-section";
 import { RealityCheck } from "@/components/reality-check";
 import { FavoriteButton } from "@/components/favorite-button";
+import { ListingViewTracker } from "@/components/listing-view-tracker";
+import { CtaTrackLink } from "@/components/cta-track-link";
 import { getActivityBySlug } from "@/lib/data/activities";
 import { isFavorited } from "@/lib/data/favorites";
 import { canPreview, getOptionalUser } from "@/lib/auth";
@@ -96,6 +98,7 @@ export default async function ActivityDetailPage({
 
   return (
     <div className="mx-auto w-full max-w-4xl px-4 py-10 sm:px-6">
+      <ListingViewTracker entityType="activity" entityId={activity.id} />
       {/* eslint-disable-next-line react/no-danger */}
       <script
         type="application/ld+json"
@@ -232,7 +235,15 @@ export default async function ActivityDetailPage({
         {goUrl ? (
           <Button
             size="lg"
-            render={<a href={goUrl} target="_blank" rel="noopener noreferrer" />}
+            render={
+              <CtaTrackLink
+                href={goUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                entityType="activity"
+                entityId={activity.id}
+              />
+            }
             nativeButton={false}
           >
             Preis &amp; Verfügbarkeit beim Anbieter prüfen

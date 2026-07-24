@@ -4,6 +4,7 @@ import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { FilterField, filterInputClass } from "@/components/filter-field";
+import { trackFamvayaEvent } from "@/lib/client-events";
 
 type Area = "unterkunft" | "aktivitaet" | "mikroabenteuer" | "unentschlossen";
 
@@ -21,12 +22,7 @@ export function QuickFamilyCheck() {
     event.preventDefault();
     const totalGuests = adults + children;
 
-    fetch("/api/track/matcher", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ adults, children, area }),
-      keepalive: true,
-    }).catch(() => {});
+    trackFamvayaEvent("matcher_submit", { metadata: { adults, children, area } });
 
     switch (area) {
       case "unterkunft":

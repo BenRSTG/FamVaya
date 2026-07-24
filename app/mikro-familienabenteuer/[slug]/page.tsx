@@ -7,6 +7,8 @@ import { PlaceholderImage } from "@/components/placeholder-image";
 import { FavoriteButton } from "@/components/favorite-button";
 import { FamilyCheckSection } from "@/components/family-check-section";
 import { RealityCheck } from "@/components/reality-check";
+import { ListingViewTracker } from "@/components/listing-view-tracker";
+import { CtaTrackLink } from "@/components/cta-track-link";
 import { getMicroAdventureBySlug } from "@/lib/data/micro-adventures";
 import { isFavorited } from "@/lib/data/favorites";
 import { canPreview, getOptionalUser } from "@/lib/auth";
@@ -100,6 +102,7 @@ export default async function MicroAdventureDetailPage({
 
   return (
     <div className="mx-auto w-full max-w-4xl px-4 py-10 sm:px-6">
+      <ListingViewTracker entityType="micro_adventure" entityId={adventure.id} />
       {/* eslint-disable-next-line react/no-danger */}
       <script
         type="application/ld+json"
@@ -218,7 +221,15 @@ export default async function MicroAdventureDetailPage({
         {goUrl ? (
           <Button
             size="lg"
-            render={<a href={goUrl} target="_blank" rel="noopener noreferrer" />}
+            render={
+              <CtaTrackLink
+                href={goUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                entityType="micro_adventure"
+                entityId={adventure.id}
+              />
+            }
             nativeButton={false}
           >
             Mehr erfahren

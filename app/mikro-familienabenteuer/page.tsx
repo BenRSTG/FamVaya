@@ -8,7 +8,7 @@ import {
 } from "@/lib/data/micro-adventures";
 import type { MicroAdventureFilters } from "@/lib/types";
 import { toNumber, toStringParam, type SearchParams } from "@/lib/search-params";
-import { logZeroResultSearch } from "@/lib/data/search-events";
+import { logFilterApplied, logZeroResultSearch } from "@/lib/data/events";
 
 export const metadata: Metadata = {
   title: "Mikro-Familienabenteuer",
@@ -53,8 +53,11 @@ export default async function MicroAdventuresPage({
     getMicroAdventureCategories(),
   ]);
 
-  if (hasActiveFilters && adventures.length === 0) {
-    await logZeroResultSearch({ filters: filters as Record<string, unknown> });
+  if (hasActiveFilters) {
+    await logFilterApplied("/mikro-familienabenteuer", filters as Record<string, unknown>);
+    if (adventures.length === 0) {
+      await logZeroResultSearch("/mikro-familienabenteuer", filters as Record<string, unknown>);
+    }
   }
 
   const totalPages = Math.max(1, Math.ceil(adventures.length / PAGE_SIZE));

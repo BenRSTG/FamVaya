@@ -57,7 +57,30 @@ export default function DatenschutzPage() {
       </section>
 
       <section className="mb-6">
-        <h2 className="mb-2 text-lg font-semibold text-foreground">5. Externe Links</h2>
+        <h2 className="mb-2 text-lg font-semibold text-foreground">
+          5. Eigene Nutzungsstatistiken (First-Party-Events)
+        </h2>
+        <p className="text-muted-foreground">
+          Nach eurer Zustimmung zeichnen wir zusätzlich zu Vercel Analytics
+          eigene, FamVaya-spezifische Nutzungsereignisse auf (z. B. Aufruf
+          einer Angebotsseite, Nutzung des Family Matchers, Klick auf einen
+          Anbieter-Button, Suchen ohne Treffer). Dabei wird eine zufällig
+          erzeugte, pseudonyme Sitzungs-ID verwendet, die nur im
+          Browser-Sitzungsspeicher (sessionStorage) liegt, nicht in einem
+          Cookie, und sich nicht auf eine Person zurückführen lässt.
+          Vollständige IP-Adressen und Browser-Kennungen speichern wir nicht
+          dauerhaft; lediglich eine grobe Geräteart (mobil/Tablet/Desktop)
+          und ein grobes Herkunftsland werden erfasst. Diese Rohdaten
+          bewahren wir bis zu 24 Monate auf und nutzen sie ausschließlich,
+          um zu verstehen, welche Inhalte gefragt sind und wo Angebote
+          fehlen. Eure Einwilligung könnt ihr jederzeit über
+          „Cookie-Einstellungen" im Footer widerrufen — danach werden keine
+          weiteren Ereignisse mehr erfasst.
+        </p>
+      </section>
+
+      <section className="mb-6">
+        <h2 className="mb-2 text-lg font-semibold text-foreground">6. Externe Links</h2>
         <p className="text-muted-foreground">
           Klickt ihr auf einen Anbieter-/Affiliate-Link, verlasst ihr
           FamVaya. Für die Datenverarbeitung auf den verlinkten Seiten gelten
@@ -66,7 +89,7 @@ export default function DatenschutzPage() {
       </section>
 
       <section>
-        <h2 className="mb-2 text-lg font-semibold text-foreground">6. Eure Rechte</h2>
+        <h2 className="mb-2 text-lg font-semibold text-foreground">7. Eure Rechte</h2>
         <p className="text-muted-foreground">
           Ihr habt das Recht auf Auskunft, Berichtigung, Löschung und
           Einschränkung der Verarbeitung eurer Daten. Wendet euch dazu an die

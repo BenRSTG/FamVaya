@@ -1234,3 +1234,95 @@ Monetarisierungs-Reporting, Content-Moderationsbereich und technisches
 Monitoring aus dem ursprünglichen Dokument sind nicht Teil dieses
 Wunsches (der sich explizit auf Besucher/Quelle/Dauer/Inhalte bezog) und
 bleiben für eine mögliche spätere Phase offen.
+
+## Phase 13: Professionelles Analytics & Reporting im Admin-Bereich
+
+Neues Vision-Dokument: ein "eigenständiges, in sich geschlossenes
+Analytics-System" im Admin-Bereich. Beim Nachprüfen des Ist-Zustands
+zeigte sich erhebliche Überschneidung mit bereits bestehender
+Tracking-Infrastruktur (`page_views`/`matcher_submissions` aus Phase 12,
+`search_events` aus Phase 7, `outbound_clicks` aus Phase 0). Das
+Dokument selbst fordert explizit, dass Zero-Result-Logging "als Teil
+desselben Events-Systems" laufen soll, "damit es nicht zwei parallele
+Tracking-Wege gibt" — dieser Gedanke wurde konsequent auf die gesamte
+Ebene-2-Landschaft angewendet.
+
+### Ein einheitliches `events`-Table ersetzt drei ältere Tabellen
+
+Migration `0022` führt `events` ein (`event_type`, `session_id`,
+`page_path`, `entity_type`/`entity_id`, `metadata` jsonb,
+`referrer_domain`, UTM-Felder, `device_type`, `country`). `page_views`,
+`matcher_submissions` (Phase 12) und `search_events` (Phase 7) werden
+nicht mehr beschrieben, aber nicht gedroppt — kein destruktiver
+Migrationsschritt nötig, die Tabellen bleiben als (praktisch leere)
+Alt-Daten-Referenz erhalten. Ein Migrationsskript für Altdaten war nicht
+nötig, da die Seite gerade erst live ist und kaum reale Traffic-Daten in
+den alten Tabellen stehen.
+
+### `outbound_clicks` bleibt unangetastet die maßgebliche Klick-Quelle
+
+Die produktiv laufende `/go/`-Redirect-Route (`lib/redirect.ts`,
+`outbound_clicks`) wird nicht verändert. `cta_clicked` im neuen
+`events`-Table ist ein zusätzliches, rein client-seitiges Beacon
+(`navigator.sendBeacon`, `components/cta-track-link.tsx`) nur für die
+Session-Korrelation im Funnel — zwei Schreibvorgänge pro Klick sind hier
+bewusst, nicht versehentlich (unterschiedliche Zwecke: Redirect-Log vs.
+Session-Funnel).
+
+### `session_id` bleibt ausschließlich in sessionStorage
+
+Wie in Phase 12 entschieden, nie ein Cookie — erhält die wörtliche
+Aussage "cookie-freie Nutzungsstatistiken" im Consent-Banner. Rein
+serverseitig ausgelöste Events (`filter_applied`, `zero_result_search`,
+`newsletter_signup`) laufen ohne `session_id`, da Server
+Components/Actions keinen Zugriff auf `sessionStorage` haben —
+unkritisch, da keines dieser drei eine Funnel-Stufe ist.
+
+### Consent-Gate zentral statt pro Komponente
+
+Client-Events prüfen zentral in `lib/client-events.ts#hasAnalyticsConsent()`
+das bestehende, nicht-httpOnly `famvaya-consent`-Cookie und no-oppen ohne
+Zustimmung — eine einzige Stelle statt eines Consent-Checks in jeder
+Tracking-Komponente. Serverseitige Events prüfen `getConsent()` (Phase 3)
+vor jedem Insert. Keine neue Consent-UI nötig.
+
+### Funnel als Näherung
+
+Analog zur Sitzungsdauer-Näherung aus Phase 12: "Stufe erreicht" heißt
+"Session hat im Zeitraum ein Event vom passenden Typ ausgelöst", keine
+strikte zeitliche Reihenfolge. Aggregation weiterhin clientseitig in JS
+über eine einzelne datumsgefilterte Query (kein SQL `GROUP BY`/eigene
+Postgres-Funktion) — gleiche, bereits akzeptierte Tradeoff-Linie wie
+Phase 12, mit demselben Optimierungsvorbehalt bei deutlich mehr Traffic.
+
+### "Ergebnisliste angesehen" ohne eigenen Event-Typ
+
+Funnel-Stufe 3 wird aus bestehenden `page_view`-Events abgeleitet
+(Pfad-Präfix-Filter auf die drei Übersichtsseiten) statt einen
+redundanten fünften Event-Typ für denselben Vorgang einzuführen.
+
+### `device_type`/`country` serverseitig abgeleitet, kein User-Agent gespeichert
+
+`/api/events` klassifiziert `device_type` grob per User-Agent-Regex und
+liest `country` aus dem `x-vercel-ip-country`-Header — der volle
+User-Agent-String wird nie gespeichert, wie vom Dokument gefordert.
+
+### CSV-Export nur für Übersicht + Content-Performance
+
+Exakter Wortlaut des Abnahme-Checks, nicht alle 5 Reiter — kann bei
+Bedarf später erweitert werden (`app/admin/reporting/export/route.ts`).
+
+### Aufbewahrungsfrist: 24 Monate, kein automatischer Lösch-Job
+
+Dokumentiert in der Datenschutzerklärung (`app/datenschutz/page.tsx`,
+Abschnitt 5). Ein automatischer Lösch-Job bräuchte eine geplante
+Funktion/Cron — als offener Folgepunkt vermerkt, gleiches Muster wie das
+zurückgestellte Instagram-Scheduling aus Phase 11.
+
+### `/admin/nutzung` und `/admin/such-insights` vollständig ersetzt
+
+Beide Seiten (Phase 12 bzw. Phase 7) werden entfernt und durch
+`/admin/reporting` (5 Unterseiten: Übersicht, Traffic,
+Content-Performance, Funnel, Zero-Result-Log) ersetzt, nicht parallel
+weitergeführt — entspricht der geforderten "in sich geschlossenen"
+Lösung ohne zwei konkurrierende Dashboards.

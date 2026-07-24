@@ -8,6 +8,7 @@ import { AccommodationCard } from "@/components/cards/accommodation-card";
 import { ActivityCard } from "@/components/cards/activity-card";
 import { Breadcrumbs, BreadcrumbJsonLd } from "@/components/breadcrumbs";
 import { PreviewBanner } from "@/components/admin/preview-banner";
+import { ListingViewTracker } from "@/components/listing-view-tracker";
 import { getArticleBySlug, getRelatedArticles } from "@/lib/data/articles";
 import { getFeaturedAccommodations } from "@/lib/data/accommodations";
 import { getFeaturedActivities } from "@/lib/data/activities";
@@ -91,6 +92,7 @@ export default async function ArticleDetailPage({
 
   return (
     <div className="mx-auto w-full max-w-3xl px-4 py-10 sm:px-6">
+      <ListingViewTracker entityType="article" entityId={article.id} />
       {/* eslint-disable-next-line react/no-danger */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }} />
       <BreadcrumbJsonLd items={breadcrumbItems} />

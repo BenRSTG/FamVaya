@@ -5,7 +5,7 @@ import { Pagination, paginate, PAGE_SIZE } from "@/components/pagination";
 import { getActivityCategories, getPublishedActivities } from "@/lib/data/activities";
 import type { ActivityFilters } from "@/lib/types";
 import { toBoolean, toNumber, toStringParam, type SearchParams } from "@/lib/search-params";
-import { logZeroResultSearch } from "@/lib/data/search-events";
+import { logFilterApplied, logZeroResultSearch } from "@/lib/data/events";
 
 export const metadata: Metadata = {
   title: "Familienaktivitäten",
@@ -38,8 +38,11 @@ export default async function ActivitiesPage({
     getActivityCategories(),
   ]);
 
-  if (hasActiveFilters && activities.length === 0) {
-    await logZeroResultSearch({ filters: filters as Record<string, unknown> });
+  if (hasActiveFilters) {
+    await logFilterApplied("/familienaktivitaeten", filters as Record<string, unknown>);
+    if (activities.length === 0) {
+      await logZeroResultSearch("/familienaktivitaeten", filters as Record<string, unknown>);
+    }
   }
 
   const totalPages = Math.max(1, Math.ceil(activities.length / PAGE_SIZE));
