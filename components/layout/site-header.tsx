@@ -13,10 +13,10 @@ export async function SiteHeader() {
       <div className="mx-auto flex h-20 max-w-6xl items-center justify-between px-4 sm:px-6">
         <Link href="/" className="flex items-center">
           <Image
-            src="/brand/famvaya-logo.svg"
+            src="/brand/famvaya-wordmark.svg"
             alt="FamVaya"
-            width={176}
-            height={99}
+            width={268}
+            height={60}
             priority
           />
         </Link>

@@ -45,6 +45,16 @@ const PROMISES = [
   "Transparente Weiterleitung zu externen Anbietern",
 ];
 
+// Bewusst keine (erfundenen) Zahlen wie "160+ Reiseziele" — bei fast
+// ausschließlich Demo-Inhalten und kaum echtem Traffic wäre das
+// irreführend und würde dem "Ehrliche Hinweise"-Versprechen oben
+// widersprechen. Stattdessen die echten Werte als kurze Highlights.
+const HERO_HIGHLIGHTS = [
+  "3+ Kinder im Fokus",
+  "Geprüfte Familientauglichkeit",
+  "Ehrliche Gesamtpreise",
+];
+
 export default async function Home({
   searchParams,
 }: {
@@ -63,21 +73,24 @@ export default async function Home({
   return (
     <div className="flex flex-col">
       {/* Hero */}
-      <section className="flex flex-col items-center gap-8 bg-background px-6 py-16 text-center sm:py-24">
+      <section className="relative isolate flex flex-col items-center gap-8 overflow-hidden px-6 py-20 text-center sm:py-28">
         <Image
-          src="/brand/famvaya-logo.svg"
-          alt="FamVaya"
-          width={380}
-          height={214}
+          src="/images/hero-familie-berge.jpg"
+          alt=""
+          fill
           priority
+          sizes="100vw"
+          className="-z-10 object-cover"
         />
+        <div className="absolute inset-0 -z-10 bg-gradient-to-b from-brand-petrol-dark/75 via-brand-petrol-dark/45 to-background" />
+
         <div className="flex flex-col gap-3">
-          <h1 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+          <h1 className="text-3xl font-semibold tracking-tight text-white drop-shadow-sm sm:text-4xl">
             Abenteuer für die ganze Familie.
             <br />
             Wirklich die ganze.
           </h1>
-          <p className="mx-auto max-w-xl text-base text-muted-foreground sm:text-lg">
+          <p className="mx-auto max-w-xl text-base text-white/90 drop-shadow-sm sm:text-lg">
             Entdeckt besondere Unterkünfte, gemeinsame Aktivitäten und kleine
             Abenteuer – speziell ausgewählt für Familien mit drei oder mehr
             Kindern.
@@ -94,6 +107,7 @@ export default async function Home({
           <Button
             size="lg"
             variant="outline"
+            className="border-white/70 bg-white/10 text-white hover:bg-white/20"
             render={<Link href="/lass-dich-inspirieren" />}
             nativeButton={false}
           >
@@ -102,6 +116,15 @@ export default async function Home({
         </div>
 
         <QuickFamilyCheck />
+
+        <ul className="flex flex-wrap items-center justify-center gap-x-8 gap-y-2 text-sm font-medium text-white/90">
+          {HERO_HIGHLIGHTS.map((highlight) => (
+            <li key={highlight} className="flex items-center gap-2">
+              <CheckCircle2 className="size-4 shrink-0" aria-hidden />
+              {highlight}
+            </li>
+          ))}
+        </ul>
       </section>
 
       {/* Drei Welten */}
