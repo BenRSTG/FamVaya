@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Menu } from "lucide-react";
+import { Menu, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -20,7 +20,7 @@ export function MobileNav() {
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger
         render={
-          <Button variant="ghost" size="icon" aria-label="Menü öffnen" className="md:hidden" />
+          <Button variant="ghost" size="icon" aria-label="Menü öffnen" className="xl:hidden" />
         }
       >
         <Menu aria-hidden />
@@ -30,6 +30,14 @@ export function MobileNav() {
           <SheetTitle>FamVaya</SheetTitle>
         </SheetHeader>
         <nav className="flex flex-col gap-1 px-4">
+          <Link
+            href="/suche"
+            onClick={() => setOpen(false)}
+            className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-foreground hover:bg-muted"
+          >
+            <Search className="size-4" aria-hidden />
+            Suche
+          </Link>
           {NAV_ITEMS.map((item) => (
             <Link
               key={item.href}

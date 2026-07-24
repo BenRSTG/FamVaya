@@ -11,33 +11,36 @@ export async function SiteHeader() {
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur">
       <div className="mx-auto flex h-20 max-w-6xl items-center justify-between px-4 sm:px-6">
-        <Link href="/" className="flex items-center">
-          <Image
-            src="/brand/famvaya-wordmark.svg"
-            alt="FamVaya"
-            width={268}
-            height={60}
-            priority
-          />
-        </Link>
+        <div className="flex min-w-0 items-center gap-5 xl:gap-10">
+          <Link href="/" className="flex shrink-0 items-center">
+            <Image
+              src="/brand/famvaya-wordmark.svg"
+              alt="FamVaya"
+              width={268}
+              height={60}
+              priority
+              className="h-12 w-auto xl:h-[60px]"
+            />
+          </Link>
 
-        <nav className="hidden items-center gap-6 md:flex">
-          {NAV_ITEMS.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="text-sm font-medium text-foreground hover:text-primary"
-            >
-              {item.label}
-            </Link>
-          ))}
-        </nav>
+          <nav className="hidden items-center gap-6 xl:flex">
+            {NAV_ITEMS.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="text-sm font-medium text-foreground hover:text-primary"
+              >
+                {item.label}
+              </Link>
+            ))}
+          </nav>
+        </div>
 
         <div className="flex items-center gap-2">
           <Link
             href="/suche"
             aria-label="Suche"
-            className="flex size-9 items-center justify-center rounded-lg text-foreground hover:bg-muted"
+            className="hidden size-9 items-center justify-center rounded-lg text-foreground hover:bg-muted xl:flex"
           >
             <Search className="size-5" aria-hidden />
           </Link>
