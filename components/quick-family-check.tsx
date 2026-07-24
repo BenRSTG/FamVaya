@@ -21,6 +21,13 @@ export function QuickFamilyCheck() {
     event.preventDefault();
     const totalGuests = adults + children;
 
+    fetch("/api/track/matcher", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ adults, children, area }),
+      keepalive: true,
+    }).catch(() => {});
+
     switch (area) {
       case "unterkunft":
         router.push(

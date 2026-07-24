@@ -1162,3 +1162,75 @@ Teil des ursprünglichen Wunsches ("direkt ... schaltbar").
 eigenständiger Workflow, erreichbar über einen neuen "Instagram-Post"-Link
 in den vier bestehenden Content-Listen (`ContentTable`). Die bestehenden
 CRUD-Formulare bleiben unangetastet.
+
+## Phase 12: Besucher- & Nutzungs-Reporting im Admin-Bereich
+
+Wunsch: sehen, wie viele Personen auf die Seite kommen, woher sie kommen,
+wie lange sie bleiben und was sie sich ansehen — direkt im eigenen
+Admin-Bereich statt nur auf vercel.com. Entspricht Teil C1 des früheren,
+bewusst zurückgestellten "Admin & Reporting"-Dokuments.
+
+### First-party Erfassung ergänzt Vercel Analytics, ersetzt es nicht
+
+Vercel Web Analytics läuft seit Phase 6 bereits und liefert Besucher/
+Seitenaufrufe/Referrer kostenlos im Vercel-Dashboard — aber nicht
+abfragbar innerhalb von `famvaya.com/admin`, und ohne Sitzungsdauer. Die
+Überschneidung wird bewusst in Kauf genommen; der Mehrwert der neuen
+`page_views`-Tabelle ist Abfragbarkeit im eigenen Admin-Bereich
+(vereinheitlicht mit Zero-Result-Insights, Matcher-Nutzung, Newsletter)
+plus eine Sitzungsdauer-Näherung, die Vercel nicht liefert.
+
+### Sitzungs-ID über `sessionStorage`, nicht über ein Cookie
+
+Der Cookie-Consent-Banner verspricht wörtlich "Anonyme, **cookie-freie**
+Nutzungsstatistiken" (`components/cookie-consent.tsx`). Ein neues
+Tracking-Cookie hätte diese Aussage falsch gemacht. `sessionStorage` wird
+nie an den Server übertragen und setzt sich pro Tab/Sitzung ohnehin
+zurück — hält die bestehende Zusage wörtlich ein und reicht für eine
+Sitzungsdauer-Näherung.
+
+### Sitzungsdauer ist eine Näherung, keine exakte Messung
+
+Berechnet aus der Differenz zwischen erstem und letztem Seitenaufruf pro
+Sitzung (`lib/data/analytics.ts#getVisitorStats`). Eine exakte "Time on
+Page"-Messung bräuchte unzuverlässige `beforeunload`-Events oder
+Heartbeat-Pings — unverhältnismäßiger Aufwand. Admin-UI beschriftet den
+Wert entsprechend als "Ø Sitzungsdauer (Näherung)".
+
+### Tracking nur nach Cookie-Zustimmung
+
+`components/visitor-tracker.tsx` wird in `app/layout.tsx` im selben
+`consent === "accepted"`-Block gerendert wie `<Analytics/>` — keine neue
+Einwilligungs-UI nötig, nur derselbe bestehende Schalter für eine zweite
+Komponente.
+
+### Matcher-Nutzungsstatistik als eigene, kleine Tabelle
+
+`matcher_submissions` statt Wiederverwendung von `search_events`: Der
+Schnelle Familien-Check (`components/quick-family-check.tsx`) wurde bisher
+gar nicht geloggt (nur Zero-Result-Fälle auf der Zielseite, nicht die
+Eingabe selbst), und `search_events` hat eine andere, bewusst enger
+gefasste Semantik ("Suchen ohne Treffer") — die soll nicht vermischt
+werden. Kein Consent-Gate nötig, da nur Zahlen + Kategorie gespeichert
+werden, keine Kennung.
+
+### Aggregation clientseitig in JS statt per SQL GROUP BY
+
+`lib/data/analytics.ts` holt Rohdaten für den gewählten Zeitraum und
+aggregiert in JavaScript, statt eine Postgres-Funktion zu schreiben —
+beim aktuellen Traffic-Volumen unproblematisch und einfacher zu warten.
+Bei deutlich mehr Zeilen wäre eine SQL-Aggregation der nächste
+Optimierungsschritt.
+
+### Zero-Result-Insights nicht dupliziert
+
+Die neue Nutzungs-Seite (`/admin/nutzung`) verlinkt auf die bestehende
+`/admin/such-insights`-Seite (seit Phase 7), statt deren Inhalt zu
+duplizieren.
+
+### Teil C2–C4 weiterhin zurückgestellt
+
+Monetarisierungs-Reporting, Content-Moderationsbereich und technisches
+Monitoring aus dem ursprünglichen Dokument sind nicht Teil dieses
+Wunsches (der sich explizit auf Besucher/Quelle/Dauer/Inhalte bezog) und
+bleiben für eine mögliche spätere Phase offen.

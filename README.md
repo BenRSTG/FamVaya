@@ -4,7 +4,7 @@ Inspirations- und Empfehlungsplattform für Familienreisen mit dem Fokus
 „Large Families First" — Familien mit drei oder mehr Kindern. Die vollständige
 Produktspezifikation liegt unter [`files/spec.md`](files/spec.md).
 
-**Aktueller Stand: Phase 0–6 von [`FamVaya_Bauplan_2.md`](FamVaya_Bauplan_2.md) abgeschlossen, plus Phase 7–11 (eigene Vision-Roadmap, siehe unten).**
+**Aktueller Stand: Phase 0–6 von [`FamVaya_Bauplan_2.md`](FamVaya_Bauplan_2.md) abgeschlossen, plus Phase 7–12 (eigene Vision-Roadmap, siehe unten).**
 Alle vier Hauptbereiche (Unterkünfte, Aktivitäten, Mikro-Abenteuer, Magazin)
 sind durchsuchbar, filterbar, paginiert und verlinkt; dazu gibt es echte
 Supabase-Auth (E-Mail/Passwort + Magic Link), ein Familienprofil, eine
@@ -31,7 +31,12 @@ Admin-Bereich (`/admin/instagram`): erzeugt aus jedem Inserat automatisch
 ein fertiges 1080×1080-Bild + Beschreibungstext, direktes Veröffentlichen
 über die Instagram-Graph-API ist vorbereitet, aber inaktiv, bis ein
 eigener Instagram-Business-Zugang eingerichtet ist (siehe „Instagram-
-Anbindung aktivieren" unten). Details zur Phasenroadmap in
+Anbindung aktivieren" unten). **Phase 12** ergänzt ein first-party
+Besucher- & Nutzungs-Reporting (`/admin/nutzung`): Besucher, Seitenaufrufe,
+Ø Sitzungsdauer (Näherung), Aufrufe nach Bereich, Top-Referrer,
+meistgesehene Seiten, Matcher-Nutzungsstatistik und Newsletter-Anmeldungen
+im Zeitverlauf — ergänzt die seit Phase 6 laufende Vercel Web Analytics,
+ersetzt sie nicht. Details zur Phasenroadmap in
 `FamVaya_Bauplan_2.md`. Getroffene technische Entscheidungen sind
 fortlaufend in [`DECISIONS.md`](DECISIONS.md) dokumentiert.
 **Live: [https://famvaya.com](https://famvaya.com)** (Vercel + Supabase
@@ -43,7 +48,7 @@ Next.js 16 (App Router) · TypeScript · React 19 · Tailwind CSS v4 · shadcn/u
 (Base UI) · Supabase (Postgres, Auth, Storage, `pg_trgm` Volltextsuche) ·
 Vitest · Lucide Icons · Vercel Analytics.
 
-## Funktionsumfang (Phase 0–11)
+## Funktionsumfang (Phase 0–12)
 
 - **Startseite** (`/`): Hero, Schneller Familien-Check, drei Welt-Karten,
   „Empfohlene Inhalte", FamVaya-Versprechen, Newsletter-Anmeldung.
@@ -80,6 +85,14 @@ Vitest · Lucide Icons · Vercel Analytics.
   vorbereitet, aber inaktiv, bis ein Instagram-Business-Zugang eingerichtet
   ist (siehe „Instagram-Anbindung aktivieren" unten) — bis dahin lässt sich
   das Bild herunterladen und der Text kopieren.
+- **Nutzungs-Reporting** (`/admin/nutzung`, Phase 12): first-party
+  Besucherstatistik (Besucher, Seitenaufrufe, Ø Sitzungsdauer als Näherung,
+  Aufrufe nach Bereich, Top-Referrer, meistgesehene Seiten), Matcher-
+  Nutzungsstatistik (Konstellationen aus dem Schnellen Familien-Check) und
+  Newsletter-Anmeldungen im Zeitverlauf, mit Zeitraum-Filter (Heute/7/30
+  Tage oder freie Auswahl). Erfassung nur nach Cookie-Zustimmung, Sitzungs-
+  ID über `sessionStorage` (kein zusätzliches Cookie), ergänzt die seit
+  Phase 6 laufende Vercel Web Analytics.
 - **Globale Suche** (`/suche`): Postgres-Volltextsuche + Trigram-
   Tippfehlertoleranz über alle drei Bereiche.
 - **„Lass dich inspirieren"-Finder** (`/lass-dich-inspirieren`): mehrstufiger,
@@ -208,7 +221,7 @@ Siehe [`.env.example`](.env.example) für alle Variablen. Benötigt für
    den Redirect URLs hinzufügen — sonst laufen Magic-Link- und
    Bestätigungs-Links ins Leere.
 
-> ✅ Alle 20 Migrationen und `seed.sql` wurden gegen ein echtes
+> ✅ Alle 21 Migrationen und `seed.sql` wurden gegen ein echtes
 > Supabase-Projekt (Produktion) ausgeführt und liefen fehlerfrei durch.
 > End-to-end verifiziert: RLS-Policies (Auth, Familienprofil, Merkliste),
 > `/go/`-Klick-Logging, `search_all_content()` inkl. Tippfehlertoleranz und
@@ -289,7 +302,7 @@ Supabase-Projekt. So wurde/wird das eingerichtet:
 2. Unter **Project Settings → Environment Variables** alle Variablen aus
    `.env.local` eintragen (siehe „Umgebungsvariablen" oben) —
    `NEXT_PUBLIC_SITE_URL` auf die endgültige Produktions-Domain setzen.
-3. Migrationen (`supabase/migrations/0001_...` bis `0020_...`) und
+3. Migrationen (`supabase/migrations/0001_...` bis `0021_...`) und
    `supabase/seed.sql` gegen das **Produktions-Supabase-Projekt** ausführen
    (siehe „Supabase einrichten" oben) — separates Projekt empfohlen, nicht
    dasselbe wie für die lokale Entwicklung.
@@ -309,7 +322,7 @@ Supabase-Projekt. So wurde/wird das eingerichtet:
 > separate Dev-Projekt wurde pausiert, um den kostenlosen Projektplatz für
 > ein anderes Vorhaben freizugeben (siehe `DECISIONS.md`, Phase 7).
 > `npm run dev` funktioniert daher lokal erst wieder mit einem neuen
-> Dev-Projekt (neues Projekt anlegen, Migrationen 0001–0020 + `seed.sql`
+> Dev-Projekt (neues Projekt anlegen, Migrationen 0001–0021 + `seed.sql`
 > ausführen, `.env.local` aktualisieren).
 
 ### Platzhalterfotos hochladen
@@ -407,6 +420,10 @@ app/
   admin/such-insights/               Zero-Result-Search-Auswertung (Phase 7)
   admin/instagram/                   Instagram-Post-Generator: page.tsx (Übersicht), neu/
                                       (Generieren), [id]/ (Vorschau/Bearbeiten/Publish), actions.ts (Phase 11)
+  admin/nutzung/                     Besucher- & Nutzungs-Reporting: Zeitraum-Filter, KPI-Karten,
+                                      Referrer/Seiten/Matcher-Auswertung (Phase 12)
+  api/track/pageview/, api/track/matcher/  Öffentliche Route Handler für first-party
+                                      Besuchs-/Matcher-Erfassung (Phase 12)
   vergleichen/                       Vergleichsseite (Query-Param ?items=, Phase 8)
 components/
   layout/                           SiteHeader (Suche/Merkliste/Konto-Links), SiteFooter, MobileNav
@@ -456,7 +473,7 @@ lib/
   types.ts                          Handgeschriebene DB-Typen
 proxy.ts                            Session-Refresh (Next.js 16 "Proxy", vormals Middleware)
 public/brand/                       FamVaya-Logo (SVG, Originalfarben)
-supabase/migrations/                SQL-Migrationen (0001-0020, in Reihenfolge ausführen)
+supabase/migrations/                SQL-Migrationen (0001-0021, in Reihenfolge ausführen)
 supabase/seed.sql                   Demo-Seed-Daten (Spec-§29-Mindestmengen)
 files/                              Produktspezifikation (spec.md) und Phase-0-Kickoff-Prompt
 FamVaya_Bauplan_2.md                Verbindliche Phasen-Roadmap (Phase 0-6)

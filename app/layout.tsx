@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
+import { VisitorTracker } from "@/components/visitor-tracker";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { CookieConsentBanner } from "@/components/cookie-consent";
@@ -96,7 +98,14 @@ export default async function RootLayout({
           <CompareTray />
         </CompareProvider>
         <CookieConsentBanner key={consent ?? "unset"} initialConsent={consent} />
-        {consent === "accepted" && <Analytics />}
+        {consent === "accepted" && (
+          <>
+            <Analytics />
+            <Suspense fallback={null}>
+              <VisitorTracker />
+            </Suspense>
+          </>
+        )}
       </body>
     </html>
   );
