@@ -21,6 +21,7 @@ export default async function AdminAccommodationsPage() {
         rows={rows}
         editHref={(id) => `/admin/unterkuenfte/${id}`}
         instagramHref={(id) => `/admin/instagram/neu?type=accommodation&id=${id}`}
+        newsletterHref={(id) => `/admin/newsletter/neu?type=accommodation&id=${id}`}
         duplicateAction={duplicateAccommodation}
         deleteAction={deleteAccommodation}
       />

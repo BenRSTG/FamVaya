@@ -1,11 +1,18 @@
 import Image from "next/image";
 import Link from "next/link";
 import { CookieSettingsLink } from "@/components/cookie-settings-link";
+import { NewsletterSignupForm } from "@/components/newsletter-signup-form";
 
 export function SiteFooter() {
   return (
     <footer className="border-t border-border bg-secondary">
       <div className="mx-auto flex max-w-6xl flex-col items-center gap-3 px-4 py-10 text-center sm:px-6">
+        <div className="mb-4 flex w-full flex-col items-center gap-2 border-b border-border pb-8">
+          <p className="text-sm font-medium text-foreground">
+            Neue Angebote zuerst erfahren
+          </p>
+          <NewsletterSignupForm compact />
+        </div>
         <Image
           src="/brand/famvaya-logo.svg"
           alt="FamVaya"

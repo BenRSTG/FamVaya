@@ -1,18 +1,17 @@
 import Link from "next/link";
 import Image from "next/image";
-import { CheckCircle2, FerrisWheel, Home as HomeIcon, TreePine } from "lucide-react";
+import { CheckCircle2, Compass, FerrisWheel, Home as HomeIcon, TreePine } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { QuickFamilyCheck } from "@/components/quick-family-check";
 import { AccommodationCard } from "@/components/cards/accommodation-card";
 import { ActivityCard } from "@/components/cards/activity-card";
 import { MicroAdventureCard } from "@/components/cards/micro-adventure-card";
 import { ArticleCard } from "@/components/cards/article-card";
-import { filterInputClass } from "@/components/filter-field";
+import { NewsletterSignupForm } from "@/components/newsletter-signup-form";
 import { getFeaturedAccommodations } from "@/lib/data/accommodations";
 import { getFeaturedActivities } from "@/lib/data/activities";
 import { getFeaturedMicroAdventures } from "@/lib/data/micro-adventures";
 import { getFeaturedArticles } from "@/lib/data/articles";
-import { subscribeNewsletter } from "@/lib/actions/newsletter";
 import { toStringParam, type SearchParams } from "@/lib/search-params";
 
 const WORLDS = [
@@ -96,26 +95,29 @@ export default async function Home({
             Kindern.
           </p>
         </div>
-        <div className="flex flex-col gap-3 sm:flex-row">
-          <Button
-            size="lg"
-            render={<Link href="/familienunterkuenfte" />}
-            nativeButton={false}
-          >
-            Jetzt entdecken
-          </Button>
+        <QuickFamilyCheck />
+
+        <div className="w-full max-w-xl rounded-2xl border border-white/20 bg-white/10 px-6 py-5 text-center backdrop-blur-sm">
+          <div className="mx-auto mb-2 flex size-10 items-center justify-center rounded-full bg-white/20">
+            <Compass className="size-5 text-white" aria-hidden />
+          </div>
+          <h2 className="text-lg font-semibold text-white drop-shadow-sm">
+            Noch unentschlossen?
+          </h2>
+          <p className="mx-auto mt-1 max-w-sm text-sm text-white/90 drop-shadow-sm">
+            Unser Inspirations-Finder schlägt euch in ein paar kurzen Fragen
+            passende Ideen vor — auch ganz ohne feste Kriterien.
+          </p>
           <Button
             size="lg"
             variant="outline"
-            className="border-white/70 bg-white/10 text-white hover:border-primary hover:bg-primary hover:text-primary-foreground"
+            className="mt-4 border-white/70 bg-white/10 text-white hover:border-primary hover:bg-primary hover:text-primary-foreground"
             render={<Link href="/lass-dich-inspirieren" />}
             nativeButton={false}
           >
             Lass dich inspirieren
           </Button>
         </div>
-
-        <QuickFamilyCheck />
 
         <ul className="flex flex-wrap items-center justify-center gap-x-8 gap-y-2 text-sm font-medium text-foreground">
           {HERO_HIGHLIGHTS.map((highlight) => (
@@ -213,61 +215,7 @@ export default async function Home({
 
       {/* Newsletter */}
       <section id="newsletter" className="scroll-mt-20 px-4 py-14 sm:px-6">
-        <div className="mx-auto max-w-xl text-center">
-          <h2 className="mb-2 text-2xl font-semibold text-foreground">
-            Neue Ideen direkt ins Postfach
-          </h2>
-          <p className="mb-6 text-muted-foreground">
-            Neue Familienideen, passende Unterkünfte und besondere Abenteuer
-            direkt ins Postfach.
-          </p>
-
-          {newsletterStatus === "success" && (
-            <p className="mb-4 rounded-lg bg-success/10 px-3 py-2 text-sm text-success">
-              Danke für deine Anmeldung!
-            </p>
-          )}
-          {newsletterStatus === "duplicate" && (
-            <p className="mb-4 rounded-lg bg-accent/40 px-3 py-2 text-sm text-foreground">
-              Diese E-Mail-Adresse ist schon angemeldet.
-            </p>
-          )}
-          {newsletterStatus === "error" && (
-            <p className="mb-4 rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive">
-              Da ist etwas schiefgelaufen — bitte versuch es noch einmal.
-            </p>
-          )}
-
-          <form
-            action={subscribeNewsletter}
-            className="flex flex-wrap items-end justify-center gap-3"
-          >
-            <label className="flex w-56 flex-col gap-1 text-left text-sm">
-              E-Mail
-              <input
-                type="email"
-                name="email"
-                required
-                placeholder="deine@email.de"
-                className={filterInputClass}
-              />
-            </label>
-            <label className="flex w-36 flex-col gap-1 text-left text-sm">
-              Wohnort (optional)
-              <input type="text" name="city" className={filterInputClass} />
-            </label>
-            <label className="flex w-28 flex-col gap-1 text-left text-sm">
-              Kinder (optional)
-              <input
-                type="number"
-                name="children_count"
-                min={0}
-                className={filterInputClass}
-              />
-            </label>
-            <Button type="submit">Anmelden</Button>
-          </form>
-        </div>
+        <NewsletterSignupForm status={newsletterStatus as "success" | "duplicate" | "error" | undefined} />
       </section>
     </div>
   );

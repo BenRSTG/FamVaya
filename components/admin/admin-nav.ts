@@ -8,4 +8,5 @@ export const ADMIN_NAV_ITEMS = [
   { href: "/admin/nutzer", label: "Nutzer" },
   { href: "/admin/reporting", label: "Reporting" },
   { href: "/admin/instagram", label: "Instagram" },
+  { href: "/admin/newsletter", label: "Newsletter" },
 ] as const;

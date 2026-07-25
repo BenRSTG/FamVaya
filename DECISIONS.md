@@ -1326,3 +1326,93 @@ Beide Seiten (Phase 12 bzw. Phase 7) werden entfernt und durch
 Content-Performance, Funnel, Zero-Result-Log) ersetzt, nicht parallel
 weitergeführt — entspricht der geforderten "in sich geschlossenen"
 Lösung ohne zwei konkurrierende Dashboards.
+
+## Phase 14: Newsletter-Bereich im Admin + bessere Anmelde-Konversion
+
+Wunsch: ein professioneller Newsletter-Bereich im Admin — Kampagnen frei
+erstellen, außerdem analog zum Instagram-Post-Generator (Phase 11)
+automatisch aus neuen Inseraten generieren und an alle Newsletter-
+Abonnent:innen verschicken können. Zusätzlich sollen Besucher:innen
+stärker zur Newsletter-Anmeldung motiviert werden.
+
+### Instagram-Feature (Phase 11) als direkte Vorlage
+
+`newsletter_campaigns` übernimmt dieselbe Struktur wie `instagram_posts`
+(Status `draft`/`sent`/`failed`, Generieren aus einem Inserat, Vorschau,
+manuell ausgelöster Versand mit Inaktiv-Gate). `lib/instagram/content-
+mapping.ts` liefert die {image, caption}-Daten für alle vier Content-
+Typen bereits normalisiert und wird direkt wiederverwendet statt erneut
+implementiert.
+
+### Resend-Anbindung "vorbereitet, aber inaktiv" (wie Instagram)
+
+`lib/newsletter/resend.ts` mit `isResendConfigured()` (prüft
+`RESEND_API_KEY` + `RESEND_FROM_EMAIL`), Versand-Button im Admin ist ohne
+Konfiguration deaktiviert mit Tooltip. Implementierung nutzt Resends
+Batch-Endpunkt (`POST /emails/batch`, bis zu 100 Nachrichten/Aufruf) per
+Rohaufruf via `fetch()`, kein neues SDK-Paket — gleicher Stil wie
+`lib/instagram/graph-api.ts`. Da nie mit einem echten Key getestet werden
+kann, sollte die Implementierung bei der Einrichtung gegen die aktuelle
+Resend-Dokumentation geprüft werden.
+
+### Kampagnen-Erzeugung bleibt manuell ausgelöst
+
+Kein automatischer Versand direkt beim Veröffentlichen eines Inserats.
+Ein Mensch prüft/bearbeitet Betreff und Text immer erst im Vorschau-
+Screen, bevor an alle Abonnent:innen verschickt wird — vermeidet
+versehentliche Massen-Mails, gleiche Sicherheitsüberlegung wie beim
+Instagram-Publish-Schritt.
+
+### Kampagnen auch ganz frei erstellbar
+
+Anders als bei `instagram_posts` sind `content_type`/`content_id` bei
+`newsletter_campaigns` nullable — ein Formular ohne Inserats-Bezug
+(freier Betreff + Text) deckt den Wunsch "Newsletter erstellen" ab, nicht
+nur das automatische Generieren aus einem Inserat.
+
+### Strukturierte Felder statt gespeichertem HTML
+
+`newsletter_campaigns` speichert `subject`/`intro_text`/`teaser` (jsonb),
+nicht fertiges HTML. Das E-Mail-HTML wird bei jeder Vorschau und beim
+Versand frisch aus diesen Feldern gerendert (`lib/newsletter/template.ts`
+via `renderCampaignHtml()`). Ursprünglich war ein gespeichertes
+`body_html`-Feld geplant — das hätte aber bedeutet, dass ein Bearbeiten
+von Betreff/Text nach dem Erzeugen aus einem Inserat den Teaser
+(Bild/Titel/Link) aus dem gespeicherten HTML wieder verloren hätte, da
+die Bearbeitung nur Betreff/Text kennt, nicht die ursprünglichen
+Eingabedaten.
+
+### E-Mail-Template als einfacher HTML-String
+
+`lib/newsletter/template.ts` mit Inline-CSS (E-Mail-Client-Kompatibilität),
+kein React-Email-Paket — passt zum bisherigen Verzicht auf zusätzliche
+Abhängigkeiten und ist für die zwei Anwendungsfälle (Inserats-Teaser,
+freier Text) einfach genug.
+
+### Abmelde-Link ist Pflichtbestandteil
+
+Auch wenn nicht explizit gewünscht — gehört zu seriösem/rechtlich
+zulässigem Newsletter-Versand dazu. `newsletter_subscribers` bekommt eine
+neue Spalte `unsubscribe_token`; die öffentliche Seite
+`app/newsletter/abmelden/[token]/page.tsx` (Pfad-Segment, gleiches Muster
+wie `/merkliste/geteilt/[token]`) setzt bei bekanntem Token
+`confirmed = false`, ganz ohne Login. Jede Kampagnen-Mail bekommt den
+Link automatisch im Footer; der Token wird erst beim Versand pro
+Empfänger:in in einen Platzhalter im gerenderten HTML eingesetzt.
+
+### Versand nur an bestätigte Abonnent:innen
+
+`sendCampaign()` lädt nur `confirmed = true`-Zeilen aus
+`newsletter_subscribers`. `recipient_count` wird beim Versand ermittelt
+und auf der Kampagne gespeichert (Historie/Nachvollziehbarkeit).
+
+### Anmelde-Konversion: wiederverwendbare Komponente statt Popup
+
+Das bisher nur inline auf der Startseite vorhandene Formular
+(`lib/actions/newsletter.ts#subscribeNewsletter`, unverändert) ist jetzt
+`components/newsletter-signup-form.tsx` — eine `compact`-Variante (nur
+E-Mail-Feld) ist zusätzlich im Footer (`components/layout/site-footer.tsx`)
+eingebaut, damit die Anmeldung von jeder Seite aus möglich ist. Bewusst
+kein Popup/Exit-Intent-Overlay (keine aufdringlichen Dark Patterns),
+sondern einfach deutlich breitere, dezente Platzierung plus kurzer
+Anreiz-Text ("Neue Angebote zuerst erfahren").

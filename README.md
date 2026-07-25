@@ -4,7 +4,7 @@ Inspirations- und Empfehlungsplattform für Familienreisen mit dem Fokus
 „Large Families First" — Familien mit drei oder mehr Kindern. Die vollständige
 Produktspezifikation liegt unter [`files/spec.md`](files/spec.md).
 
-**Aktueller Stand: Phase 0–6 von [`FamVaya_Bauplan_2.md`](FamVaya_Bauplan_2.md) abgeschlossen, plus Phase 7–13 (eigene Vision-Roadmap, siehe unten).**
+**Aktueller Stand: Phase 0–6 von [`FamVaya_Bauplan_2.md`](FamVaya_Bauplan_2.md) abgeschlossen, plus Phase 7–14 (eigene Vision-Roadmap, siehe unten).**
 Alle vier Hauptbereiche (Unterkünfte, Aktivitäten, Mikro-Abenteuer, Magazin)
 sind durchsuchbar, filterbar, paginiert und verlinkt; dazu gibt es echte
 Supabase-Auth (E-Mail/Passwort + Magic Link), ein Familienprofil, eine
@@ -44,8 +44,14 @@ Content-Performance (meistgesehene/-geklickte Angebote, CTR),
 Funnel (Startseite → Matcher → Ergebnisliste → Detailseite →
 Anbieter-Klick, mit Vorwochenvergleich) und Zero-Result-Log — inkl.
 CSV-Export für Übersicht und Content-Performance. Ergänzt weiterhin die
-seit Phase 6 laufende Vercel Web Analytics, ersetzt sie nicht. Details
-zur Phasenroadmap in
+seit Phase 6 laufende Vercel Web Analytics, ersetzt sie nicht. **Phase 14**
+ergänzt einen Newsletter-Bereich im Admin (`/admin/newsletter`): Kampagnen
+frei erstellen oder automatisch aus einem Inserat generieren (analog zum
+Instagram-Post-Generator aus Phase 11), Vorschau, Versand an alle
+bestätigten Abonnent:innen mit Abmelde-Link — Versand über Resend
+vorbereitet, aber inaktiv, bis ein Zugang eingerichtet ist. Die
+Newsletter-Anmeldung ist jetzt zusätzlich zur Startseite kompakt im
+Footer jeder Seite verfügbar. Details zur Phasenroadmap in
 `FamVaya_Bauplan_2.md`. Getroffene technische Entscheidungen sind
 fortlaufend in [`DECISIONS.md`](DECISIONS.md) dokumentiert.
 **Live: [https://famvaya.com](https://famvaya.com)** (Vercel + Supabase
@@ -57,7 +63,7 @@ Next.js 16 (App Router) · TypeScript · React 19 · Tailwind CSS v4 · shadcn/u
 (Base UI) · Supabase (Postgres, Auth, Storage, `pg_trgm` Volltextsuche) ·
 Vitest · Lucide Icons · Vercel Analytics.
 
-## Funktionsumfang (Phase 0–13)
+## Funktionsumfang (Phase 0–14)
 
 - **Startseite** (`/`): Hero, Schneller Familien-Check, drei Welt-Karten,
   „Empfohlene Inhalte", FamVaya-Versprechen, Newsletter-Anmeldung.
@@ -122,10 +128,17 @@ Vitest · Lucide Icons · Vercel Analytics.
 - **Merkliste** (`/merkliste`, geschützt): Merken/Entfernen auf allen drei
   Detailseiten, eine automatische Standardliste pro Nutzer:in, Freigabe-Link
   (`/merkliste/geteilt/[token]`, öffentlich, ohne Login einsehbar).
-- **Newsletter**: vereinfachtes Single-Opt-in (kein Resend-Key hinterlegt,
-  siehe `DECISIONS.md`).
+- **Newsletter**: Anmeldung mit vereinfachtem Single-Opt-in (`components/
+  newsletter-signup-form.tsx`), sowohl auf der Startseite als auch
+  kompakt im Footer jeder Seite. Admin-Bereich `/admin/newsletter`
+  (Phase 14): Kampagnen frei erstellen oder automatisch aus einem
+  Inserat generieren (Bild/Titel/Preis-Teaser, analog zum Instagram-
+  Post-Generator), Vorschau, Versand an alle bestätigten Abonnent:innen
+  inkl. Abmelde-Link. Versand über Resend vorbereitet, aber inaktiv, bis
+  ein Zugang eingerichtet ist (siehe „Newsletter-Versand aktivieren"
+  unten) — bis dahin bleiben Kampagnen als Entwurf erstellbar.
 - Responsive Navigation mit Such-, Merkliste- und Konto-Link, mobilem Menü,
-  sticky Header, minimaler Footer.
+  sticky Header, Footer mit Newsletter-Anmeldung.
 - **Admin-Bereich** (`/admin`, geschützt für Rollen `admin`/`editor`):
   Dashboard mit Status-/Nutzungs-Kennzahlen, vollständiges CRUD für
   Familienunterkünfte, -aktivitäten, Mikro-Familienabenteuer, Magazin-
@@ -235,7 +248,7 @@ Siehe [`.env.example`](.env.example) für alle Variablen. Benötigt für
    den Redirect URLs hinzufügen — sonst laufen Magic-Link- und
    Bestätigungs-Links ins Leere.
 
-> ✅ Alle 22 Migrationen und `seed.sql` wurden gegen ein echtes
+> ✅ Alle 23 Migrationen und `seed.sql` wurden gegen ein echtes
 > Supabase-Projekt (Produktion) ausgeführt und liefen fehlerfrei durch.
 > End-to-end verifiziert: RLS-Policies (Auth, Familienprofil, Merkliste),
 > `/go/`-Klick-Logging, `search_all_content()` inkl. Tippfehlertoleranz und
@@ -316,7 +329,7 @@ Supabase-Projekt. So wurde/wird das eingerichtet:
 2. Unter **Project Settings → Environment Variables** alle Variablen aus
    `.env.local` eintragen (siehe „Umgebungsvariablen" oben) —
    `NEXT_PUBLIC_SITE_URL` auf die endgültige Produktions-Domain setzen.
-3. Migrationen (`supabase/migrations/0001_...` bis `0022_...`) und
+3. Migrationen (`supabase/migrations/0001_...` bis `0023_...`) und
    `supabase/seed.sql` gegen das **Produktions-Supabase-Projekt** ausführen
    (siehe „Supabase einrichten" oben) — separates Projekt empfohlen, nicht
    dasselbe wie für die lokale Entwicklung.
@@ -336,7 +349,7 @@ Supabase-Projekt. So wurde/wird das eingerichtet:
 > separate Dev-Projekt wurde pausiert, um den kostenlosen Projektplatz für
 > ein anderes Vorhaben freizugeben (siehe `DECISIONS.md`, Phase 7).
 > `npm run dev` funktioniert daher lokal erst wieder mit einem neuen
-> Dev-Projekt (neues Projekt anlegen, Migrationen 0001–0022 + `seed.sql`
+> Dev-Projekt (neues Projekt anlegen, Migrationen 0001–0023 + `seed.sql`
 > ausführen, `.env.local` aktualisieren).
 
 ### Platzhalterfotos hochladen
@@ -384,6 +397,31 @@ du ihn ein:
 
 Danach funktioniert der "Jetzt bei Instagram posten"-Button ohne weitere
 Codeänderung.
+
+## Newsletter-Versand aktivieren
+
+Der Newsletter-Bereich (`/admin/newsletter`) funktioniert bereits
+vollständig ohne weitere Einrichtung — Kampagnen lassen sich erstellen,
+aus Inseraten generieren und bearbeiten, nur der "Jetzt an alle
+Abonnent:innen senden"-Button ist deaktiviert, bis ein echter
+Resend-Zugang hinterlegt ist. So richtest du ihn ein:
+
+1. Ein Konto bei [resend.com](https://resend.com) anlegen.
+2. Eine **eigene Absender-Domain** unter "Domains" hinzufügen und die
+   angezeigten DNS-Einträge (SPF/DKIM) beim Domain-Provider eintragen —
+   ohne verifizierte Domain landen E-Mails zuverlässig im Spam-Ordner
+   bzw. der Versand wird abgelehnt.
+3. Einen **API-Key** unter "API Keys" erzeugen.
+4. `RESEND_API_KEY` (der erzeugte Key) und `RESEND_FROM_EMAIL` (z. B.
+   `FamVaya <newsletter@famvaya.com>`, muss zur verifizierten Domain
+   passen) in den Vercel-Umgebungsvariablen (und lokal in `.env.local`)
+   eintragen.
+5. Resends genaue API-Details vor der ersten echten Kampagne gegen die
+   aktuelle [Resend-Dokumentation](https://resend.com/docs) prüfen
+   (siehe `DECISIONS.md`, Phase 14).
+
+Danach funktioniert der "Jetzt an alle Abonnent:innen senden"-Button ohne
+weitere Codeänderung.
 
 ## Analytics
 
@@ -435,6 +473,9 @@ app/
                                       (Generieren), [id]/ (Vorschau/Bearbeiten/Publish), actions.ts (Phase 11)
   admin/reporting/                   Übersicht, traffic/, content/, funnel/, zero-result/
                                       (je eigene Unterseite), export/ (CSV-Route) — Phase 13
+  admin/newsletter/                  Kampagnen-Liste, neu/ (frei oder aus Inserat), [id]/
+                                      (Vorschau/Bearbeiten/Versand), actions.ts (Phase 14)
+  newsletter/abmelden/[token]/       Öffentliche Abmelde-Seite (kein Login, Phase 14)
   api/events/                        Öffentlicher Route Handler für alle first-party
                                       Client-Events (page_view, matcher_submit, listing_viewed,
                                       cta_clicked, favorite_added) — Phase 13
@@ -452,6 +493,8 @@ components/
   visitor-tracker.tsx               Feuert page_view-Event bei jedem Routenwechsel (Client, Phase 12/13)
   listing-view-tracker.tsx          Feuert listing_viewed-Event auf Detailseiten (Client, Phase 13)
   cta-track-link.tsx                Anbieter-CTA-Link, feuert cta_clicked per sendBeacon (Client, Phase 13)
+  newsletter-signup-form.tsx        Wiederverwendbare Anmelde-Komponente (Startseite + Footer,
+                                     `compact`-Variante), Phase 14
   breadcrumbs.tsx                   Sichtbare Breadcrumbs + BreadcrumbList-JSON-LD
   pagination.tsx                    Seiten-Navigation (Array-Slice) für die 4 Übersichtsseiten
   cookie-consent.tsx                DSGVO-Consent-Banner (Client Component)
@@ -472,7 +515,8 @@ lib/
                                      (Dashboard) + media.ts (Upload) + users.ts + providers.ts +
                                      events.ts (logEvent()/logFilterApplied()/logZeroResultSearch(),
                                      Phase 13) + reporting.ts (Auswertungs-Queries für
-                                     /admin/reporting, Phase 13)
+                                     /admin/reporting, Phase 13) + newsletter-campaigns.ts
+                                     (Kampagnen erzeugen/versenden, Phase 14)
   actions/                          Geteilte Server Actions (favorites.ts, newsletter.ts, consent.ts)
   analytics/                        events.ts (Vokabular) + client.ts + server.ts — trackEvent()-Abstraktion
                                      zu Vercel Analytics ("Ebene 1", unverändert seit Phase 6)
@@ -487,6 +531,9 @@ lib/
   redirect.ts                       Reine Entscheidungslogik der /go/-Route, getestet
   instagram/                        template.tsx (ImageResponse-Bildgenerierung), content-mapping.ts,
                                      caption.ts, graph-api.ts (vorbereitet, inaktiv ohne Env-Vars, Phase 11)
+  newsletter/                       template.ts (E-Mail-HTML), content-to-email.ts (nutzt
+                                     lib/instagram/content-mapping.ts weiter), resend.ts
+                                     (vorbereitet, inaktiv ohne Env-Vars) — Phase 14
   compare.ts                        Reine Vergleichs-Typen + Parse-/Serialisierungslogik (Phase 8,
                                      kein "use client" — von Server- und Client-Code importierbar)
   consent.ts                        Cookie-Consent lesen (Server Component)
@@ -497,7 +544,7 @@ lib/
   types.ts                          Handgeschriebene DB-Typen
 proxy.ts                            Session-Refresh (Next.js 16 "Proxy", vormals Middleware)
 public/brand/                       FamVaya-Logo (SVG, Originalfarben)
-supabase/migrations/                SQL-Migrationen (0001-0022, in Reihenfolge ausführen)
+supabase/migrations/                SQL-Migrationen (0001-0023, in Reihenfolge ausführen)
 supabase/seed.sql                   Demo-Seed-Daten (Spec-§29-Mindestmengen)
 files/                              Produktspezifikation (spec.md) und Phase-0-Kickoff-Prompt
 FamVaya_Bauplan_2.md                Verbindliche Phasen-Roadmap (Phase 0-6)

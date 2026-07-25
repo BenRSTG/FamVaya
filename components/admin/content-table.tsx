@@ -13,12 +13,14 @@ export function ContentTable({
   rows,
   editHref,
   instagramHref,
+  newsletterHref,
   duplicateAction,
   deleteAction,
 }: {
   rows: AdminListRow[];
   editHref: (id: string) => string;
   instagramHref?: (id: string) => string;
+  newsletterHref?: (id: string) => string;
   duplicateAction?: (formData: FormData) => void | Promise<void>;
   deleteAction?: (formData: FormData) => void | Promise<void>;
 }) {
@@ -59,6 +61,11 @@ export function ContentTable({
                   {instagramHref && (
                     <Link href={instagramHref(row.id)} className="text-primary hover:underline">
                       Instagram-Post
+                    </Link>
+                  )}
+                  {newsletterHref && (
+                    <Link href={newsletterHref(row.id)} className="text-primary hover:underline">
+                      Newsletter
                     </Link>
                   )}
                   {duplicateAction && (

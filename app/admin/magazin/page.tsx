@@ -21,6 +21,7 @@ export default async function AdminArticlesPage() {
         rows={rows}
         editHref={(id) => `/admin/magazin/${id}`}
         instagramHref={(id) => `/admin/instagram/neu?type=article&id=${id}`}
+        newsletterHref={(id) => `/admin/newsletter/neu?type=article&id=${id}`}
         duplicateAction={duplicateArticle}
         deleteAction={deleteArticle}
       />

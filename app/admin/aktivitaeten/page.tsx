@@ -21,6 +21,7 @@ export default async function AdminActivitiesPage() {
         rows={rows}
         editHref={(id) => `/admin/aktivitaeten/${id}`}
         instagramHref={(id) => `/admin/instagram/neu?type=activity&id=${id}`}
+        newsletterHref={(id) => `/admin/newsletter/neu?type=activity&id=${id}`}
         duplicateAction={duplicateActivity}
         deleteAction={deleteActivity}
       />

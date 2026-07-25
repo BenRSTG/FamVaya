@@ -21,6 +21,7 @@ export default async function AdminMicroAdventuresPage() {
         rows={rows}
         editHref={(id) => `/admin/mikro-abenteuer/${id}`}
         instagramHref={(id) => `/admin/instagram/neu?type=micro_adventure&id=${id}`}
+        newsletterHref={(id) => `/admin/newsletter/neu?type=micro_adventure&id=${id}`}
         duplicateAction={duplicateMicroAdventure}
         deleteAction={deleteMicroAdventure}
       />
