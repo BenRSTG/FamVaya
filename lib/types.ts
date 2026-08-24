@@ -155,6 +155,7 @@ export interface Accommodation {
   external_url: string | null;
   status: ContentStatus;
   featured: boolean;
+  personally_tested: boolean;
   family_rating: number | null;
   expires_at: string | null;
   pros: string[];
@@ -191,6 +192,7 @@ export interface Activity {
   external_url: string | null;
   status: ContentStatus;
   featured: boolean;
+  personally_tested: boolean;
   family_rating: number | null;
   expires_at: string | null;
   pros: string[];
@@ -228,6 +230,7 @@ export interface MicroAdventure {
   affiliate_url: string | null;
   status: ContentStatus;
   featured: boolean;
+  personally_tested: boolean;
   family_rating: number | null;
   pros: string[];
   cons: string[];

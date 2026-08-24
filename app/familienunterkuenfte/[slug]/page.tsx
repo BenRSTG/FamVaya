@@ -169,6 +169,7 @@ export default async function AccommodationDetailPage({
         <FamilyCheckSection
           familyRating={accommodation.family_rating}
           maxChildren={accommodation.max_children}
+          personallyTested={accommodation.personally_tested}
         />
       </div>
 

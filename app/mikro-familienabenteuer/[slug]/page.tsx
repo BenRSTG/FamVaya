@@ -171,7 +171,10 @@ export default async function MicroAdventureDetailPage({
       </div>
 
       <div className="mb-8">
-        <FamilyCheckSection familyRating={adventure.family_rating} />
+        <FamilyCheckSection
+          familyRating={adventure.family_rating}
+          personallyTested={adventure.personally_tested}
+        />
       </div>
 
       <RealityCheck pros={adventure.pros} cons={adventure.cons} />

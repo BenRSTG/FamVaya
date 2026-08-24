@@ -1481,3 +1481,22 @@ bleibt für signup/magiclink unverändert (die tragen echte `?code=`-Werte).
 
 Serverseitig in `setNewPassword()` geprüft (Supabase selbst erzwingt nur
 6) — einfache Verbesserung ohne zusätzliches Paket.
+
+## "Persönlich getestet"-Badge (Vorstufe zum Qualitätssiegel)
+
+Neues Boolean-Flag `personally_tested` auf `accommodations`/`activities`/
+`micro_adventures` (Migration `0025`). Admin-Checkbox im jeweiligen
+Formular, Anzeige als Badge + erklärender Satz direkt im bestehenden
+`FamVaya-Familiencheck` (`components/family-check-section.tsx`) statt
+einer zweiten separaten Box — es gibt sonst zwei "Vertrauens-Boxen" auf
+derselben Seite.
+
+Bewusst **kein** Badge auf den Übersichts-Karten (`components/cards/*.tsx`)
+in dieser Iteration: die Karten haben mit dem "Familienfavorit"-Badge
+(`featured`) und `FamilyFitBadge` (`family_rating`) schon zwei Badge-
+Slots, ein dritter würde überladen wirken. Das ist bewusst der erste,
+einfache Schritt — geplant ist ein Ausbau zu einem echten Stufen-
+Qualitätssiegel (Bronze/Silber/Gold), inkl. Card-Badge, eigener
+Landingpage/Filter. Das Flag ist so gewählt, dass es sich ohne
+Schema-Bruch zu einem Text-/Enum-Feld erweitern lässt, sobald die Stufen
+kommen.

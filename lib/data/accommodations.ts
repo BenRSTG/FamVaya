@@ -16,7 +16,7 @@ const LIST_SELECT = `
   id, title, slug, short_description, city,
   max_guests, max_adults, max_children, bedrooms, bathrooms,
   price_from, price_type, currency, example_family_size, example_total_price,
-  status, featured, family_rating,
+  status, featured, personally_tested, family_rating,
   accommodation_type:accommodation_types(id, name, slug),
   country:countries(id, name, code),
   region:regions(id, name, slug)
@@ -27,7 +27,7 @@ const DETAIL_SELECT = `
   max_guests, max_adults, max_children, bedrooms, bathrooms, beds, living_area,
   price_from, price_type, currency, example_family_size, example_total_price,
   example_nights, value_tier, price_checked_at,
-  affiliate_url, external_url, status, featured, family_rating, expires_at,
+  affiliate_url, external_url, status, featured, personally_tested, family_rating, expires_at,
   pros, cons,
   accommodation_type:accommodation_types(id, name, slug),
   country:countries(id, name, code),
@@ -179,6 +179,7 @@ export interface AccommodationInput {
   external_url: string | null;
   status: ContentStatus;
   featured: boolean;
+  personally_tested: boolean;
   family_rating: number | null;
   expires_at: string | null;
   pros: string[];
@@ -208,7 +209,7 @@ const ADMIN_FORM_SELECT = `
   max_guests, max_adults, max_children, bedrooms, bathrooms, beds, living_area,
   price_from, price_type, currency, example_family_size, example_total_price,
   example_nights, value_tier, price_checked_at,
-  affiliate_url, external_url, status, featured, family_rating, expires_at,
+  affiliate_url, external_url, status, featured, personally_tested, family_rating, expires_at,
   pros, cons
 `;
 

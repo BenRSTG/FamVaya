@@ -416,6 +416,19 @@ export function AccommodationForm({
           <input type="checkbox" name="featured" defaultChecked={a?.featured ?? false} className="size-4" />
           Hervorgehoben (Featured)
         </label>
+        <label className="flex items-center gap-2 text-sm text-foreground">
+          <input
+            type="checkbox"
+            name="personally_tested"
+            defaultChecked={a?.personally_tested ?? false}
+            className="size-4"
+          />
+          Von uns persönlich getestet
+        </label>
+        <p className="text-xs text-muted-foreground">
+          Zeigt auf der Detailseite ein Badge — nur aktivieren, wenn das Angebot wirklich selbst
+          getestet wurde.
+        </p>
       </FormSection>
 
       <button

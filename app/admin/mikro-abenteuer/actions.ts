@@ -42,6 +42,7 @@ function parseMicroAdventureInput(formData: FormData): MicroAdventureInput {
     affiliate_url: stringOrNull(formData, "affiliate_url"),
     status: requiredString(formData, "status") as ContentStatus,
     featured: checkboxOn(formData, "featured"),
+    personally_tested: checkboxOn(formData, "personally_tested"),
     family_rating: numberOrNull(formData, "family_rating"),
     pros: semicolonSeparatedList(formData, "pros"),
     cons: semicolonSeparatedList(formData, "cons"),

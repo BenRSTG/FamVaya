@@ -2,6 +2,7 @@ import { CheckCircle2, XCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getFamilyRatingLabel, type FamilyRatingTier } from "@/lib/family-rating";
 import { getChildSuitability } from "@/lib/family-check";
+import { PersonallyTestedBadge } from "@/components/personally-tested-badge";
 
 const TIER_CLASSES: Record<FamilyRatingTier, string> = {
   excellent: "bg-success/15 text-success",
@@ -14,11 +15,13 @@ const TIER_CLASSES: Record<FamilyRatingTier, string> = {
 export function FamilyCheckSection({
   familyRating,
   maxChildren,
+  personallyTested,
 }: {
   familyRating: number | null;
   maxChildren?: number | null;
+  personallyTested?: boolean;
 }) {
-  if (familyRating == null && maxChildren === undefined) return null;
+  if (familyRating == null && maxChildren === undefined && !personallyTested) return null;
 
   const ratingInfo = familyRating != null ? getFamilyRatingLabel(familyRating) : null;
   const suitability =
@@ -26,9 +29,20 @@ export function FamilyCheckSection({
 
   return (
     <section className="rounded-2xl border border-border bg-card p-6">
-      <h2 className="mb-4 text-lg font-semibold text-foreground">
-        FamVaya-Familiencheck
-      </h2>
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+        <h2 className="text-lg font-semibold text-foreground">
+          FamVaya-Familiencheck
+        </h2>
+        {personallyTested && <PersonallyTestedBadge />}
+      </div>
+
+      {personallyTested && (
+        <p className="mb-4 text-sm text-foreground">
+          <strong>Von unserem Team persönlich getestet</strong> — wir haben
+          dieses Angebot selbst geprüft und für Familien mit 3 oder mehr
+          Kindern für sehr gut befunden.
+        </p>
+      )}
 
       {ratingInfo && (
         <div className="mb-4 flex flex-wrap items-center gap-3">

@@ -46,6 +46,7 @@ async function parseActivityInput(formData: FormData): Promise<ActivityInput> {
     external_url: stringOrNull(formData, "external_url"),
     status: requiredString(formData, "status") as ContentStatus,
     featured: checkboxOn(formData, "featured"),
+    personally_tested: checkboxOn(formData, "personally_tested"),
     family_rating: numberOrNull(formData, "family_rating"),
     expires_at: dateOrNull(formData, "expires_at"),
     pros: semicolonSeparatedList(formData, "pros"),

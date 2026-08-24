@@ -164,7 +164,10 @@ export default async function ActivityDetailPage({
       </div>
 
       <div className="mb-8">
-        <FamilyCheckSection familyRating={activity.family_rating} />
+        <FamilyCheckSection
+          familyRating={activity.family_rating}
+          personallyTested={activity.personally_tested}
+        />
       </div>
 
       <RealityCheck pros={activity.pros} cons={activity.cons} />
