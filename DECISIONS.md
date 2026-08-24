@@ -1463,6 +1463,20 @@ nicht selbst beheben können. Bekannte Einschränkung: Bis Resend als
 SMTP-Anbieter hinterlegt ist (siehe README "Newsletter-Versand
 aktivieren"), kommt die Reset-Mail möglicherweise gar nicht an.
 
+### `/auth/recovery` als Client-Bridge statt `/auth/callback`
+
+Recovery-Links (sowohl von `resetPasswordForEmail()` als auch von
+Admin-API-Support-Skripten via `generateLink({type: "recovery"})`) tragen
+die Session als URL-Fragment (`#access_token=...`), nicht als `?code=`
+wie signup/magiclink — ein Fragment wird nie an den Server geschickt,
+`/auth/callback` (ein Route Handler) kann es also nicht lesen. Deshalb
+gibt es `app/auth/recovery/page.tsx`, eine kleine Client-Seite, die den
+Supabase-Browser-Client das Fragment automatisch verarbeiten lässt
+(`detectSessionInUrl`, Default true) und die Session per `@supabase/ssr`
+in die Cookies schreibt, bevor sie zu `/konto/passwort-setzen`
+weiterleitet, wo `requireUser()` sie serverseitig sieht. `/auth/callback`
+bleibt für signup/magiclink unverändert (die tragen echte `?code=`-Werte).
+
 ### Passwort-Mindestlänge 8 Zeichen
 
 Serverseitig in `setNewPassword()` geprüft (Supabase selbst erzwingt nur
