@@ -250,7 +250,7 @@ export default async function ActivityDetailPage({
             <ExternalLink aria-hidden />
           </Button>
         ) : (
-          <Button size="lg" disabled title="Demo-Eintrag, noch kein Anbieter verlinkt">
+          <Button size="lg" disabled title="Noch kein Anbieter verlinkt">
             Preis &amp; Verfügbarkeit beim Anbieter prüfen
             <ExternalLink aria-hidden />
           </Button>
@@ -258,7 +258,7 @@ export default async function ActivityDetailPage({
         <p className="text-xs text-muted-foreground">
           {goUrl
             ? "Einige Links sind Affiliate-Links. Wenn ihr darüber bucht oder kauft, erhält FamVaya möglicherweise eine Provision. Für euch entstehen keine zusätzlichen Kosten."
-            : "Demo-Eintrag: Für dieses Beispiel ist noch kein echter Anbieter hinterlegt."}
+            : "Für dieses Angebot ist noch kein Buchungslink hinterlegt."}
         </p>
       </div>
     </div>
