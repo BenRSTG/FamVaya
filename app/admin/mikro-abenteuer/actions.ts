@@ -12,7 +12,7 @@ import {
 } from "@/lib/data/micro-adventures";
 import { replaceContentAgeGroups, replaceContentTags } from "@/lib/data/shared";
 import { setCoverImage, uploadMediaFile } from "@/lib/data/media";
-import { checkboxOn, commaSeparatedList, dateOrNull, numberOrNull, requiredString, stringList, stringOrNull } from "@/lib/form-utils";
+import { checkboxOn, commaSeparatedList, dateOrNull, numberOrNull, requiredString, semicolonSeparatedList, stringList, stringOrNull } from "@/lib/form-utils";
 import type { ContentStatus } from "@/lib/types";
 
 function parseMicroAdventureInput(formData: FormData): MicroAdventureInput {
@@ -43,8 +43,8 @@ function parseMicroAdventureInput(formData: FormData): MicroAdventureInput {
     status: requiredString(formData, "status") as ContentStatus,
     featured: checkboxOn(formData, "featured"),
     family_rating: numberOrNull(formData, "family_rating"),
-    pros: commaSeparatedList(formData, "pros"),
-    cons: commaSeparatedList(formData, "cons"),
+    pros: semicolonSeparatedList(formData, "pros"),
+    cons: semicolonSeparatedList(formData, "cons"),
   };
 }
 

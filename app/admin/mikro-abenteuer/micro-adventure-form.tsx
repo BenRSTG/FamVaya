@@ -217,26 +217,26 @@ export function MicroAdventureForm({
         <FormField
           label="Das spricht dafür"
           htmlFor="pros"
-          hint="kommagetrennt, z. B. „Kostenlos, in 10 Minuten startklar“"
+          hint="mit Semikolon getrennt, z. B. „Kostenlos; in 10 Minuten startklar“"
         >
           <textarea
             id="pros"
             name="pros"
             rows={2}
-            defaultValue={m?.pros.join(", ") ?? ""}
+            defaultValue={m?.pros.join("; ") ?? ""}
             className={filterInputClass + " h-auto py-2"}
           />
         </FormField>
         <FormField
           label="Das solltet ihr wissen"
           htmlFor="cons"
-          hint="kommagetrennt, z. B. „Nur bei trockenem Wetter geeignet“"
+          hint="mit Semikolon getrennt, z. B. „Nur bei trockenem Wetter geeignet“"
         >
           <textarea
             id="cons"
             name="cons"
             rows={2}
-            defaultValue={m?.cons.join(", ") ?? ""}
+            defaultValue={m?.cons.join("; ") ?? ""}
             className={filterInputClass + " h-auto py-2"}
           />
         </FormField>

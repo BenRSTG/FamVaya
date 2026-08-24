@@ -7,6 +7,7 @@ import {
   dateOrNull,
   stringList,
   commaSeparatedList,
+  semicolonSeparatedList,
 } from "./form-utils";
 
 function formData(entries: Record<string, string | string[]>): FormData {
@@ -91,5 +92,20 @@ describe("commaSeparatedList", () => {
 
   it("returns an empty array when the field is missing", () => {
     expect(commaSeparatedList(formData({}), "materials")).toEqual([]);
+  });
+});
+
+describe("semicolonSeparatedList", () => {
+  it("splits, trims and drops empty entries, keeping commas within a point", () => {
+    expect(
+      semicolonSeparatedList(
+        formData({ pros: "Viel Platz, Garten;  Nähe zum Strand ;;Kostenlos" }),
+        "pros"
+      )
+    ).toEqual(["Viel Platz, Garten", "Nähe zum Strand", "Kostenlos"]);
+  });
+
+  it("returns an empty array when the field is missing", () => {
+    expect(semicolonSeparatedList(formData({}), "pros")).toEqual([]);
   });
 });

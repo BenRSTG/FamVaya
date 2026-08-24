@@ -33,11 +33,24 @@ export function stringList(formData: FormData, key: string): string[] {
 }
 
 // Für text[]-Spalten, die im Formular als ein kommagetrenntes Textfeld
-// gepflegt werden (z. B. materials/seasonal_tags/weather_tags).
+// gepflegt werden (z. B. materials/seasonal_tags/weather_tags) — kurze
+// Stichwörter, in denen ein Komma nie Teil des Werts selbst ist.
 export function commaSeparatedList(formData: FormData, key: string): string[] {
   const raw = String(formData.get(key) ?? "");
   return raw
     .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
+// Für text[]-Spalten mit ganzen Sätzen (Reality-Check pros/cons) — Komma
+// wäre hier als Trenner ungeeignet, da Kommas auch innerhalb eines Punkts
+// vorkommen (z. B. "Bei Starkregen nicht empfehlenswert, Wege können
+// rutschig werden").
+export function semicolonSeparatedList(formData: FormData, key: string): string[] {
+  const raw = String(formData.get(key) ?? "");
+  return raw
+    .split(";")
     .map((s) => s.trim())
     .filter(Boolean);
 }

@@ -258,26 +258,26 @@ export function ActivityForm({
         <FormField
           label="Das spricht dafür"
           htmlFor="pros"
-          hint="kommagetrennt, z. B. „Kinderwagenfreundlich, Familienrabatt“"
+          hint="mit Semikolon getrennt, z. B. „Kinderwagenfreundlich; Familienrabatt“"
         >
           <textarea
             id="pros"
             name="pros"
             rows={2}
-            defaultValue={a?.pros.join(", ") ?? ""}
+            defaultValue={a?.pros.join("; ") ?? ""}
             className={filterInputClass + " h-auto py-2"}
           />
         </FormField>
         <FormField
           label="Das solltet ihr wissen"
           htmlFor="cons"
-          hint="kommagetrennt, z. B. „Lange Wartezeiten am Wochenende“"
+          hint="mit Semikolon getrennt, z. B. „Lange Wartezeiten am Wochenende“"
         >
           <textarea
             id="cons"
             name="cons"
             rows={2}
-            defaultValue={a?.cons.join(", ") ?? ""}
+            defaultValue={a?.cons.join("; ") ?? ""}
             className={filterInputClass + " h-auto py-2"}
           />
         </FormField>
