@@ -52,6 +52,9 @@ export default async function LoginPage({
           Passwort
           <input type="password" name="password" required className={filterInputClass} />
         </label>
+        <Link href="/passwort-vergessen" className="text-sm text-primary underline">
+          Passwort vergessen?
+        </Link>
         <Button type="submit">Mit Passwort anmelden</Button>
       </form>
 

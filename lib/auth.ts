@@ -38,9 +38,13 @@ export async function requireAdminOrEditor(next?: string): Promise<User> {
   const supabase = await createClient();
   const { data: profile } = await supabase
     .from("users")
-    .select("role")
+    .select("role, must_change_password")
     .eq("id", user.id)
     .maybeSingle();
+
+  if (profile?.must_change_password) {
+    redirect(`/konto/passwort-setzen?forced=1&next=${encodeURIComponent(next ?? "/admin")}`);
+  }
 
   if (!canAccessAdmin(profile?.role)) {
     redirect("/");
@@ -74,9 +78,13 @@ export async function requireAdmin(next?: string): Promise<User> {
   const supabase = await createClient();
   const { data: profile } = await supabase
     .from("users")
-    .select("role")
+    .select("role, must_change_password")
     .eq("id", user.id)
     .maybeSingle();
+
+  if (profile?.must_change_password) {
+    redirect(`/konto/passwort-setzen?forced=1&next=${encodeURIComponent(next ?? "/admin")}`);
+  }
 
   if (!isAdmin(profile?.role)) {
     redirect("/");

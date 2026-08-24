@@ -4,7 +4,7 @@ Inspirations- und Empfehlungsplattform für Familienreisen mit dem Fokus
 „Large Families First" — Familien mit drei oder mehr Kindern. Die vollständige
 Produktspezifikation liegt unter [`files/spec.md`](files/spec.md).
 
-**Aktueller Stand: Phase 0–6 von [`FamVaya_Bauplan_2.md`](FamVaya_Bauplan_2.md) abgeschlossen, plus Phase 7–14 (eigene Vision-Roadmap, siehe unten).**
+**Aktueller Stand: Phase 0–6 von [`FamVaya_Bauplan_2.md`](FamVaya_Bauplan_2.md) abgeschlossen, plus Phase 7–15 (eigene Vision-Roadmap, siehe unten).**
 Alle vier Hauptbereiche (Unterkünfte, Aktivitäten, Mikro-Abenteuer, Magazin)
 sind durchsuchbar, filterbar, paginiert und verlinkt; dazu gibt es echte
 Supabase-Auth (E-Mail/Passwort + Magic Link), ein Familienprofil, eine
@@ -63,7 +63,7 @@ Next.js 16 (App Router) · TypeScript · React 19 · Tailwind CSS v4 · shadcn/u
 (Base UI) · Supabase (Postgres, Auth, Storage, `pg_trgm` Volltextsuche) ·
 Vitest · Lucide Icons · Vercel Analytics.
 
-## Funktionsumfang (Phase 0–14)
+## Funktionsumfang (Phase 0–15)
 
 - **Startseite** (`/`): Hero, Schneller Familien-Check, drei Welt-Karten,
   „Empfohlene Inhalte", FamVaya-Versprechen, Newsletter-Anmeldung.
@@ -137,6 +137,13 @@ Vitest · Lucide Icons · Vercel Analytics.
   inkl. Abmelde-Link. Versand über Resend vorbereitet, aber inaktiv, bis
   ein Zugang eingerichtet ist (siehe „Newsletter-Versand aktivieren"
   unten) — bis dahin bleiben Kampagnen als Entwurf erstellbar.
+- **Passwort-Reset & Admin-Einladung** (Phase 15): Self-Service
+  "Passwort vergessen" (`/passwort-vergessen`) für alle Nutzer:innen,
+  gemeinsame Seite `/konto/passwort-setzen` zum Festlegen eines neuen
+  Passworts (freiwillig, nach Recovery-Link oder erzwungen). Im
+  Admin-Bereich (`/admin/nutzer`, nur `admin`) können neue Nutzer:innen
+  direkt mit einem angezeigten Einmalpasswort angelegt werden, das nach
+  der ersten Anmeldung zwingend geändert werden muss.
 - Responsive Navigation mit Such-, Merkliste- und Konto-Link, mobilem Menü,
   sticky Header, Footer mit Newsletter-Anmeldung.
 - **Admin-Bereich** (`/admin`, geschützt für Rollen `admin`/`editor`):
@@ -349,7 +356,7 @@ Supabase-Projekt. So wurde/wird das eingerichtet:
 > separate Dev-Projekt wurde pausiert, um den kostenlosen Projektplatz für
 > ein anderes Vorhaben freizugeben (siehe `DECISIONS.md`, Phase 7).
 > `npm run dev` funktioniert daher lokal erst wieder mit einem neuen
-> Dev-Projekt (neues Projekt anlegen, Migrationen 0001–0023 + `seed.sql`
+> Dev-Projekt (neues Projekt anlegen, Migrationen 0001–0024 + `seed.sql`
 > ausführen, `.env.local` aktualisieren).
 
 ### Platzhalterfotos hochladen
@@ -453,9 +460,11 @@ app/
   lass-dich-inspirieren/            Finder-Wizard + Server Action (actions.ts)
   go/[contentType]/[contentId]/     Affiliate-Redirect-Route (Klick-Logging)
   anmelden/, registrieren/          Auth-Seiten
-  auth/callback/                    Magic-Link-/Bestätigungs-Callback
-  auth/actions.ts                   Auth-Server-Actions (Sign-in/up/out)
+  passwort-vergessen/               Self-Service Passwort-Reset anfordern (Phase 15)
+  auth/callback/                    Magic-Link-/Bestätigungs-/Recovery-Callback
+  auth/actions.ts                   Auth-Server-Actions (Sign-in/up/out, Passwort-Reset, Phase 15)
   konto/                            Familienprofil (geschützt) + Server Action
+  konto/passwort-setzen/            Neues Passwort setzen (freiwillig/erzwungen, Phase 15)
   merkliste/                        Merkliste (geschützt) + Freigabe-Seite (öffentlich)
   magazin/                          Magazin-Übersicht (Kategoriefilter, Pagination) + [slug]-Detailseite
   impressum/, datenschutz/          Rechts-Platzhalterseiten (nicht indexiert)
@@ -468,7 +477,7 @@ app/
   admin/mikro-abenteuer/, magazin/,
   admin/anbieter/                   CRUD je Content-Typ: page.tsx (Liste), neu/, [id]/,
                                      *-form.tsx (Formular), actions.ts (Server Actions)
-  admin/nutzer/                     Nutzerliste + Rollenänderung (nur requireAdmin())
+  admin/nutzer/                     Nutzerliste + Rollenänderung + Einladung mit Einmalpasswort (nur requireAdmin(), Phase 15)
   admin/instagram/                   Instagram-Post-Generator: page.tsx (Übersicht), neu/
                                       (Generieren), [id]/ (Vorschau/Bearbeiten/Publish), actions.ts (Phase 11)
   admin/reporting/                   Übersicht, traffic/, content/, funnel/, zero-result/
@@ -544,7 +553,7 @@ lib/
   types.ts                          Handgeschriebene DB-Typen
 proxy.ts                            Session-Refresh (Next.js 16 "Proxy", vormals Middleware)
 public/brand/                       FamVaya-Logo (SVG, Originalfarben)
-supabase/migrations/                SQL-Migrationen (0001-0023, in Reihenfolge ausführen)
+supabase/migrations/                SQL-Migrationen (0001-0024, in Reihenfolge ausführen)
 supabase/seed.sql                   Demo-Seed-Daten (Spec-§29-Mindestmengen)
 files/                              Produktspezifikation (spec.md) und Phase-0-Kickoff-Prompt
 FamVaya_Bauplan_2.md                Verbindliche Phasen-Roadmap (Phase 0-6)

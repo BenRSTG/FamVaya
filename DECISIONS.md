@@ -1416,3 +1416,54 @@ eingebaut, damit die Anmeldung von jeder Seite aus möglich ist. Bewusst
 kein Popup/Exit-Intent-Overlay (keine aufdringlichen Dark Patterns),
 sondern einfach deutlich breitere, dezente Platzierung plus kurzer
 Anreiz-Text ("Neue Angebote zuerst erfahren").
+
+## Phase 15: Passwort-Reset + Admin-Einladung mit Pflicht-Passwortwechsel
+
+Auslöser: Ein Admin-Login funktionierte nicht mehr, und es gab keine Seite,
+die einen Passwort-Reset tatsächlich zu Ende führt — nur `/auth/callback`
+(tauscht `?code=` gegen eine Session), aber keine Seite danach, um ein
+neues Passwort zu setzen.
+
+### `must_change_password`-Flag nur für admin-angelegte Accounts
+
+Selbst-Registrierte (`/registrieren`) haben die Flagge nie gesetzt
+(Trigger-Default `false`), da sie ihr Passwort selbst gewählt haben. Die
+Durchsetzung sitzt deshalb gezielt in `requireAdminOrEditor()`/
+`requireAdmin()` (`lib/auth.ts`) statt in `requireUser()` — kein
+zusätzlicher DB-Roundtrip auf jeder öffentlichen `/konto`-/`/merkliste`-
+Seite für eine Fallgruppe, die es dort nicht geben kann.
+
+### Ein gemeinsames "neues Passwort setzen"-UI für alle drei Fälle
+
+`app/konto/passwort-setzen/page.tsx` + `setNewPassword()` bedienen
+freiwillige Änderung im Konto, erzwungene Änderung nach Admin-Einladung
+und den Abschluss eines Recovery-Links gleichermaßen — alle drei brauchen
+nur eine gültige Session + `auth.updateUser({password})`, kein Sonderfall
+im Code nötig.
+
+### Einmalpasswort wird im Admin-UI angezeigt, nicht per E-Mail verschickt
+
+Konsistent mit der bereits etablierten "vorbereitet, aber inaktiv"-Haltung
+zu E-Mail-Versand in diesem Projekt (Resend/Instagram) und dem in dieser
+Phase erlebten Rate-Limit-Problem des eingebauten Supabase-Mailversands:
+zuverlässiger Versand ist ohne eigenes SMTP nicht gegeben. Die Anzeige
+läuft über einen Redirect-Query-Param (`?tempPassword=&tempEmail=`),
+analog zum bestehenden `?magicLinkSent=`/`?newsletter=`-Muster — die
+Admin-Person gibt das Passwort dann persönlich/über einen anderen Kanal
+weiter.
+
+### `requestPasswordReset()` meldet immer Erfolg
+
+`supabase.auth.resetPasswordForEmail()` nutzt denselben rate-limitierten
+eingebauten Mailversand wie oben — Fehler daraus (inkl. Rate-Limit) werden
+bewusst wie ein Erfolg behandelt und führen zur selben
+"prüfe dein Postfach"-Meldung. Das verhindert zusätzlich User-Enumeration
+und vermeidet eine Fehlermeldung für ein Problem, das Nutzer:innen eh
+nicht selbst beheben können. Bekannte Einschränkung: Bis Resend als
+SMTP-Anbieter hinterlegt ist (siehe README "Newsletter-Versand
+aktivieren"), kommt die Reset-Mail möglicherweise gar nicht an.
+
+### Passwort-Mindestlänge 8 Zeichen
+
+Serverseitig in `setNewPassword()` geprüft (Supabase selbst erzwingt nur
+6) — einfache Verbesserung ohne zusätzliches Paket.
