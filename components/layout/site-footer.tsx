@@ -23,6 +23,9 @@ export function SiteFooter() {
           Abenteuer für die ganze Familie. Wirklich die ganze.
         </p>
         <nav className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+          <Link href="/kooperationen" className="underline-offset-2 hover:underline">
+            Kooperationen
+          </Link>
           <Link href="/impressum" className="underline-offset-2 hover:underline">
             Impressum
           </Link>
