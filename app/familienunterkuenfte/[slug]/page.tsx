@@ -6,10 +6,12 @@ import { Button } from "@/components/ui/button";
 import { PlaceholderImage } from "@/components/placeholder-image";
 import { FamilyCheckSection } from "@/components/family-check-section";
 import { RealityCheck } from "@/components/reality-check";
+import { ProviderSpotlightSection } from "@/components/provider-spotlight-section";
 import { FavoriteButton } from "@/components/favorite-button";
 import { ListingViewTracker } from "@/components/listing-view-tracker";
 import { CtaTrackLink } from "@/components/cta-track-link";
 import { getAccommodationBySlug } from "@/lib/data/accommodations";
+import { getProviderGallery } from "@/lib/data/providers";
 import { isFavorited } from "@/lib/data/favorites";
 import { canPreview, getOptionalUser } from "@/lib/auth";
 import { PreviewBanner } from "@/components/admin/preview-banner";
@@ -82,6 +84,9 @@ export default async function AccommodationDetailPage({
   const isExpired = accommodation.expires_at != null && new Date(accommodation.expires_at) < new Date();
   const ctaUrl = accommodation.affiliate_url ?? accommodation.external_url;
   const goUrl = ctaUrl && !isExpired ? `/go/accommodation/${accommodation.id}` : null;
+  const providerGallery = accommodation.provider
+    ? await getProviderGallery(accommodation.provider.id)
+    : [];
 
   const breadcrumbItems = [
     { label: "Startseite", href: "/" },
@@ -282,6 +287,10 @@ export default async function AccommodationDetailPage({
             ? "Einige Links sind Affiliate-Links. Wenn ihr darüber bucht oder kauft, erhält FamVaya möglicherweise eine Provision. Für euch entstehen keine zusätzlichen Kosten."
             : "Für dieses Angebot ist noch kein Buchungslink hinterlegt."}
         </p>
+      </div>
+
+      <div className="mt-8">
+        <ProviderSpotlightSection provider={accommodation.provider} gallery={providerGallery} />
       </div>
     </div>
   );

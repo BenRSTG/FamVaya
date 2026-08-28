@@ -1,12 +1,14 @@
 import { filterInputClass } from "@/components/filter-field";
 import { FormField, FormSection } from "@/components/admin/form-field";
-import type { Provider } from "@/lib/types";
+import { MediaPicker } from "@/components/admin/media-picker";
+import { GalleryPicker } from "@/components/admin/gallery-picker";
+import type { ProviderFormData } from "@/lib/data/providers";
 
 export function ProviderForm({
   provider,
   action,
 }: {
-  provider: Provider | null;
+  provider: ProviderFormData | null;
   action: (formData: FormData) => void | Promise<void>;
 }) {
   const p = provider;
@@ -24,7 +26,11 @@ export function ProviderForm({
             <input id="slug" name="slug" required defaultValue={p?.slug ?? ""} className={filterInputClass} />
           </FormField>
         </div>
-        <FormField label="Beschreibung" htmlFor="description">
+        <FormField
+          label="Beschreibung"
+          htmlFor="description"
+          hint="Erscheint als „Über {Anbieter}“-Abschnitt auf verknüpften Detailseiten — bleibt unsichtbar, solange dieses Feld leer ist."
+        >
           <textarea
             id="description"
             name="description"
@@ -62,6 +68,17 @@ export function ProviderForm({
             </select>
           </FormField>
         </div>
+      </FormSection>
+
+      <FormSection title="Anbieter-Vorstellung (öffentlich sichtbar)">
+        <MediaPicker
+          currentImageUrl={p?.logo?.storage_path}
+          currentAltText={p?.logo?.alt_text}
+          name="logo"
+          altName="logo_alt"
+          label="Logo"
+        />
+        <GalleryPicker images={p?.gallery ?? []} />
       </FormSection>
 
       <button

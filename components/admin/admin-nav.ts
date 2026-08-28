@@ -5,6 +5,7 @@ export const ADMIN_NAV_ITEMS = [
   { href: "/admin/mikro-abenteuer", label: "Mikro-Familienabenteuer" },
   { href: "/admin/magazin", label: "Magazin" },
   { href: "/admin/anbieter", label: "Anbieter" },
+  { href: "/admin/spotlights", label: "Spotlights" },
   { href: "/admin/nutzer", label: "Nutzer" },
   { href: "/admin/reporting", label: "Reporting" },
   { href: "/admin/instagram", label: "Instagram" },

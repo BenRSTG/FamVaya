@@ -1500,3 +1500,73 @@ Qualitätssiegel (Bronze/Silber/Gold), inkl. Card-Badge, eigener
 Landingpage/Filter. Das Flag ist so gewählt, dass es sich ohne
 Schema-Bruch zu einem Text-/Enum-Feld erweitern lässt, sobald die Stufen
 kommen.
+
+(Nachtrag: Der Card-Badge wurde in einer Folgeänderung doch ergänzt —
+prominent unten links, ein bislang ungenutzter Slot bei allen drei
+Karten-Typen. Siehe Commit-Historie.)
+
+## Anbieter-Vorstellung + Homepage-Spotlights
+
+Zwei zusammenhängende Wünsche: (A) Anbieter mit Bildern + Kurztext auf
+verknüpften Detailseiten vorstellen, (B) im Admin ein-/ausschaltbare
+Werbeflächen auf der Startseite für bezahlte Partnerschaften.
+
+### Eigene `provider_media`-Tabelle statt Enum-Erweiterung
+
+Der `content_type`-Enum (Migration `0001`/`0007`) ist bewusst 3-wertig
+(`accommodation`/`activity`/`micro_adventure`) und hart verdrahtet in
+`outbound_clicks` sowie dem polymorphen `content_media`. Ihn für
+`provider` zu erweitern wäre ein Bruch mit dem etablierten Muster —
+Artikel/Instagram/Newsletter nutzen bereits eigene, lose
+`text check(...)`-Spalten statt den Enum anzufassen (`0020`/`0023`).
+Migration `0026` legt deshalb eine eigene `provider_media`-Tabelle an
+(`provider_id`, `media_id`, `sort_order`) plus `providers.logo_media_id`.
+
+### Provider-Beschreibung bestimmt Sichtbarkeit
+
+`providers.description` existierte bereits (Migration `0002`), war aber
+öffentlich nirgends sichtbar. `components/provider-spotlight-section.tsx`
+rendert `null`, solange `description` leer ist — gleiches Prinzip wie
+`RealityCheck`/`FamilyCheckSection`: lieber ausblenden als eine
+halbfertige Box zeigen. Gilt nur für Unterkünfte/Aktivitäten (haben
+`provider_id`); Mikro-Abenteuer sind DIY-Content ohne Anbieter-Bezug.
+
+### Spotlight-Klicks über `cta_clicked`, nicht über `/go/`
+
+Die bestehende `/go/[contentType]/[contentId]`-Route ist hart an die
+3 Content-Tabellen gebunden (lädt `affiliate_url`/`external_url` aus
+`accommodations`/`activities`/`micro_adventures`) und passt strukturell
+nicht für eine freie Sponsor-URL, die zu keinem dieser Datensätze gehört.
+Stattdessen wird das bereits vorhandene, nicht enum-gebundene
+`components/cta-track-link.tsx` wiederverwendet (`entityType`/`entityId`
+sind freie Strings) — Spotlight-Klicks fließen mit
+`entityType: "homepage_spotlight"` ins bestehende Funnel-/Reporting-
+System (Phase 13, `lib/data/events.ts`), ohne neuen Tracking-Mechanismus.
+
+### Ein Slot, "oberster aktiver Spotlight gewinnt"
+
+`homepage_spotlights` hat bewusst kein `slot`-Feld — es gibt in v1 nur
+eine Fläche auf der Startseite (direkt nach der "Drei Welten"-Sektion,
+der bestehende Hero mit Foto+Suche bleibt unangetastet). Sind mehrere
+Spotlights gleichzeitig aktiv, wird einfach der mit dem niedrigsten
+`sort_order` angezeigt — die Admin-Oberfläche weist im Formular darauf
+hin. Ein zweiter Slot (z. B. im Hero) ist als spätere Erweiterung denkbar.
+
+### Pflicht-Kennzeichnung nicht deaktivierbar
+
+`is_sponsored = true` erzwingt automatisch das "Anzeige"-Badge
+(`components/sponsored-badge.tsx`) auf der Fläche — das ist keine
+gestalterische Option, sondern eine rechtliche Kennzeichnungspflicht bei
+bezahlten Partnerschaften, deshalb keine Möglichkeit, es separat
+auszublenden. Externe, gesponserte Links bekommen zusätzlich
+`rel="sponsored"` (SEO-Standard für bezahlte Links).
+
+### Ziel-Auswahl über ein Dropdown statt Freitext
+
+Um tote interne Links zu vermeiden, wählt das Admin-Formular das
+Link-Ziel aus einem einzigen `<select>` mit allen veröffentlichten
+Unterkünften/Aktivitäten/Mikro-Abenteuern (`value="{contentType}:{id}"`,
+serverseitig aufgeteilt) statt zwei/drei getrennter, dynamisch
+ein-/ausblendbarer Dropdowns — vermeidet Client-JS für ein
+Zeig-nur-bei-Bedarf-Verhalten, konsistent mit dem übrigen
+Admin-Formular-Stil (progressive enhancement ohne JS).

@@ -163,6 +163,7 @@ export interface Accommodation {
   accommodation_type: AccommodationType | null;
   country: Country | null;
   region: Region | null;
+  provider: ProviderPublic | null;
   amenities: Amenity[];
   age_groups: AgeGroup[];
   tags: Tag[];
@@ -200,6 +201,7 @@ export interface Activity {
   category: { id: string; name: string; slug: string } | null;
   country: Country | null;
   region: Region | null;
+  provider: ProviderPublic | null;
   features: ActivityFeature[];
   age_groups: AgeGroup[];
   tags: Tag[];
@@ -307,6 +309,45 @@ export interface Provider {
   affiliate_network: string | null;
   contact_email: string | null;
   status: "active" | "inactive" | "pending";
+  logo_media_id: string | null;
+}
+
+// Öffentlich eingebettet auf Unterkunfts-/Aktivitäten-Detailseiten
+// (lib/data/accommodations.ts/activities.ts#DETAIL_SELECT) — bewusst
+// schlanker als der volle admin-seitige Provider-Typ.
+export interface ProviderPublic {
+  id: string;
+  name: string;
+  description: string | null;
+  logo: { id: string; storage_path: string; alt_text: string | null } | null;
+}
+
+export interface ProviderGalleryImage {
+  id: string;
+  storage_path: string;
+  alt_text: string | null;
+}
+
+export interface HomepageSpotlight {
+  id: string;
+  title: string;
+  body_text: string;
+  image: { storage_path: string; alt_text: string | null };
+  link_type: "internal" | "external";
+  content_type: ContentType | null;
+  content_id: string | null;
+  external_url: string | null;
+  is_active: boolean;
+  is_sponsored: boolean;
+  starts_at: string | null;
+  ends_at: string | null;
+  sort_order: number;
+}
+
+// Angereichert mit dem aufgelösten Ziel-Link für die Startseite
+// (lib/data/spotlights.ts#getActiveHomepageSpotlight).
+export interface ResolvedHomepageSpotlight extends HomepageSpotlight {
+  href: string;
 }
 
 // Region-Dropdowns im Admin sind flach (Land + Region in einem Feld) statt

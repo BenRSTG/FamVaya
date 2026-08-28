@@ -8,10 +8,12 @@ import { ActivityCard } from "@/components/cards/activity-card";
 import { MicroAdventureCard } from "@/components/cards/micro-adventure-card";
 import { ArticleCard } from "@/components/cards/article-card";
 import { NewsletterSignupForm } from "@/components/newsletter-signup-form";
+import { HomepageSpotlight } from "@/components/homepage-spotlight";
 import { getFeaturedAccommodations } from "@/lib/data/accommodations";
 import { getFeaturedActivities } from "@/lib/data/activities";
 import { getFeaturedMicroAdventures } from "@/lib/data/micro-adventures";
 import { getFeaturedArticles } from "@/lib/data/articles";
+import { getActiveHomepageSpotlight } from "@/lib/data/spotlights";
 import { toStringParam, type SearchParams } from "@/lib/search-params";
 
 const WORLDS = [
@@ -62,11 +64,12 @@ export default async function Home({
   const params = await searchParams;
   const newsletterStatus = toStringParam(params.newsletter);
 
-  const [accommodations, activities, microAdventures, articles] = await Promise.all([
+  const [accommodations, activities, microAdventures, articles, spotlight] = await Promise.all([
     getFeaturedAccommodations(3),
     getFeaturedActivities(3),
     getFeaturedMicroAdventures(3),
     getFeaturedArticles(3),
+    getActiveHomepageSpotlight(),
   ]);
 
   return (
@@ -156,6 +159,8 @@ export default async function Home({
           ))}
         </div>
       </section>
+
+      {spotlight && <HomepageSpotlight spotlight={spotlight} />}
 
       {/* Empfohlene Inhalte */}
       {accommodations.length > 0 && (

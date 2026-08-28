@@ -144,6 +144,16 @@ Vitest · Lucide Icons · Vercel Analytics.
   Admin-Bereich (`/admin/nutzer`, nur `admin`) können neue Nutzer:innen
   direkt mit einem angezeigten Einmalpasswort angelegt werden, das nach
   der ersten Anmeldung zwingend geändert werden muss.
+- **Anbieter-Vorstellung**: Anbieter können im Admin (`/admin/anbieter`)
+  mit Logo, Bildergalerie und Kurzbeschreibung gepflegt werden — erscheint
+  als "Über {Anbieter}"-Abschnitt am Ende verknüpfter Unterkunfts-/
+  Aktivitäten-Detailseiten, bleibt unsichtbar ohne gepflegte Beschreibung.
+- **Homepage-Spotlights** (`/admin/spotlights`, nur `admin`/`editor`):
+  ein-/ausschaltbare Werbefläche auf der Startseite (nach der
+  "Drei Welten"-Sektion) für besonders beworbene Partner/Angebote, intern
+  oder extern verlinkbar, mit optionalem Zeitraum. Bei bezahlten
+  Partnerschaften erzwingt `is_sponsored` eine nicht deaktivierbare
+  "Anzeige"-Kennzeichnung.
 - Responsive Navigation mit Such-, Merkliste- und Konto-Link, mobilem Menü,
   sticky Header, Footer mit Newsletter-Anmeldung.
 - **Admin-Bereich** (`/admin`, geschützt für Rollen `admin`/`editor`):
@@ -356,7 +366,7 @@ Supabase-Projekt. So wurde/wird das eingerichtet:
 > separate Dev-Projekt wurde pausiert, um den kostenlosen Projektplatz für
 > ein anderes Vorhaben freizugeben (siehe `DECISIONS.md`, Phase 7).
 > `npm run dev` funktioniert daher lokal erst wieder mit einem neuen
-> Dev-Projekt (neues Projekt anlegen, Migrationen 0001–0025 + `seed.sql`
+> Dev-Projekt (neues Projekt anlegen, Migrationen 0001–0027 + `seed.sql`
 > ausführen, `.env.local` aktualisieren).
 
 ### Platzhalterfotos hochladen
@@ -485,6 +495,8 @@ app/
   admin/newsletter/                  Kampagnen-Liste, neu/ (frei oder aus Inserat), [id]/
                                       (Vorschau/Bearbeiten/Versand), actions.ts (Phase 14)
   newsletter/abmelden/[token]/       Öffentliche Abmelde-Seite (kein Login, Phase 14)
+  admin/spotlights/                  Homepage-Spotlights: page.tsx (Liste mit Inline-Toggle),
+                                      neu/, [id]/, spotlight-form.tsx, actions.ts
   api/events/                        Öffentlicher Route Handler für alle first-party
                                       Client-Events (page_view, matcher_submit, listing_viewed,
                                       cta_clicked, favorite_added) — Phase 13
@@ -496,8 +508,10 @@ components/
                                      compare-tray.tsx (globale Bottom-Bar, Phase 8)
   ui/                                shadcn/ui-Komponenten
   admin/                            Geteilte Admin-UI: content-table.tsx, status-badge.tsx,
-                                     status-select.tsx, checkbox-group.tsx, media-picker.tsx,
-                                     form-field.tsx, preview-banner.tsx, reporting-tabs.tsx
+                                     status-select.tsx, checkbox-group.tsx, media-picker.tsx
+                                     (name/altName/label-Props, ein Bild), gallery-picker.tsx
+                                     (mehrere Bilder, Anbieter-Galerie), form-field.tsx,
+                                     preview-banner.tsx, reporting-tabs.tsx
                                      (Reiter + Zeitraum-Filter für /admin/reporting, Phase 13)
   visitor-tracker.tsx               Feuert page_view-Event bei jedem Routenwechsel (Client, Phase 12/13)
   listing-view-tracker.tsx          Feuert listing_viewed-Event auf Detailseiten (Client, Phase 13)
@@ -516,13 +530,18 @@ components/
   personally-tested-badge.tsx       "Persönlich getestet"-Badge, Vorstufe zum geplanten Stufen-Qualitätssiegel
   family-fit-badge.tsx              Kompaktes Family-Fit-Score-Badge (Karten, Phase 7)
   reality-check.tsx                 "Das spricht dafür" / "Das solltet ihr wissen" (Phase 7)
+  provider-spotlight-section.tsx    "Über {Anbieter}"-Abschnitt auf Detailseiten (Logo,
+                                     Galerie, Beschreibung) — unsichtbar ohne Beschreibung
+  homepage-spotlight.tsx            Admin-steuerbare Werbefläche auf der Startseite
+  sponsored-badge.tsx               Nicht deaktivierbare "Anzeige"-Kennzeichnung
   search-result-item.tsx            Schlanke Suchergebnis-Darstellung
   placeholder-image.tsx             Fallback für fehlende Bilder
 lib/
   supabase/                         admin.ts (service_role, Content/Suche) + client.ts/server.ts (Auth, session-gebunden)
   data/                             Datenzugriffs-Schicht je Content-Typ (inkl. articles.ts, öffentlich
                                      + Admin) + search.ts + favorites.ts + shared.ts + admin.ts
-                                     (Dashboard) + media.ts (Upload) + users.ts + providers.ts +
+                                     (Dashboard) + media.ts (Upload) + users.ts + providers.ts
+                                     (inkl. Logo/Galerie) + spotlights.ts (Homepage-Spotlights) +
                                      events.ts (logEvent()/logFilterApplied()/logZeroResultSearch(),
                                      Phase 13) + reporting.ts (Auswertungs-Queries für
                                      /admin/reporting, Phase 13) + newsletter-campaigns.ts
@@ -554,7 +573,7 @@ lib/
   types.ts                          Handgeschriebene DB-Typen
 proxy.ts                            Session-Refresh (Next.js 16 "Proxy", vormals Middleware)
 public/brand/                       FamVaya-Logo (SVG, Originalfarben)
-supabase/migrations/                SQL-Migrationen (0001-0025, in Reihenfolge ausführen)
+supabase/migrations/                SQL-Migrationen (0001-0027, in Reihenfolge ausführen)
 supabase/seed.sql                   Demo-Seed-Daten (Spec-§29-Mindestmengen)
 files/                              Produktspezifikation (spec.md) und Phase-0-Kickoff-Prompt
 FamVaya_Bauplan_2.md                Verbindliche Phasen-Roadmap (Phase 0-6)

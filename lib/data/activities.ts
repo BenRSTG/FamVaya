@@ -33,7 +33,8 @@ const DETAIL_SELECT = `
   pros, cons,
   category:categories(id, name, slug),
   country:countries(id, name, code),
-  region:regions(id, name, slug)
+  region:regions(id, name, slug),
+  provider:providers(id, name, description, logo:media(id, storage_path, alt_text))
 `;
 
 // Abgelaufene, aber noch "published" Angebote sollen aus Listen verschwinden

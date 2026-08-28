@@ -6,10 +6,12 @@ import { Button } from "@/components/ui/button";
 import { PlaceholderImage } from "@/components/placeholder-image";
 import { FamilyCheckSection } from "@/components/family-check-section";
 import { RealityCheck } from "@/components/reality-check";
+import { ProviderSpotlightSection } from "@/components/provider-spotlight-section";
 import { FavoriteButton } from "@/components/favorite-button";
 import { ListingViewTracker } from "@/components/listing-view-tracker";
 import { CtaTrackLink } from "@/components/cta-track-link";
 import { getActivityBySlug } from "@/lib/data/activities";
+import { getProviderGallery } from "@/lib/data/providers";
 import { isFavorited } from "@/lib/data/favorites";
 import { canPreview, getOptionalUser } from "@/lib/auth";
 import { formatPrice, formatPriceEstimate } from "@/lib/format";
@@ -71,6 +73,7 @@ export default async function ActivityDetailPage({
   const isExpired = activity.expires_at != null && new Date(activity.expires_at) < new Date();
   const ctaUrl = activity.affiliate_url ?? activity.external_url;
   const goUrl = ctaUrl && !isExpired ? `/go/activity/${activity.id}` : null;
+  const providerGallery = activity.provider ? await getProviderGallery(activity.provider.id) : [];
 
   const breadcrumbItems = [
     { label: "Startseite", href: "/" },
@@ -263,6 +266,10 @@ export default async function ActivityDetailPage({
             ? "Einige Links sind Affiliate-Links. Wenn ihr darüber bucht oder kauft, erhält FamVaya möglicherweise eine Provision. Für euch entstehen keine zusätzlichen Kosten."
             : "Für dieses Angebot ist noch kein Buchungslink hinterlegt."}
         </p>
+      </div>
+
+      <div className="mt-8">
+        <ProviderSpotlightSection provider={activity.provider} gallery={providerGallery} />
       </div>
     </div>
   );

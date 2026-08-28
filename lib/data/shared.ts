@@ -182,7 +182,7 @@ export async function getAllProviders(): Promise<Provider[]> {
   const supabase = createAdminClient();
   const { data } = await supabase
     .from("providers")
-    .select("id, name, slug, description, website, affiliate_network, contact_email, status")
+    .select("id, name, slug, description, website, affiliate_network, contact_email, status, logo_media_id")
     .order("name");
   return data ?? [];
 }
