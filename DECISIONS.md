@@ -1631,3 +1631,16 @@ erfolgreicher Übersetzung zuverlässig die Klasse `translated-ltr` auf
 einmal automatisch erneut, und setzt den Zustand ehrlich zurück auf
 Deutsch, falls auch der zweite Versuch scheitert (statt einen falschen
 Erfolg zu behaupten).
+
+Zweiter, gravierenderer Bug beim Live-Debugging gefunden: Es können
+gleichzeitig zwei `googtrans`-Cookies mit unterschiedlichem
+`domain`-Attribut existieren (z. B. aus einer früheren Sitzung auf
+`www.famvaya.com` vs. `famvaya.com`) — der ursprüngliche Lösch-Versuch
+(eine einzelne `document.cookie = "googtrans=; ...; path=/;"`-Zeile ohne
+`domain`) hat nur eine der beiden Varianten getroffen. Die Seite lud
+dadurch reproduzierbar bereits auf Englisch, obwohl "Default Deutsch"
+gefordert ist — das war vermutlich der Kern der Rückmeldung
+"funktioniert nicht". `clearGoogTransCookie()` löscht jetzt alle
+plausiblen `domain`-Varianten (ohne Angabe, aktueller Host, aktueller
+Host mit führendem Punkt, sowie bei `www.`-Hosts zusätzlich die
+Basis-Domain in beiden Formen).

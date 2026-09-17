@@ -65,6 +65,26 @@ function waitForCombo(callback: (combo: HTMLSelectElement) => void, attemptsLeft
   window.setTimeout(() => waitForCombo(callback, attemptsLeft - 1), 150);
 }
 
+// Google (bzw. eine vorherige Sitzung mit anderem Host, z. B. www.famvaya.com
+// vs. famvaya.com) kann mehrere googtrans-Cookies mit unterschiedlichem
+// domain-Attribut gleichzeitig gesetzt haben — ein einzelner Lösch-Versuch
+// mit nur einer domain-Variante lässt die andere übrig, wodurch Google beim
+// nächsten Laden trotzdem die falsche (nicht-deutsche) Ausgangssprache
+// liest. Deshalb hier alle plausiblen Varianten löschen.
+function clearGoogTransCookie() {
+  const host = window.location.hostname;
+  const domains = [undefined, host, `.${host}`];
+  const bareHost = host.replace(/^www\./, "");
+  if (bareHost !== host) {
+    domains.push(bareHost, `.${bareHost}`);
+  }
+  for (const domain of domains) {
+    document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;${
+      domain ? ` domain=${domain};` : ""
+    }`;
+  }
+}
+
 function setLanguage(target: "de" | "en") {
   waitForCombo((combo) => {
     combo.value = target;
@@ -111,7 +131,7 @@ export function LanguageToggle() {
 
     // Ein vorhandenes googtrans-Cookie aus einer früheren Sitzung würde die
     // Initialisierung in den oben beschriebenen kaputten Zustand versetzen.
-    document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    clearGoogTransCookie();
 
     if (document.getElementById(WIDGET_ELEMENT_ID)) {
       setReady(true);
@@ -149,7 +169,7 @@ export function LanguageToggle() {
   function goToGerman() {
     if (unavailable || switching || !isEnglish) return;
     window.sessionStorage.setItem(SCROLL_STORAGE_KEY, String(window.scrollY));
-    document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    clearGoogTransCookie();
     setSwitching(true);
     // Kurze Verzögerung, damit der Spinner noch sichtbar aufblitzt, bevor
     // der Reload den Seiteninhalt ersetzt — sonst wirkt der Klick wie ins
