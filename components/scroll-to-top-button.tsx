@@ -25,9 +25,9 @@ export function ScrollToTopButton() {
       type="button"
       onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
       aria-label="Nach oben scrollen"
-      className="fixed bottom-20 right-4 z-40 flex size-10 items-center justify-center rounded-full border border-border bg-card text-foreground shadow-lg hover:bg-secondary"
+      className="fixed bottom-20 right-4 z-40 flex size-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg hover:opacity-90"
     >
-      <ArrowUp className="size-5" aria-hidden />
+      <ArrowUp className="size-7" aria-hidden />
     </button>
   );
 }

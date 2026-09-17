@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Languages } from "lucide-react";
+import { Loader2 } from "lucide-react";
 
 // Client-seitige Ganze-Seite-Übersetzung per Google Translate Website-Widget
 // (kein next-intl/eigene Übersetzungsdateien) — bewusste Entscheidung, da
@@ -25,6 +25,11 @@ import { Languages } from "lucide-react";
 // "de"-Option zum programmatischen Zurückschalten. Der einzige zuverlässige
 // Weg zurück zur Ausgangssprache ist deshalb: Cookie löschen + neu laden.
 //
+// Das Google-Skript wird von manchen Werbeblockern/Privacy-Extensions
+// blockiert (translate.google.com steht auf gängigen Blocklisten) — in dem
+// Fall bleibt der Button sichtbar, aber deaktiviert mit erklärendem Titel,
+// statt scheinbar wirkungslos zu bleiben.
+//
 // Bekannte Einschränkung: maschinelle Übersetzung, keine eigenen URLs pro
 // Sprache, kein SEO-Effekt für die englische Fassung.
 
@@ -47,6 +52,8 @@ declare global {
 }
 
 const WIDGET_ELEMENT_ID = "google_translate_element";
+const INIT_TIMEOUT_MS = 6000;
+const SCROLL_STORAGE_KEY = "famvaya-lang-scroll";
 
 function waitForCombo(callback: (combo: HTMLSelectElement) => void, attemptsLeft = 20) {
   const combo = document.querySelector<HTMLSelectElement>("select.goog-te-combo");
@@ -65,11 +72,43 @@ function setLanguage(target: "de" | "en") {
   });
 }
 
+// Google setzt bei erfolgreicher Übersetzung die Klasse "translated-ltr"
+// auf <html> — dient hier als zuverlässiges Erfolgssignal, weil der
+// externe Übersetzungsdienst (translate-pa.googleapis.com) gelegentlich
+// mit einem CORS-/Netzwerkfehler fehlschlägt, ohne dass das von außen
+// sonst erkennbar wäre (siehe DECISIONS.md).
+function isTranslated(): boolean {
+  return document.documentElement.classList.contains("translated-ltr");
+}
+
+function waitForTranslation(onResult: (success: boolean) => void, attemptsLeft = 25) {
+  if (isTranslated()) {
+    onResult(true);
+    return;
+  }
+  if (attemptsLeft <= 0) {
+    onResult(false);
+    return;
+  }
+  window.setTimeout(() => waitForTranslation(onResult, attemptsLeft - 1), 200);
+}
+
 export function LanguageToggle() {
   const [ready, setReady] = useState(false);
+  const [unavailable, setUnavailable] = useState(false);
   const [isEnglish, setIsEnglish] = useState(false);
+  const [switching, setSwitching] = useState(false);
 
   useEffect(() => {
+    // Nach einem Reload (Rücksprung auf Deutsch, siehe toggle()) die vorher
+    // gemerkte Scroll-Position wiederherstellen, damit sich der Wechsel
+    // weniger abrupt anfühlt.
+    const savedScroll = window.sessionStorage.getItem(SCROLL_STORAGE_KEY);
+    if (savedScroll) {
+      window.sessionStorage.removeItem(SCROLL_STORAGE_KEY);
+      window.scrollTo(0, Number(savedScroll));
+    }
+
     // Ein vorhandenes googtrans-Cookie aus einer früheren Sitzung würde die
     // Initialisierung in den oben beschriebenen kaputten Zustand versetzen.
     document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
@@ -78,6 +117,8 @@ export function LanguageToggle() {
       setReady(true);
       return;
     }
+
+    const timeout = window.setTimeout(() => setUnavailable(true), INIT_TIMEOUT_MS);
 
     const container = document.createElement("div");
     container.id = WIDGET_ELEMENT_ID;
@@ -89,39 +130,105 @@ export function LanguageToggle() {
         { pageLanguage: "de", includedLanguages: "en", autoDisplay: false },
         WIDGET_ELEMENT_ID
       );
+      window.clearTimeout(timeout);
       setReady(true);
     };
 
     const script = document.createElement("script");
     script.src = "https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
     script.async = true;
+    script.onerror = () => {
+      window.clearTimeout(timeout);
+      setUnavailable(true);
+    };
     document.body.appendChild(script);
+
+    return () => window.clearTimeout(timeout);
   }, []);
 
-  function toggle() {
-    if (isEnglish) {
-      document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-      window.location.reload();
-      return;
-    }
-    if (ready) {
-      setLanguage("en");
-    } else {
-      window.setTimeout(() => setLanguage("en"), 500);
-    }
+  function goToGerman() {
+    if (unavailable || switching || !isEnglish) return;
+    window.sessionStorage.setItem(SCROLL_STORAGE_KEY, String(window.scrollY));
+    document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    setSwitching(true);
+    // Kurze Verzögerung, damit der Spinner noch sichtbar aufblitzt, bevor
+    // der Reload den Seiteninhalt ersetzt — sonst wirkt der Klick wie ins
+    // Leere gegangen.
+    window.setTimeout(() => window.location.reload(), 120);
+  }
+
+  function goToEnglish(isRetry = false) {
+    if (!isRetry && (unavailable || switching || isEnglish)) return;
+    setSwitching(true);
     setIsEnglish(true);
+
+    function apply() {
+      setLanguage("en");
+      waitForTranslation((success) => {
+        if (success) {
+          setSwitching(false);
+          return;
+        }
+        if (!isRetry) {
+          // Einmal automatisch erneut versuchen — der externe
+          // Übersetzungsdienst schlägt gelegentlich transient fehl.
+          goToEnglish(true);
+          return;
+        }
+        // Auch der zweite Versuch ist gescheitert: Zustand zurücksetzen,
+        // damit der Button nicht fälschlich "Englisch" behauptet.
+        setSwitching(false);
+        setIsEnglish(false);
+      });
+    }
+
+    if (ready) {
+      apply();
+    } else {
+      window.setTimeout(apply, 500);
+    }
   }
 
   return (
-    <button
-      type="button"
-      onClick={toggle}
-      aria-label={isEnglish ? "Auf Deutsch umschalten" : "Switch to English"}
-      title={isEnglish ? "Auf Deutsch umschalten" : "Switch to English"}
-      className="notranslate flex items-center gap-1 rounded-lg px-2 text-sm font-medium text-foreground hover:bg-muted"
-    >
-      <Languages className="size-4" aria-hidden />
-      {isEnglish ? "DE" : "EN"}
-    </button>
+    <div className="flex items-center gap-1">
+      <button
+        type="button"
+        onClick={goToGerman}
+        aria-label="Auf Deutsch umschalten"
+        aria-current={!isEnglish}
+        title="Auf Deutsch umschalten"
+        disabled={unavailable}
+        className={`notranslate flex size-9 items-center justify-center rounded-lg text-xl leading-none hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40 ${
+          !isEnglish ? "bg-muted ring-1 ring-inset ring-border" : "opacity-50"
+        }`}
+      >
+        {switching && isEnglish ? (
+          <Loader2 className="size-4 animate-spin text-foreground" aria-hidden />
+        ) : (
+          "🇩🇪"
+        )}
+      </button>
+      <button
+        type="button"
+        onClick={() => goToEnglish()}
+        aria-label={unavailable ? "Übersetzung nicht verfügbar" : "Switch to English"}
+        aria-current={isEnglish}
+        title={
+          unavailable
+            ? "Übersetzung aktuell nicht verfügbar (evtl. durch einen Werbeblocker blockiert)"
+            : "Switch to English"
+        }
+        disabled={unavailable}
+        className={`notranslate flex size-9 items-center justify-center rounded-lg text-xl leading-none hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40 ${
+          isEnglish ? "bg-muted ring-1 ring-inset ring-border" : "opacity-50"
+        }`}
+      >
+        {switching && !isEnglish ? (
+          <Loader2 className="size-4 animate-spin text-foreground" aria-hidden />
+        ) : (
+          "🇬🇧"
+        )}
+      </button>
+    </div>
   );
 }

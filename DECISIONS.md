@@ -1606,3 +1606,28 @@ gefunden:
   Wechsel zurück zu Deutsch `googtrans`-Cookie löschen + `location.reload()`
   aus, statt (erfolglos) zu versuchen, die Übersetzung clientseitig
   rückgängig zu machen.
+
+Nachtrag (UX-Feinschliff nach Rückmeldung "fühlt sich falsch an"): Beim
+Klick reagiert der Button sofort sichtbar (Spinner statt Fahne, ~1,8s),
+auch wenn Googles eigentliche Übersetzung selbst durch den externen
+Dienst spürbar Zeit braucht — das lässt sich nicht beschleunigen, ohne
+das Widget durch eine echte, selbst gepflegte Übersetzung zu ersetzen.
+Beim Zurückschalten auf Deutsch (Reload) wird die Scroll-Position vorher
+in `sessionStorage` gemerkt und nach dem Reload wiederhergestellt, damit
+der Sprung weniger abrupt wirkt. Fahnen/Pfeil sind außerdem prominenter
+gestaltet (größer, in Markenfarbe beim Nach-oben-Button).
+
+Zwei einzelne Flaggen-Buttons (🇩🇪 🇬🇧) statt eines wechselnden Symbols —
+beide Sprachen sind immer sichtbar, die aktive ist hervorgehoben
+(`aria-current`), Klick auf die schon aktive Fahne ist ein No-op.
+
+Beim Debuggen der Rückmeldung "funktioniert nicht" gefunden: Googles
+interner Übersetzungsdienst (`translate-pa.googleapis.com`) schlägt
+gelegentlich mit einem CORS-/Netzwerkfehler fehl, ohne dass das nach
+außen sichtbar wäre — der Button hätte dann fälschlich "Englisch aktiv"
+angezeigt, während die Seite unübersetzt blieb. Google setzt bei
+erfolgreicher Übersetzung zuverlässig die Klasse `translated-ltr` auf
+`<html>` — `goToEnglish()` pollt jetzt darauf, versucht bei Ausbleiben
+einmal automatisch erneut, und setzt den Zustand ehrlich zurück auf
+Deutsch, falls auch der zweite Versuch scheitert (statt einen falschen
+Erfolg zu behaupten).
