@@ -3,6 +3,7 @@ import Image from "next/image";
 import { Heart, Search, User } from "lucide-react";
 import { DESKTOP_NAV_ITEMS } from "@/components/layout/nav-items";
 import { MobileNav } from "@/components/layout/mobile-nav";
+import { LanguageToggle } from "@/components/language-toggle";
 import { getOptionalUser } from "@/lib/auth";
 
 export async function SiteHeader() {
@@ -35,6 +36,7 @@ export async function SiteHeader() {
         </nav>
 
         <div className="flex items-center justify-self-end gap-2">
+          <LanguageToggle />
           <Link
             href="/suche"
             aria-label="Suche"

@@ -1570,3 +1570,39 @@ serverseitig aufgeteilt) statt zwei/drei getrennter, dynamisch
 ein-/ausblendbarer Dropdowns — vermeidet Client-JS für ein
 Zeig-nur-bei-Bedarf-Verhalten, konsistent mit dem übrigen
 Admin-Formular-Stil (progressive enhancement ohne JS).
+
+## "Nach oben"-Button + Sprachumschalter (DE/EN)
+
+`components/scroll-to-top-button.tsx`: erscheint ab `scrollY > 400`, fest
+`bottom-20 right-4` — bewusst höher als die Vergleichs-Leiste
+(`compare-tray.tsx`, `bottom-4 right-4`), damit beide sich nicht
+überlappen, falls gleichzeitig sichtbar.
+
+### Google-Translate-Widget statt next-intl/eigener Übersetzung
+
+`components/language-toggle.tsx`: automatische Ganze-Seite-Übersetzung
+per Google-Translate-Website-Widget (der bekannte Trick, das unsichtbare
+`<select class="goog-te-combo">` programmatisch zu bedienen), nicht
+next-intl mit von Hand gepflegten Übersetzungsdateien. Grund: Inhalte
+(Unterkunfts-/Aktivitätenbeschreibungen etc.) kommen als freier Text aus
+der Datenbank und müssten sonst zusätzlich auf Englisch gepflegt werden —
+bei einer noch sehr jungen Plattform mit wenig Content unverhältnismäßiger
+laufender Aufwand gegenüber einer maschinellen Übersetzung.
+
+Zwei nicht offensichtliche Einschränkungen, während der Umsetzung
+gefunden:
+- Ein vorhandenes `googtrans`-Cookie führt beim Initialisieren
+  zuverlässig zu einem kaputten Zustand (das Dropdown zeigt "en", die
+  Seite bleibt aber unübersetzt) — vermutlich ein Zusammenspiel mit
+  `autoDisplay: false`. Deshalb startet die Seite bei jedem harten
+  Reload bewusst auf Deutsch (passt ohnehin zur Anforderung "Default
+  Deutsch") statt den Zustand aus dem Cookie wiederherzustellen.
+  Innerhalb einer Sitzung bleibt Englisch über normale
+  Next.js-Client-Navigation (`<Link>`) erhalten, da dabei kein
+  vollständiges Neuladen stattfindet.
+- Das versteckte `<select>` enthält bei `includedLanguages: "en"`
+  ausschließlich die Option `"en"` — es gibt keine `"de"`-Option zum
+  programmatischen Zurückschalten. Der Umschalter löst deshalb beim
+  Wechsel zurück zu Deutsch `googtrans`-Cookie löschen + `location.reload()`
+  aus, statt (erfolglos) zu versuchen, die Übersetzung clientseitig
+  rückgängig zu machen.

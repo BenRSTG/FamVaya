@@ -8,6 +8,7 @@ import { SiteFooter } from "@/components/layout/site-footer";
 import { CookieConsentBanner } from "@/components/cookie-consent";
 import { CompareProvider } from "@/components/compare/compare-context";
 import { CompareTray } from "@/components/compare/compare-tray";
+import { ScrollToTopButton } from "@/components/scroll-to-top-button";
 import { getSiteUrl } from "@/lib/site-url";
 import { getConsent } from "@/lib/consent";
 import "./globals.css";
@@ -97,6 +98,7 @@ export default async function RootLayout({
           <SiteFooter />
           <CompareTray />
         </CompareProvider>
+        <ScrollToTopButton />
         <CookieConsentBanner key={consent ?? "unset"} initialConsent={consent} />
         {consent === "accepted" && (
           <>

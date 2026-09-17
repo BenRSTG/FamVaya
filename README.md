@@ -156,6 +156,11 @@ Vitest · Lucide Icons · Vercel Analytics.
   "Anzeige"-Kennzeichnung.
 - Responsive Navigation mit Such-, Merkliste- und Konto-Link, mobilem Menü,
   sticky Header, Footer mit Newsletter-Anmeldung.
+- DE/EN-Umschalter im Header (automatische Ganze-Seite-Übersetzung per
+  Google-Translate-Widget, Default Deutsch) und ein "Nach oben"-Button
+  unten rechts.
+- **Kooperationen** (`/kooperationen`, im Footer verlinkt): Kurzer Pitch
+  für Werbepartner mit mailto-Kontakt.
 - **Admin-Bereich** (`/admin`, geschützt für Rollen `admin`/`editor`):
   Dashboard mit Status-/Nutzungs-Kennzahlen, vollständiges CRUD für
   Familienunterkünfte, -aktivitäten, Mikro-Familienabenteuer, Magazin-
@@ -516,6 +521,8 @@ components/
   visitor-tracker.tsx               Feuert page_view-Event bei jedem Routenwechsel (Client, Phase 12/13)
   listing-view-tracker.tsx          Feuert listing_viewed-Event auf Detailseiten (Client, Phase 13)
   cta-track-link.tsx                Anbieter-CTA-Link, feuert cta_clicked per sendBeacon (Client, Phase 13)
+  scroll-to-top-button.tsx          "Nach oben"-Button, erscheint ab scrollY > 400 (Client)
+  language-toggle.tsx               DE/EN-Umschalter oben rechts im Header, Google-Translate-Widget (Client)
   newsletter-signup-form.tsx        Wiederverwendbare Anmelde-Komponente (Startseite + Footer,
                                      `compact`-Variante), Phase 14
   breadcrumbs.tsx                   Sichtbare Breadcrumbs + BreadcrumbList-JSON-LD
