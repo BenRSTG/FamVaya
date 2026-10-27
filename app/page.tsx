@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { CheckCircle2, Compass, FerrisWheel, Home as HomeIcon, TreePine } from "lucide-react";
+import { ArrowRight, BookOpen, CheckCircle2, Compass, FerrisWheel, Home as HomeIcon, TreePine } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { QuickFamilyCheck } from "@/components/quick-family-check";
 import { AccommodationCard } from "@/components/cards/accommodation-card";
@@ -14,6 +14,7 @@ import { getFeaturedActivities } from "@/lib/data/activities";
 import { getFeaturedMicroAdventures } from "@/lib/data/micro-adventures";
 import { getFeaturedArticles } from "@/lib/data/articles";
 import { getActiveHomepageSpotlight } from "@/lib/data/spotlights";
+import { cn } from "@/lib/utils";
 import { toStringParam, type SearchParams } from "@/lib/search-params";
 
 const WORLDS = [
@@ -162,37 +163,66 @@ export default async function Home({
 
       {spotlight && <HomepageSpotlight spotlight={spotlight} />}
 
-      {/* Empfohlene Inhalte */}
+      {/* Empfohlene Inhalte: jeder Bereich als eigener, eingerahmter Block */}
       {accommodations.length > 0 && (
-        <RecommendedSection id="empfohlene-inhalte" title="Besonders geeignet für 3+ Kinder">
+        <AreaSection
+          id="empfohlene-inhalte"
+          tone="accommodations"
+          icon={HomeIcon}
+          area="Familienunterkünfte"
+          title="Besonders geeignet für 3+ Kinder"
+          href="/familienunterkuenfte"
+          linkLabel="Alle Unterkünfte ansehen"
+        >
           {accommodations.map((a) => (
             <AccommodationCard key={a.id} accommodation={a} />
           ))}
-        </RecommendedSection>
+        </AreaSection>
       )}
 
       {activities.length > 0 && (
-        <RecommendedSection title="Beliebte Familienaktivitäten">
+        <AreaSection
+          tone="activities"
+          icon={FerrisWheel}
+          area="Familienaktivitäten"
+          title="Beliebte Familienaktivitäten"
+          href="/familienaktivitaeten"
+          linkLabel="Alle Aktivitäten ansehen"
+        >
           {activities.map((a) => (
             <ActivityCard key={a.id} activity={a} />
           ))}
-        </RecommendedSection>
+        </AreaSection>
       )}
 
       {microAdventures.length > 0 && (
-        <RecommendedSection title="Kleine Abenteuer für den Familienalltag">
+        <AreaSection
+          tone="micro"
+          icon={TreePine}
+          area="Mikro-Familienabenteuer"
+          title="Kleine Abenteuer für den Familienalltag"
+          href="/mikro-familienabenteuer"
+          linkLabel="Alle Abenteuer ansehen"
+        >
           {microAdventures.map((a) => (
             <MicroAdventureCard key={a.id} adventure={a} />
           ))}
-        </RecommendedSection>
+        </AreaSection>
       )}
 
       {articles.length > 0 && (
-        <RecommendedSection title="Aus dem Magazin">
+        <AreaSection
+          tone="magazine"
+          icon={BookOpen}
+          area="Magazin"
+          title="Aus dem Magazin"
+          href="/magazin"
+          linkLabel="Alle Artikel lesen"
+        >
           {articles.map((a) => (
             <ArticleCard key={a.id} article={a} />
           ))}
-        </RecommendedSection>
+        </AreaSection>
       )}
 
       {/* FamVaya-Versprechen */}
@@ -226,19 +256,80 @@ export default async function Home({
   );
 }
 
-function RecommendedSection({
+const AREA_TONES = {
+  accommodations: {
+    panel: "border-primary/30 bg-primary/5",
+    chip: "bg-primary/15 text-primary",
+    area: "text-primary",
+    title: "text-foreground",
+    link: "text-primary",
+  },
+  activities: {
+    panel: "border-accent bg-accent/25",
+    chip: "bg-accent text-accent-foreground",
+    area: "text-brand-petrol-dark/70",
+    title: "text-foreground",
+    link: "text-brand-petrol-dark",
+  },
+  micro: {
+    panel: "border-success/30 bg-success/10",
+    chip: "bg-success/20 text-success",
+    area: "text-success",
+    title: "text-foreground",
+    link: "text-success",
+  },
+  magazine: {
+    panel: "border-brand-petrol-dark bg-brand-petrol-dark",
+    chip: "bg-white/15 text-white",
+    area: "text-brand-sand",
+    title: "text-white",
+    link: "text-white",
+  },
+} as const;
+
+function AreaSection({
   id,
+  tone,
+  icon: Icon,
+  area,
   title,
+  href,
+  linkLabel,
   children,
 }: {
   id?: string;
+  tone: keyof typeof AREA_TONES;
+  icon: React.ComponentType<{ className?: string }>;
+  area: string;
   title: string;
+  href: string;
+  linkLabel: string;
   children: React.ReactNode;
 }) {
+  const t = AREA_TONES[tone];
   return (
-    <section id={id} className="mx-auto w-full max-w-6xl scroll-mt-20 px-4 py-8 sm:px-6">
-      <h2 className="mb-5 text-xl font-semibold text-foreground">{title}</h2>
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">{children}</div>
+    <section id={id} className="mx-auto w-full max-w-6xl scroll-mt-20 px-4 py-4 sm:px-6 sm:py-5">
+      <div className={cn("rounded-3xl border-2 p-5 sm:p-8", t.panel)}>
+        <div className="mb-6 flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
+          <div className="flex items-center gap-4">
+            <div className={cn("flex size-12 shrink-0 items-center justify-center rounded-xl", t.chip)}>
+              <Icon className="size-6" aria-hidden />
+            </div>
+            <div>
+              <p className={cn("text-xs font-semibold uppercase tracking-wider", t.area)}>{area}</p>
+              <h2 className={cn("text-xl font-semibold sm:text-2xl", t.title)}>{title}</h2>
+            </div>
+          </div>
+          <Link
+            href={href}
+            className={cn("group flex items-center gap-1.5 text-sm font-medium hover:underline", t.link)}
+          >
+            {linkLabel}
+            <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" aria-hidden />
+          </Link>
+        </div>
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">{children}</div>
+      </div>
     </section>
   );
 }

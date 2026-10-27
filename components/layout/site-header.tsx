@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Heart, Search, User } from "lucide-react";
-import { DESKTOP_NAV_ITEMS } from "@/components/layout/nav-items";
+import { DesktopNav } from "@/components/layout/desktop-nav";
 import { MobileNav } from "@/components/layout/mobile-nav";
 import { LanguageToggle } from "@/components/language-toggle";
 import { getOptionalUser } from "@/lib/auth";
@@ -23,17 +23,7 @@ export async function SiteHeader() {
           />
         </Link>
 
-        <nav className="hidden items-center justify-center gap-6 lg:flex">
-          {DESKTOP_NAV_ITEMS.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="text-sm font-medium text-foreground hover:text-primary"
-            >
-              {item.label}
-            </Link>
-          ))}
-        </nav>
+        <DesktopNav />
 
         <div className="flex items-center justify-self-end gap-2">
           <LanguageToggle />

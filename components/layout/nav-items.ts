@@ -8,9 +8,10 @@ export const NAV_ITEMS = [
 ] as const;
 
 // Schlankere Auswahl für die horizontale Desktop-Navigation im Header:
-// "Startseite" entfällt (das Logo verlinkt bereits auf "/"), "Magazin" und
-// "Lass dich inspirieren" sind schon auf der Startseite verlinkt (Hero-Button
-// bzw. "Aus dem Magazin"-Sektion) und bleiben im Hamburger-Menü erreichbar.
+// "Startseite" entfällt (das Logo verlinkt bereits auf "/"), "Lass dich
+// inspirieren" ist schon auf der Startseite verlinkt (Hero-Button) und bleibt
+// im Hamburger-Menü erreichbar. Das Magazin steht als eigener Bereich in der
+// Navigation, damit man immer sieht, in welchem Bereich man gerade ist.
 export const DESKTOP_NAV_ITEMS = NAV_ITEMS.filter(
-  (item) => !["/", "/magazin", "/lass-dich-inspirieren"].includes(item.href)
+  (item) => !["/", "/lass-dich-inspirieren"].includes(item.href)
 );
