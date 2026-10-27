@@ -258,28 +258,28 @@ export default async function Home({
 
 const AREA_TONES = {
   accommodations: {
-    panel: "border-primary/30 bg-primary/5",
+    panel: "bg-gradient-to-b from-background via-primary/10 to-background",
     chip: "bg-primary/15 text-primary",
     area: "text-primary",
     title: "text-foreground",
     link: "text-primary",
   },
   activities: {
-    panel: "border-accent bg-accent/25",
+    panel: "bg-gradient-to-b from-background via-accent/40 to-background",
     chip: "bg-accent text-accent-foreground",
     area: "text-brand-petrol-dark/70",
     title: "text-foreground",
     link: "text-brand-petrol-dark",
   },
   micro: {
-    panel: "border-success/30 bg-success/10",
+    panel: "bg-gradient-to-b from-background via-success/10 to-background",
     chip: "bg-success/20 text-success",
     area: "text-success",
     title: "text-foreground",
     link: "text-success",
   },
   magazine: {
-    panel: "border-brand-petrol-dark bg-brand-petrol-dark",
+    panel: "bg-brand-petrol-dark",
     chip: "bg-white/15 text-white",
     area: "text-brand-sand",
     title: "text-white",
@@ -308,8 +308,8 @@ function AreaSection({
 }) {
   const t = AREA_TONES[tone];
   return (
-    <section id={id} className="mx-auto w-full max-w-6xl scroll-mt-20 px-4 py-4 sm:px-6 sm:py-5">
-      <div className={cn("rounded-3xl border-2 p-5 sm:p-8", t.panel)}>
+    <section id={id} className={cn("w-full scroll-mt-20", t.panel)}>
+      <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
         <div className="mb-6 flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
           <div className="flex items-center gap-4">
             <div className={cn("flex size-12 shrink-0 items-center justify-center rounded-xl", t.chip)}>
