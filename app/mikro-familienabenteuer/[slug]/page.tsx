@@ -15,6 +15,7 @@ import { canPreview, getOptionalUser } from "@/lib/auth";
 import { formatPriceEstimate } from "@/lib/format";
 import { resolveMediaUrl } from "@/lib/media";
 import { getSiteUrl } from "@/lib/site-url";
+import { RichText } from "@/components/rich-text";
 import { PreviewBanner } from "@/components/admin/preview-banner";
 import { Breadcrumbs, BreadcrumbJsonLd } from "@/components/breadcrumbs";
 
@@ -41,22 +42,25 @@ export async function generateMetadata({
   if (!adventure) return {};
 
   const description =
-    adventure.short_description ?? `${adventure.title} – ein FamVaya-Mikro-Abenteuer.`;
+    adventure.meta_description ??
+    adventure.short_description ??
+    `${adventure.title} – ein FamVaya-Mikro-Abenteuer.`;
+  const seoTitle = adventure.seo_title ?? adventure.title;
   const imageUrl = resolveMediaUrl(adventure.cover_media);
 
   return {
-    title: adventure.title,
+    title: seoTitle,
     description,
     alternates: { canonical: `/mikro-familienabenteuer/${adventure.slug}` },
     openGraph: {
-      title: adventure.title,
+      title: seoTitle,
       description,
       type: "website",
       images: imageUrl ? [{ url: imageUrl }] : undefined,
     },
     twitter: {
       card: "summary_large_image",
-      title: adventure.title,
+      title: seoTitle,
       description,
       images: imageUrl ? [imageUrl] : undefined,
     },
@@ -174,6 +178,7 @@ export default async function MicroAdventureDetailPage({
         <FamilyCheckSection
           familyRating={adventure.family_rating}
           personallyTested={adventure.personally_tested}
+          kind="micro_adventure"
         />
       </div>
 
@@ -184,9 +189,7 @@ export default async function MicroAdventureDetailPage({
           <h2 className="mb-3 text-lg font-semibold text-foreground">
             Beschreibung
           </h2>
-          <p className="whitespace-pre-line text-muted-foreground">
-            {adventure.full_description}
-          </p>
+          <RichText text={adventure.full_description} className="text-muted-foreground" />
         </section>
       )}
 

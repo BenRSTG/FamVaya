@@ -4,7 +4,7 @@ import type { AdminListRow } from "@/components/admin/content-table";
 
 const DETAIL_SELECT = `
   id, title, slug, excerpt, content, author_id, category_id, cover_media_id,
-  status, published_at, updated_at,
+  status, seo_title, meta_description, published_at, updated_at,
   category:categories(id, name, slug),
   cover_media:media(id, storage_path, alt_text),
   author:users(display_name)
@@ -35,6 +35,8 @@ export interface ArticleInput {
   category_id: string | null;
   cover_media_id: string | null;
   status: ContentStatus;
+  seo_title: string | null;
+  meta_description: string | null;
   published_at: string | null;
 }
 
@@ -146,6 +148,8 @@ export async function duplicateArticleRow(id: string): Promise<string> {
     category_id: original.category_id,
     cover_media_id: null,
     status: "draft",
+    seo_title: original.seo_title,
+    meta_description: original.meta_description,
     published_at: null,
   });
 }

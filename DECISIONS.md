@@ -1644,3 +1644,45 @@ gefordert ist — das war vermutlich der Kern der Rückmeldung
 plausiblen `domain`-Varianten (ohne Angabe, aktueller Host, aktueller
 Host mit führendem Punkt, sowie bei `www.`-Hosts zusätzlich die
 Basis-Domain in beiden Formen).
+
+## SEO-Ausbau: Überschriften im Fließtext, eigene SEO-Felder, Content-Batch 2
+
+`articles.seo_title`/`meta_description` existierten seit Migration `0008`,
+wurden aber von keiner Seite ausgelesen (Titel/Description kamen immer aus
+`title`/`excerpt`). Jetzt greifen die Artikelseite und die
+Mikro-Abenteuer-Seite zuerst auf diese Felder zu und fallen sonst auf den
+bisherigen Wert zurück (`seo_title ?? title`, `meta_description ?? excerpt`
+bzw. `short_description`). Mikro-Abenteuer bekommen die beiden Spalten neu
+(Migration `0028`), beide Admin-Formulare einen SEO-Abschnitt.
+
+Fließtext (Artikelinhalt, Mikro-Abenteuer-Beschreibung) wurde bisher als ein
+einziger `whitespace-pre-line`-Block ausgegeben — Zwischenüberschriften waren
+also nur Textzeilen, für Suchmaschinen keine Struktur. `lib/rich-text.ts`
+(+ `components/rich-text.tsx`) erkennt jetzt `## …` (H2), `### …` (H3) und
+`- …`-Listen, bewusst ohne Markdown-Bibliothek. Text ohne diese Markierungen
+erscheint unverändert als Absätze (Abwärtskompatibilität). Auf der
+Mikro-Abenteuer-Seite steht die Beschreibung bereits unter dem H2
+"Beschreibung", deshalb nutzen die Texte dort `###` (H3).
+
+Content-Batch 2 (`supabase/content/*-batch-2.sql`): erweitert die 30
+Mikro-Abenteuer und 8 Artikel aus Batch 1 (nur Text-/SEO-Felder werden per
+`on conflict … do update` überschrieben, Status/Titelbild/Kategorie bleiben)
+und legt 20 neue Abenteuer und 8 neue Artikel als Entwurf an. Reihenfolge
+beim Einspielen: erst Migration `0028`, dann pushen/deployen (die
+Detail-Query liest `seo_title`/`meta_description`), dann die SQL-Dateien.
+
+### Family-Fit-Score der Mikro-Abenteuer: festes Raster statt freier Schätzung
+
+Der Score bleibt eine redaktionelle Einschätzung (siehe Phase 7), bekommt
+für Mikro-Abenteuer aber ein festes, nachvollziehbares Raster: Summe aus
+fünf Kriterien à 0–20 Punkte — Eignung für mehrere Kinder, Altersmischung,
+Einfachheit (Vorbereitung/Kosten), Wetter-/Jahreszeit-Flexibilität,
+Sicherheit/Aufsichtsbedarf. So stehen die 50 Einträge aus Batch 1/2 in
+einem begründbaren Verhältnis zueinander (58–91, Ø 75) statt alle bei
+einem „gefühlt guten" Wert. `supabase/content/micro-abenteuer-family-fit.sql`
+setzt die Scores nur, wo `family_rating` noch leer ist, und überschreibt
+nie einen von Hand gepflegten Wert. Die Erklärung auf der Detailseite
+nennt für Mikro-Abenteuer diese Kriterien (`FamilyCheckSection kind=
+"micro_adventure"`); der bisherige Text ("Zimmer, Rabatte") passte dort nicht.
+Wichtig: Der Score ist keine Testbewertung. "Persönlich getestet" bleibt
+ein separates, von Hand gesetztes Flag.

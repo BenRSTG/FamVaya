@@ -40,11 +40,15 @@ export function ArticleForm({
             className={filterInputClass + " h-auto py-2"}
           />
         </FormField>
-        <FormField label="Inhalt" htmlFor="content">
+        <FormField
+          label="Inhalt"
+          htmlFor="content"
+          hint="Absätze durch eine Leerzeile trennen. „## Überschrift“ in eine eigene Zeile schreiben für eine Zwischenüberschrift (H2), „### …“ für eine kleinere (H3), „- Punkt“ für Aufzählungen."
+        >
           <textarea
             id="content"
             name="content"
-            rows={12}
+            rows={16}
             defaultValue={a?.content ?? ""}
             className={filterInputClass + " h-auto py-2"}
           />
@@ -58,6 +62,30 @@ export function ArticleForm({
               </option>
             ))}
           </select>
+        </FormField>
+      </FormSection>
+
+      <FormSection title="Suchmaschinen (SEO)">
+        <FormField
+          label="SEO-Titel"
+          htmlFor="seo_title"
+          hint="Optional, ca. 50 Zeichen. Erscheint im Browser-Tab und in Google. Leer = normaler Titel."
+        >
+          <input id="seo_title" name="seo_title" maxLength={70} defaultValue={a?.seo_title ?? ""} className={filterInputClass} />
+        </FormField>
+        <FormField
+          label="Meta-Beschreibung"
+          htmlFor="meta_description"
+          hint="Optional, ca. 150 Zeichen. Vorschautext in Google. Leer = Einleitung."
+        >
+          <textarea
+            id="meta_description"
+            name="meta_description"
+            rows={2}
+            maxLength={200}
+            defaultValue={a?.meta_description ?? ""}
+            className={filterInputClass + " h-auto py-2"}
+          />
         </FormField>
       </FormSection>
 

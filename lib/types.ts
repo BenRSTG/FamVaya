@@ -233,6 +233,8 @@ export interface MicroAdventure {
   status: ContentStatus;
   featured: boolean;
   personally_tested: boolean;
+  seo_title: string | null;
+  meta_description: string | null;
   family_rating: number | null;
   pros: string[];
   cons: string[];
@@ -370,6 +372,8 @@ export interface Article {
   cover_media_id: string | null;
   cover_media: Media | null;
   status: ContentStatus;
+  seo_title: string | null;
+  meta_description: string | null;
   published_at: string | null;
   updated_at: string;
 }

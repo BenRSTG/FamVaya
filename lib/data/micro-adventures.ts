@@ -28,7 +28,8 @@ const DETAIL_SELECT = `
   preparation_level, difficulty_level, indoor, outdoor,
   seasonal_tags, weather_tags, materials, instructions, location_optional,
   price_checked_at,
-  external_url, affiliate_url, status, featured, personally_tested, family_rating, pros, cons,
+  external_url, affiliate_url, status, featured, personally_tested, seo_title, meta_description,
+  family_rating, pros, cons,
   category:categories(id, name, slug)
 `;
 
@@ -153,6 +154,8 @@ export interface MicroAdventureInput {
   status: ContentStatus;
   featured: boolean;
   personally_tested: boolean;
+  seo_title: string | null;
+  meta_description: string | null;
   family_rating: number | null;
   pros: string[];
   cons: string[];
@@ -180,7 +183,7 @@ const ADMIN_FORM_SELECT = `
   preparation_level, difficulty_level, indoor, outdoor,
   seasonal_tags, weather_tags, materials, instructions, safety_notes,
   location_optional, price_checked_at, external_url, affiliate_url, status, featured,
-  personally_tested, family_rating, pros, cons
+  personally_tested, seo_title, meta_description, family_rating, pros, cons
 `;
 
 export async function getMicroAdventureByIdForAdmin(

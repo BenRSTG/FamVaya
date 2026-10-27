@@ -213,6 +213,30 @@ export function MicroAdventureForm({
         </FormField>
       </FormSection>
 
+      <FormSection title="Suchmaschinen (SEO)">
+        <FormField
+          label="SEO-Titel"
+          htmlFor="seo_title"
+          hint="Optional, ca. 50 Zeichen, mit dem wichtigsten Suchbegriff. Leer = normaler Titel."
+        >
+          <input id="seo_title" name="seo_title" maxLength={70} defaultValue={m?.seo_title ?? ""} className={filterInputClass} />
+        </FormField>
+        <FormField
+          label="Meta-Beschreibung"
+          htmlFor="meta_description"
+          hint="Optional, ca. 150 Zeichen, Vorschautext in Google. Leer = Kurzbeschreibung."
+        >
+          <textarea
+            id="meta_description"
+            name="meta_description"
+            rows={2}
+            maxLength={200}
+            defaultValue={m?.meta_description ?? ""}
+            className={filterInputClass + " h-auto py-2"}
+          />
+        </FormField>
+      </FormSection>
+
       <FormSection title="Reality Check">
         <FormField
           label="Das spricht dafür"

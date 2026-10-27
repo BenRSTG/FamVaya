@@ -8,6 +8,7 @@ import { AccommodationCard } from "@/components/cards/accommodation-card";
 import { ActivityCard } from "@/components/cards/activity-card";
 import { Breadcrumbs, BreadcrumbJsonLd } from "@/components/breadcrumbs";
 import { PreviewBanner } from "@/components/admin/preview-banner";
+import { RichText } from "@/components/rich-text";
 import { ListingViewTracker } from "@/components/listing-view-tracker";
 import { getArticleBySlug, getRelatedArticles } from "@/lib/data/articles";
 import { getFeaturedAccommodations } from "@/lib/data/accommodations";
@@ -25,15 +26,17 @@ export async function generateMetadata({
   const article = await getArticleBySlug(slug);
   if (!article) return {};
 
-  const description = article.excerpt ?? `${article.title} – ein FamVaya-Magazinartikel.`;
+  const description =
+    article.meta_description ?? article.excerpt ?? `${article.title} – ein FamVaya-Magazinartikel.`;
+  const seoTitle = article.seo_title ?? article.title;
   const imageUrl = resolveMediaUrl(article.cover_media);
 
   return {
-    title: article.title,
+    title: seoTitle,
     description,
     alternates: { canonical: `/magazin/${article.slug}` },
     openGraph: {
-      title: article.title,
+      title: seoTitle,
       description,
       type: "article",
       ...(article.published_at ? { publishedTime: article.published_at } : {}),
@@ -41,7 +44,7 @@ export async function generateMetadata({
     },
     twitter: {
       card: "summary_large_image",
-      title: article.title,
+      title: seoTitle,
       description,
       images: imageUrl ? [imageUrl] : undefined,
     },
@@ -133,7 +136,7 @@ export default async function ArticleDetailPage({
       )}
 
       {article.content && (
-        <div className="mb-10 whitespace-pre-line text-foreground">{article.content}</div>
+        <RichText text={article.content} className="mb-10 text-foreground" />
       )}
 
       {(featuredAccommodations.length > 0 || featuredActivities.length > 0) && (

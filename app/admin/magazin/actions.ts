@@ -34,6 +34,8 @@ export async function createArticle(formData: FormData) {
     category_id: stringOrNull(formData, "category_id"),
     cover_media_id: null,
     status: requiredString(formData, "status") as ContentStatus,
+    seo_title: stringOrNull(formData, "seo_title"),
+    meta_description: stringOrNull(formData, "meta_description"),
     published_at: dateOrNull(formData, "published_at"),
   };
   input.cover_media_id = await resolveCoverMediaId(formData, null);
@@ -57,6 +59,8 @@ export async function updateArticle(formData: FormData) {
     category_id: stringOrNull(formData, "category_id"),
     cover_media_id: existingCoverMediaId,
     status: requiredString(formData, "status") as ContentStatus,
+    seo_title: stringOrNull(formData, "seo_title"),
+    meta_description: stringOrNull(formData, "meta_description"),
     published_at: dateOrNull(formData, "published_at"),
   };
   input.cover_media_id = await resolveCoverMediaId(formData, existingCoverMediaId);

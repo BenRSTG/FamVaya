@@ -159,6 +159,7 @@ Vitest · Lucide Icons · Vercel Analytics.
 - DE/EN-Umschalter im Header (automatische Ganze-Seite-Übersetzung per
   Google-Translate-Widget, Default Deutsch) und ein "Nach oben"-Button
   unten rechts.
+- **SEO & Inhalte**: Artikel und Mikro-Abenteuer haben eigene SEO-Titel/Meta-Beschreibungen (Admin-Abschnitt „Suchmaschinen"); Fließtexte unterstützen `##`/`###`-Überschriften und `-`-Listen (`lib/rich-text.ts`). Redaktionelle SQL-Batches liegen unter `supabase/content/`.
 - **Kooperationen** (`/kooperationen`, im Footer verlinkt): Kurzer Pitch
   für Werbepartner mit mailto-Kontakt.
 - **Admin-Bereich** (`/admin`, geschützt für Rollen `admin`/`editor`):
@@ -371,7 +372,7 @@ Supabase-Projekt. So wurde/wird das eingerichtet:
 > separate Dev-Projekt wurde pausiert, um den kostenlosen Projektplatz für
 > ein anderes Vorhaben freizugeben (siehe `DECISIONS.md`, Phase 7).
 > `npm run dev` funktioniert daher lokal erst wieder mit einem neuen
-> Dev-Projekt (neues Projekt anlegen, Migrationen 0001–0027 + `seed.sql`
+> Dev-Projekt (neues Projekt anlegen, Migrationen 0001–0028 + `seed.sql`
 > ausführen, `.env.local` aktualisieren).
 
 ### Platzhalterfotos hochladen
@@ -580,7 +581,7 @@ lib/
   types.ts                          Handgeschriebene DB-Typen
 proxy.ts                            Session-Refresh (Next.js 16 "Proxy", vormals Middleware)
 public/brand/                       FamVaya-Logo (SVG, Originalfarben)
-supabase/migrations/                SQL-Migrationen (0001-0027, in Reihenfolge ausführen)
+supabase/migrations/                SQL-Migrationen (0001-0028, in Reihenfolge ausführen)
 supabase/seed.sql                   Demo-Seed-Daten (Spec-§29-Mindestmengen)
 files/                              Produktspezifikation (spec.md) und Phase-0-Kickoff-Prompt
 FamVaya_Bauplan_2.md                Verbindliche Phasen-Roadmap (Phase 0-6)
