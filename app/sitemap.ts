@@ -16,8 +16,7 @@ const STATIC_ROUTES = [
   "/lass-dich-inspirieren",
   "/suche",
   // /impressum und /datenschutz sind bewusst nicht gelistet: beide tragen
-  // robots: { index: false }, solange sie nur strukturierte Platzhalter
-  // sind (siehe DECISIONS.md) — eine Sitemap-Aufnahme wäre widersprüchlich.
+  // robots: { index: false } — eine Sitemap-Aufnahme wäre widersprüchlich.
 ];
 
 async function getPublishedSlugs(table: string): Promise<{ slug: string; updated_at: string }[]> {

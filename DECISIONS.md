@@ -1702,3 +1702,16 @@ Artikeln. Search-Console-/Bing-Bestätigung optional per Umgebungsvariable
 und Reichweiten-Maßnahmen: `SEO-Plan.md`. Die Seed-Demo-Einträge werden per
 `supabase/content/demo-inhalte-ausblenden.sql` auf Entwurf gesetzt, damit weder
 Google noch Anbieter erfundene Hotels sehen.
+
+### Impressum, Datenschutz und Google-Übersetzer erst nach Klick (Oktober 2026)
+
+Impressum (§ 5 DDG, § 18 Abs. 2 MStV) und Datenschutzerklärung sind keine
+Platzhalter mehr, Angaben: Benjamin Richtsteiger (Privatanschrift), E-Mail.
+Keine USt-ID, noch kein Gewerbe angemeldet — vor Affiliate-Einnahmen
+Gewerbeanmeldung/Steuerberatung klären. Nicht anwaltlich geprüft.
+Der Google-Übersetzer-Skript (`components/language-toggle.tsx`) wurde bisher
+bei jedem Seitenaufruf geladen und übertrug damit IP-Adressen an Google, auch
+ohne Übersetzungswunsch. Er lädt jetzt erst beim Klick auf die englische
+Flagge (`loadWidget`); die Datenschutzerklärung beschreibt das. Offen:
+Newsletter nutzt Single-Opt-in (`lib/actions/newsletter.ts`) — vor dem ersten
+Versand auf Double-Opt-in umstellen.

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Loader2 } from "lucide-react";
 
 // Client-seitige Ganze-Seite-Übersetzung per Google Translate Website-Widget
@@ -114,10 +114,11 @@ function waitForTranslation(onResult: (success: boolean) => void, attemptsLeft =
 }
 
 export function LanguageToggle() {
-  const [ready, setReady] = useState(false);
   const [unavailable, setUnavailable] = useState(false);
   const [isEnglish, setIsEnglish] = useState(false);
   const [switching, setSwitching] = useState(false);
+  const readyRef = useRef(false);
+  const loadingRef = useRef(false);
 
   useEffect(() => {
     // Nach einem Reload (Rücksprung auf Deutsch, siehe toggle()) die vorher
@@ -134,9 +135,17 @@ export function LanguageToggle() {
     clearGoogTransCookie();
 
     if (document.getElementById(WIDGET_ELEMENT_ID)) {
-      setReady(true);
-      return;
+      readyRef.current = true;
     }
+    // Das Google-Skript wird bewusst NICHT hier geladen, sondern erst beim
+    // Klick auf die englische Flagge (loadWidget): sonst würde bei jedem
+    // Seitenaufruf die IP-Adresse an Google übertragen, auch von Besuchern,
+    // die gar nicht übersetzen wollen (Datenschutzerklärung, Abschnitt 7).
+  }, []);
+
+  function loadWidget() {
+    if (readyRef.current || loadingRef.current) return;
+    loadingRef.current = true;
 
     const timeout = window.setTimeout(() => setUnavailable(true), INIT_TIMEOUT_MS);
 
@@ -151,7 +160,7 @@ export function LanguageToggle() {
         WIDGET_ELEMENT_ID
       );
       window.clearTimeout(timeout);
-      setReady(true);
+      readyRef.current = true;
     };
 
     const script = document.createElement("script");
@@ -159,12 +168,11 @@ export function LanguageToggle() {
     script.async = true;
     script.onerror = () => {
       window.clearTimeout(timeout);
+      loadingRef.current = false;
       setUnavailable(true);
     };
     document.body.appendChild(script);
-
-    return () => window.clearTimeout(timeout);
-  }, []);
+  }
 
   function goToGerman() {
     if (unavailable || switching || !isEnglish) return;
@@ -202,11 +210,23 @@ export function LanguageToggle() {
       });
     }
 
-    if (ready) {
-      apply();
-    } else {
-      window.setTimeout(apply, 500);
+    // Skript erst jetzt laden (siehe Kommentar im useEffect) und auf die
+    // Initialisierung warten, bevor übersetzt wird.
+    loadWidget();
+    waitUntilReady(apply);
+  }
+
+  function waitUntilReady(callback: () => void, attemptsLeft = 40) {
+    if (readyRef.current) {
+      callback();
+      return;
     }
+    if (attemptsLeft <= 0) {
+      setSwitching(false);
+      setIsEnglish(false);
+      return;
+    }
+    window.setTimeout(() => waitUntilReady(callback, attemptsLeft - 1), 200);
   }
 
   return (

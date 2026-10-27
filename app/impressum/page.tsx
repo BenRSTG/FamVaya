@@ -8,38 +8,53 @@ export const metadata: Metadata = {
 export default function ImpressumPage() {
   return (
     <div className="mx-auto w-full max-w-2xl px-4 py-12 sm:px-6">
-      <h1 className="mb-2 text-3xl font-semibold text-foreground">Impressum</h1>
-      <p className="mb-8 rounded-lg border border-warning/40 bg-warning/10 px-4 py-3 text-sm text-warning">
-        Diese Seite ist ein strukturierter Platzhalter und wurde nicht
-        anwaltlich geprüft. Vor einem echten Launch muss sie durch
-        rechtsverbindliche Angaben ersetzt werden.
-      </p>
+      <h1 className="mb-8 text-3xl font-semibold text-foreground">Impressum</h1>
 
       <section className="mb-6">
-        <h2 className="mb-2 text-lg font-semibold text-foreground">Angaben gemäß § 5 TMG</h2>
+        <h2 className="mb-2 text-lg font-semibold text-foreground">Angaben gemäß § 5 DDG</h2>
         <p className="text-muted-foreground">
-          [Firmenname / Name der verantwortlichen Person]
+          Benjamin Richtsteiger
           <br />
-          [Straße und Hausnummer]
+          Osterwiese 51
           <br />
-          [Postleitzahl und Ort]
+          38162 Cremlingen
         </p>
       </section>
 
       <section className="mb-6">
         <h2 className="mb-2 text-lg font-semibold text-foreground">Kontakt</h2>
         <p className="text-muted-foreground">
-          Telefon: [Telefonnummer]
-          <br />
-          E-Mail: [E-Mail-Adresse]
+          E-Mail:{" "}
+          <a href="mailto:b.richtsteigerrstg@gmail.com" className="text-primary hover:underline">
+            b.richtsteigerrstg@gmail.com
+          </a>
         </p>
       </section>
 
       <section className="mb-6">
         <h2 className="mb-2 text-lg font-semibold text-foreground">
-          Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV
+          Verantwortlich für den Inhalt nach § 18 Abs. 2 MStV
         </h2>
-        <p className="text-muted-foreground">[Name, Anschrift wie oben]</p>
+        <p className="text-muted-foreground">
+          Benjamin Richtsteiger, Anschrift wie oben
+        </p>
+      </section>
+
+      <section className="mb-6">
+        <h2 className="mb-2 text-lg font-semibold text-foreground">Hinweis zu Affiliate-Links</h2>
+        <p className="text-muted-foreground">
+          Einige Links auf FamVaya sind Affiliate-Links. Wenn ihr über einen
+          solchen Link bucht oder kauft, erhalten wir möglicherweise eine
+          Provision. Für euch entstehen dadurch keine zusätzlichen Kosten.
+        </p>
+      </section>
+
+      <section className="mb-6">
+        <h2 className="mb-2 text-lg font-semibold text-foreground">Verbraucherstreitbeilegung</h2>
+        <p className="text-muted-foreground">
+          Wir sind nicht bereit und nicht verpflichtet, an Streitbeilegungsverfahren
+          vor einer Verbraucherschlichtungsstelle teilzunehmen.
+        </p>
       </section>
 
       <section>
