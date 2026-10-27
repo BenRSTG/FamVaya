@@ -223,8 +223,8 @@ export default async function MicroAdventureDetailPage({
         </section>
       )}
 
-      <div className="flex flex-col items-start gap-2">
-        {goUrl ? (
+      {goUrl && (
+        <div className="flex flex-col items-start gap-2">
           <Button
             size="lg"
             render={
@@ -241,18 +241,11 @@ export default async function MicroAdventureDetailPage({
             Mehr erfahren
             <ExternalLink aria-hidden />
           </Button>
-        ) : (
-          <Button size="lg" disabled title="Noch kein Anbieter verlinkt">
-            Mehr erfahren
-            <ExternalLink aria-hidden />
-          </Button>
-        )}
-        <p className="text-xs text-muted-foreground">
-          {goUrl
-            ? "Einige Links sind Affiliate-Links. Wenn ihr darüber bucht oder kauft, erhält FamVaya möglicherweise eine Provision. Für euch entstehen keine zusätzlichen Kosten."
-            : "Für dieses Angebot ist noch kein Buchungslink hinterlegt."}
-        </p>
-      </div>
+          <p className="text-xs text-muted-foreground">
+            Einige Links sind Affiliate-Links. Wenn ihr darüber bucht oder kauft, erhält FamVaya möglicherweise eine Provision. Für euch entstehen keine zusätzlichen Kosten.
+          </p>
+        </div>
+      )}
     </div>
   );
 }
