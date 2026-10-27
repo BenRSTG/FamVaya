@@ -1686,3 +1686,19 @@ nennt für Mikro-Abenteuer diese Kriterien (`FamilyCheckSection kind=
 "micro_adventure"`); der bisherige Text ("Zimmer, Rabatte") passte dort nicht.
 Wichtig: Der Score ist keine Testbewertung. "Persönlich getestet" bleibt
 ein separates, von Hand gesetztes Flag.
+
+### SEO für allgemeine Suchbegriffe (Oktober 2026)
+
+Die Seite wird bereits unter dem Markennamen gefunden; für allgemeine
+Begriffe fehlten suchbegriff-orientierte Titel/Beschreibungen auf Startseite
+und Übersichten sowie interne Verlinkung (Mikro-Abenteuer-Seiten hatten keine
+Links zu anderen Inhalten). Umgesetzt: neue Titel/Beschreibungen, Einleitungs-
+texte auf Magazin und Mikro-Abenteuer-Übersicht, Standard-Vorschaubild
+(`/images/hero-familie-berge.jpg`), Abschnitte "Mehr Mikro-Abenteuer" und
+"Passende Tipps aus dem Magazin" (`getRelatedMicroAdventures`: gleiche
+Kategorie, sonst mit neuesten aufgefüllt) sowie "Passende Mikro-Abenteuer" in
+Artikeln. Search-Console-/Bing-Bestätigung optional per Umgebungsvariable
+(`GOOGLE_SITE_VERIFICATION`, `BING_SITE_VERIFICATION`). Strategie, Themenliste
+und Reichweiten-Maßnahmen: `SEO-Plan.md`. Die Seed-Demo-Einträge werden per
+`supabase/content/demo-inhalte-ausblenden.sql` auf Entwurf gesetzt, damit weder
+Google noch Anbieter erfundene Hotels sehen.

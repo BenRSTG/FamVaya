@@ -2,6 +2,11 @@ import type { MetadataRoute } from "next";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getSiteUrl } from "@/lib/site-url";
 
+// Ohne dieses Intervall wird die Sitemap nur beim Deployen gebaut: neu
+// veröffentlichte (oder ausgeblendete) Inhalte tauchten erst nach dem nächsten
+// Deployment auf bzw. verschwänden erst dann.
+export const revalidate = 3600;
+
 const STATIC_ROUTES = [
   "",
   "/familienunterkuenfte",

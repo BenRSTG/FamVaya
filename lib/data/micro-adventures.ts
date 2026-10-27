@@ -48,6 +48,36 @@ export async function getFeaturedMicroAdventures(
   return attachListExtras(data ?? []);
 }
 
+export async function getRelatedMicroAdventures(
+  adventure: Pick<MicroAdventure, "id" | "category">,
+  limit: number
+): Promise<MicroAdventure[]> {
+  const supabase = createAdminClient();
+  const base = () =>
+    supabase.from("micro_adventures").select(LIST_SELECT).eq("status", "published");
+
+  let rows: unknown[] = [];
+  if (adventure.category?.id) {
+    const { data } = await base()
+      .eq("category_id", adventure.category.id)
+      .neq("id", adventure.id)
+      .order("published_at", { ascending: false })
+      .limit(limit);
+    rows = data ?? [];
+  }
+  if (rows.length < limit) {
+    // Zu wenige in der eigenen Kategorie: mit neuesten Einträgen auffüllen,
+    // damit jede Detailseite genug interne Links hat.
+    const excluded = [adventure.id, ...rows.map((r) => (r as { id: string }).id)];
+    const { data } = await base()
+      .not("id", "in", `(${excluded.join(",")})`)
+      .order("published_at", { ascending: false })
+      .limit(limit - rows.length);
+    rows = [...rows, ...(data ?? [])];
+  }
+  return attachListExtras(rows as Parameters<typeof attachListExtras>[0]);
+}
+
 export async function getPublishedMicroAdventures(
   filters: MicroAdventureFilters = {}
 ): Promise<MicroAdventure[]> {

@@ -8,9 +8,9 @@ import { toNumber, toStringParam, type SearchParams } from "@/lib/search-params"
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
-  title: "Magazin",
+  title: "Magazin: Tipps für Familien mit 3+ Kindern",
   description:
-    "Tipps, Ideen und Erfahrungsberichte für Familienreisen mit drei oder mehr Kindern.",
+    "Ratgeber für Großfamilien: Urlaub planen, Geld sparen, Packlisten und Ausflüge bei Regen – ehrlich und praxisnah für Familien mit drei oder mehr Kindern.",
 };
 
 export default async function MagazinePage({
@@ -44,6 +44,12 @@ export default async function MagazinePage({
         <h1 className="text-3xl font-semibold text-foreground">Magazin</h1>
         <p className="mt-3 text-muted-foreground">
           Tipps, Ideen und Erfahrungsberichte für Familien mit drei oder mehr Kindern.
+        </p>
+        <p className="mt-3 text-muted-foreground">
+          Wie plant man Urlaub mit mehreren Kindern, ohne dass das Budget
+          explodiert? Was gehört in die Packliste einer Großfamilie, und welche
+          Ausflüge funktionieren auch bei Regen? Hier findet ihr Ratgeber, die
+          genau dafür gemacht sind – ehrlich, praxisnah und ohne Werbefloskeln.
         </p>
       </div>
 

@@ -8,9 +8,9 @@ import { toBoolean, toNumber, toStringParam, type SearchParams } from "@/lib/sea
 import { logFilterApplied, logZeroResultSearch } from "@/lib/data/events";
 
 export const metadata: Metadata = {
-  title: "Familienaktivitäten",
+  title: "Familienaktivitäten & Ausflüge mit Kindern",
   description:
-    "Freizeitparks, Erlebnisbäder, Zoos und mehr – für Wochenenden und Kurzurlaube mit der ganzen Familie.",
+    "Freizeitparks, Erlebnisbäder, Zoos und mehr: Ausflugsziele für Großfamilien mit Gesamtpreisen, Familienticket-Infos und Rabatten für drei oder mehr Kinder.",
 };
 
 export default async function ActivitiesPage({

@@ -9,7 +9,10 @@ import { FamilyCheckSection } from "@/components/family-check-section";
 import { RealityCheck } from "@/components/reality-check";
 import { ListingViewTracker } from "@/components/listing-view-tracker";
 import { CtaTrackLink } from "@/components/cta-track-link";
-import { getMicroAdventureBySlug } from "@/lib/data/micro-adventures";
+import { MicroAdventureCard } from "@/components/cards/micro-adventure-card";
+import { ArticleCard } from "@/components/cards/article-card";
+import { getMicroAdventureBySlug, getRelatedMicroAdventures } from "@/lib/data/micro-adventures";
+import { getFeaturedArticles } from "@/lib/data/articles";
 import { isFavorited } from "@/lib/data/favorites";
 import { canPreview, getOptionalUser } from "@/lib/auth";
 import { formatPriceEstimate } from "@/lib/format";
@@ -79,6 +82,11 @@ export default async function MicroAdventureDetailPage({
   const includeUnpublished = preview === "1" && (await canPreview());
   const adventure = await getMicroAdventureBySlug(slug, { includeUnpublished });
   if (!adventure) notFound();
+
+  const [relatedAdventures, magazineArticles] = await Promise.all([
+    getRelatedMicroAdventures(adventure, 3),
+    getFeaturedArticles(3),
+  ]);
 
   const user = await getOptionalUser();
   const favorited = user
@@ -245,6 +253,32 @@ export default async function MicroAdventureDetailPage({
             Einige Links sind Affiliate-Links. Wenn ihr darüber bucht oder kauft, erhält FamVaya möglicherweise eine Provision. Für euch entstehen keine zusätzlichen Kosten.
           </p>
         </div>
+      )}
+
+      {relatedAdventures.length > 0 && (
+        <section className="mt-14">
+          <h2 className="mb-4 text-xl font-semibold text-foreground">
+            Mehr Mikro-Abenteuer für eure Familie
+          </h2>
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {relatedAdventures.map((related) => (
+              <MicroAdventureCard key={related.id} adventure={related} />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {magazineArticles.length > 0 && (
+        <section className="mt-12">
+          <h2 className="mb-4 text-xl font-semibold text-foreground">
+            Passende Tipps aus dem Magazin
+          </h2>
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {magazineArticles.map((article) => (
+              <ArticleCard key={article.id} article={article} />
+            ))}
+          </div>
+        </section>
       )}
     </div>
   );

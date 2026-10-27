@@ -6,6 +6,7 @@ import { PlaceholderImage } from "@/components/placeholder-image";
 import { ArticleCard } from "@/components/cards/article-card";
 import { AccommodationCard } from "@/components/cards/accommodation-card";
 import { ActivityCard } from "@/components/cards/activity-card";
+import { MicroAdventureCard } from "@/components/cards/micro-adventure-card";
 import { Breadcrumbs, BreadcrumbJsonLd } from "@/components/breadcrumbs";
 import { PreviewBanner } from "@/components/admin/preview-banner";
 import { RichText } from "@/components/rich-text";
@@ -13,6 +14,7 @@ import { ListingViewTracker } from "@/components/listing-view-tracker";
 import { getArticleBySlug, getRelatedArticles } from "@/lib/data/articles";
 import { getFeaturedAccommodations } from "@/lib/data/accommodations";
 import { getFeaturedActivities } from "@/lib/data/activities";
+import { getFeaturedMicroAdventures } from "@/lib/data/micro-adventures";
 import { canPreview } from "@/lib/auth";
 import { resolveMediaUrl } from "@/lib/media";
 import { getSiteUrl } from "@/lib/site-url";
@@ -64,10 +66,11 @@ export default async function ArticleDetailPage({
   const article = await getArticleBySlug(slug, { includeUnpublished });
   if (!article) notFound();
 
-  const [relatedArticles, featuredAccommodations, featuredActivities] = await Promise.all([
+  const [relatedArticles, featuredAccommodations, featuredActivities, microAdventures] = await Promise.all([
     getRelatedArticles(article, 3),
     getFeaturedAccommodations(2),
     getFeaturedActivities(2),
+    getFeaturedMicroAdventures(3),
   ]);
 
   const imageUrl = resolveMediaUrl(article.cover_media);
@@ -150,6 +153,19 @@ export default async function ArticleDetailPage({
             ))}
             {featuredActivities.map((activity) => (
               <ActivityCard key={activity.id} activity={activity} />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {microAdventures.length > 0 && (
+        <section className="mb-10">
+          <h2 className="mb-4 text-lg font-semibold text-foreground">
+            Passende Mikro-Abenteuer zum Ausprobieren
+          </h2>
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {microAdventures.map((adventure) => (
+              <MicroAdventureCard key={adventure.id} adventure={adventure} />
             ))}
           </div>
         </section>

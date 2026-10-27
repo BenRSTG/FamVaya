@@ -11,9 +11,9 @@ import { toNumber, toStringParam, type SearchParams } from "@/lib/search-params"
 import { logFilterApplied, logZeroResultSearch } from "@/lib/data/events";
 
 export const metadata: Metadata = {
-  title: "Mikro-Familienabenteuer",
+  title: "Mikro-Abenteuer für Familien: Ideen mit Kindern",
   description:
-    "Kleine, spontane, oft kostenlose Erlebnisse für den Familienalltag – von der Nachtwanderung bis zur Schatzsuche im Garten.",
+    "Kleine Familienabenteuer für Garten, Wald, Strand und Wohnzimmer – kostenlos oder günstig, mit Anleitung und Tipps für Familien mit mehreren Kindern.",
 };
 
 const COST_LEVELS = ["free", "low", "medium", "high"] as const;
@@ -82,6 +82,13 @@ export default async function MicroAdventuresPage({
         <p className="mt-3 text-muted-foreground">
           Für spontane Tagesausflüge und kleine Abenteuer im Familienalltag –
           günstig oder kostenlos, mit oder ohne Vorbereitung.
+        </p>
+        <p className="mt-3 text-muted-foreground">
+          Ein Mikro-Abenteuer dauert Minuten bis wenige Stunden und braucht
+          kaum Material: eine Schatzsuche im Garten, eine Lesenacht mit
+          Taschenlampen oder die Erkundung des nächsten Bachs. Jede Idee hat eine
+          Anleitung, eine Materialliste und Tipps, wie sie mit mehreren Kindern
+          unterschiedlichen Alters klappt.
         </p>
       </div>
 

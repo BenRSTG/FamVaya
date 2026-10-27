@@ -24,12 +24,12 @@ const geistMono = Geist_Mono({
 });
 
 const SITE_DESCRIPTION =
-  "Inspirations- und Empfehlungsplattform für Familienreisen mit Fokus auf Familien mit drei oder mehr Kindern.";
+  "Familienunterkünfte, Ausflüge, Mikro-Abenteuer und Tipps für Familien mit drei oder mehr Kindern – ehrlich geprüft, mit Gesamtpreisen und klaren Hinweisen.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(getSiteUrl()),
   title: {
-    default: "FamVaya – Abenteuer für die ganze Familie. Wirklich die ganze.",
+    default: "FamVaya – Familienurlaub & Ausflüge mit 3+ Kindern",
     template: "%s | FamVaya",
   },
   description: SITE_DESCRIPTION,
@@ -37,13 +37,23 @@ export const metadata: Metadata = {
     siteName: "FamVaya",
     type: "website",
     locale: "de_DE",
-    title: "FamVaya – Abenteuer für die ganze Familie. Wirklich die ganze.",
+    title: "FamVaya – Familienurlaub & Ausflüge mit 3+ Kindern",
     description: SITE_DESCRIPTION,
+    images: [{ url: "/images/hero-familie-berge.jpg", alt: "Familie wandert in den Bergen" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "FamVaya – Abenteuer für die ganze Familie. Wirklich die ganze.",
+    title: "FamVaya – Familienurlaub & Ausflüge mit 3+ Kindern",
     description: SITE_DESCRIPTION,
+    images: ["/images/hero-familie-berge.jpg"],
+  },
+  // Search Console / Bing Webmaster: Code per Umgebungsvariable, kein Eintrag nötig,
+  // wenn die Domain per DNS bestätigt wurde.
+  verification: {
+    google: process.env.GOOGLE_SITE_VERIFICATION,
+    other: process.env.BING_SITE_VERIFICATION
+      ? { "msvalidate.01": process.env.BING_SITE_VERIFICATION }
+      : undefined,
   },
 };
 

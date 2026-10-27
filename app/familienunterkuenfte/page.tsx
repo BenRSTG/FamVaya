@@ -11,9 +11,9 @@ import { toNumber, toStringParam, type SearchParams } from "@/lib/search-params"
 import { logFilterApplied, logZeroResultSearch } from "@/lib/data/events";
 
 export const metadata: Metadata = {
-  title: "Familienunterkünfte",
+  title: "Familienunterkünfte für Großfamilien",
   description:
-    "Familienhotels, Ferienhäuser, Ferienwohnungen und mehr – speziell geeignet für Familien mit drei oder mehr Kindern.",
+    "Familienhotels, Ferienhäuser und Ferienwohnungen mit genug Platz – geprüft für Familien mit drei oder mehr Kindern, mit ehrlichen Hinweisen zu Platz und Gesamtkosten.",
 };
 
 export default async function AccommodationsPage({
