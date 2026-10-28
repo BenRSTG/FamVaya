@@ -194,6 +194,8 @@ export interface Activity {
   status: ContentStatus;
   featured: boolean;
   personally_tested: boolean;
+  seo_title: string | null;
+  meta_description: string | null;
   family_rating: number | null;
   expires_at: string | null;
   pros: string[];

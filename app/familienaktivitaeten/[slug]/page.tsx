@@ -17,6 +17,7 @@ import { canPreview, getOptionalUser } from "@/lib/auth";
 import { formatPrice, formatPriceEstimate } from "@/lib/format";
 import { resolveMediaUrl } from "@/lib/media";
 import { getSiteUrl } from "@/lib/site-url";
+import { RichText } from "@/components/rich-text";
 import { PreviewBanner } from "@/components/admin/preview-banner";
 import { Breadcrumbs, BreadcrumbJsonLd } from "@/components/breadcrumbs";
 
@@ -30,22 +31,25 @@ export async function generateMetadata({
   if (!activity) return {};
 
   const description =
-    activity.short_description ?? `${activity.title} – eine FamVaya-Familienaktivität.`;
+    activity.meta_description ??
+    activity.short_description ??
+    `${activity.title} – eine FamVaya-Familienaktivität.`;
+  const seoTitle = activity.seo_title ?? activity.title;
   const imageUrl = resolveMediaUrl(activity.cover_media);
 
   return {
-    title: activity.title,
+    title: seoTitle,
     description,
     alternates: { canonical: `/familienaktivitaeten/${activity.slug}` },
     openGraph: {
-      title: activity.title,
+      title: seoTitle,
       description,
       type: "website",
       images: imageUrl ? [{ url: imageUrl }] : undefined,
     },
     twitter: {
       card: "summary_large_image",
-      title: activity.title,
+      title: seoTitle,
       description,
       images: imageUrl ? [imageUrl] : undefined,
     },
@@ -180,9 +184,7 @@ export default async function ActivityDetailPage({
           <h2 className="mb-3 text-lg font-semibold text-foreground">
             Beschreibung
           </h2>
-          <p className="whitespace-pre-line text-muted-foreground">
-            {activity.full_description}
-          </p>
+          <RichText text={activity.full_description} className="text-muted-foreground" />
         </section>
       )}
 

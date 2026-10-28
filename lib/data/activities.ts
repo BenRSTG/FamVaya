@@ -29,7 +29,7 @@ const DETAIL_SELECT = `
   duration_min, duration_max, indoor, outdoor, weather_suitable,
   adult_price, child_price, example_total_price, family_ticket,
   large_family_discount, booking_required, price_checked_at,
-  affiliate_url, external_url, status, featured, personally_tested, family_rating, expires_at,
+  affiliate_url, external_url, status, featured, personally_tested, seo_title, meta_description, family_rating, expires_at,
   pros, cons,
   category:categories(id, name, slug),
   country:countries(id, name, code),
@@ -166,6 +166,8 @@ export interface ActivityInput {
   status: ContentStatus;
   featured: boolean;
   personally_tested: boolean;
+  seo_title: string | null;
+  meta_description: string | null;
   family_rating: number | null;
   expires_at: string | null;
   pros: string[];
@@ -195,7 +197,7 @@ const ADMIN_FORM_SELECT = `
   duration_min, duration_max, indoor, outdoor, weather_suitable,
   adult_price, child_price, example_total_price, family_ticket,
   large_family_discount, booking_required, price_checked_at,
-  affiliate_url, external_url, status, featured, personally_tested, family_rating, expires_at,
+  affiliate_url, external_url, status, featured, personally_tested, seo_title, meta_description, family_rating, expires_at,
   pros, cons
 `;
 

@@ -1731,3 +1731,20 @@ speichern. Zwischen zwei Bestätigungs-Mails an dieselbe Adresse liegen
 mindestens 2 Minuten (Missbrauchsschutz). Früher abgemeldete Adressen
 (`confirmed = false`) durchlaufen beim erneuten Anmelden wieder die Bestätigung.
 Die Anmeldung wird erst nach der Bestätigung als Event gezählt.
+
+### Familienaktivitäten: SEO-Felder, Überschriften, Batch 1 mit belegten Angaben (Oktober 2026)
+
+Aktivitäten bekommen wie Mikro-Abenteuer eigene SEO-Felder (`seo_title`,
+`meta_description`, Migration `0030`), der Admin-Abschnitt "Suchmaschinen (SEO)"
+und die Beschreibung läuft über `RichText` (`##`/`###`/`-`). Content-Batch 1
+(`supabase/content/aktivitaeten-batch-1.sql`): 10 bekannte Ziele (Europa-Park,
+Heide Park, Phantasialand, LEGOLAND, HANSA-PARK, Serengeti-Park, Erlebnis-Zoo
+Hannover, Tierpark Hagenbeck, Tropical Islands, Therme Erding) als Entwurf.
+Regel: Preise, Altersgrenzen und Zeiten nur, wenn sie auf der offiziellen
+Anbieter-Seite stehen (Stand 28.10.2026, mit `price_checked_at`); die meisten
+Parks haben datumsabhängige Preise, deshalb stehen die Beträge im Text mit
+Datum statt in `adult_price`/`child_price` (nur Hagenbeck mit festen
+Einzelpreisen). Was nicht belegt werden konnte (z. B. Zoo Hannover, Therme
+Erding, Preise Serengeti/HANSA-PARK), bleibt leer und ist im Text so benannt.
+Kein Familienscore, kein "persönlich getestet", keine Affiliate-URL: das folgt
+nach Gegenlesen bzw. Freischaltung eines Partnerprogramms.
