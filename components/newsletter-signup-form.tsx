@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { filterInputClass } from "@/components/filter-field";
 import { subscribeNewsletter } from "@/lib/actions/newsletter";
 
-type NewsletterStatus = "success" | "duplicate" | "error" | undefined;
+type NewsletterStatus = "pending" | "duplicate" | "unavailable" | "error" | undefined;
 
 // Wiederverwendbare Anmelde-Komponente (Phase 14) — bisher nur inline auf
 // der Startseite. `compact` blendet Wohnort/Kinderanzahl aus und wird für
@@ -30,9 +30,15 @@ export function NewsletterSignupForm({
         </>
       )}
 
-      {status === "success" && (
+      {status === "pending" && (
         <p className="mb-4 rounded-lg bg-success/10 px-3 py-2 text-sm text-success">
-          Danke für deine Anmeldung!
+          Fast geschafft! Wir haben dir eine E-Mail geschickt — bitte bestätige
+          deine Anmeldung über den Link darin (ggf. im Spam-Ordner nachsehen).
+        </p>
+      )}
+      {status === "unavailable" && (
+        <p className="mb-4 rounded-lg bg-accent/40 px-3 py-2 text-sm text-foreground">
+          Die Newsletter-Anmeldung ist gerade nicht verfügbar. Bitte versuch es später noch einmal.
         </p>
       )}
       {status === "duplicate" && (

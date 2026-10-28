@@ -51,9 +51,14 @@ export default function DatenschutzPage() {
         <p className="text-muted-foreground">
           Für die Newsletter-Anmeldung verarbeiten wir eure E-Mail-Adresse
           sowie optionale Angaben (Wohnort, Kinderanzahl) auf Grundlage eurer
-          Einwilligung (Art. 6 Abs. 1 lit. a DSGVO). Der Versand erfolgt über
-          den Dienst Resend (Resend, Inc., USA). Jede E-Mail enthält einen
-          Abmelde-Link; eine Abmeldung ist jederzeit möglich.
+          Einwilligung (Art. 6 Abs. 1 lit. a DSGVO). Wir nutzen das
+          Double-Opt-in-Verfahren: Nach der Anmeldung erhaltet ihr eine
+          E-Mail mit einem Bestätigungslink; erst nach dem Klick darauf
+          bekommt ihr den Newsletter. Zum Nachweis speichern wir den
+          Zeitpunkt der Anmeldung, des Mailversands und der Bestätigung.
+          Der Versand erfolgt über den Dienst Resend (Resend, Inc., USA).
+          Jede Newsletter-E-Mail enthält einen Abmelde-Link; eine Abmeldung
+          ist jederzeit möglich.
         </p>
       </section>
 

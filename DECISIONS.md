@@ -1715,3 +1715,19 @@ ohne Übersetzungswunsch. Er lädt jetzt erst beim Klick auf die englische
 Flagge (`loadWidget`); die Datenschutzerklärung beschreibt das. Offen:
 Newsletter nutzt Single-Opt-in (`lib/actions/newsletter.ts`) — vor dem ersten
 Versand auf Double-Opt-in umstellen.
+
+### Newsletter: Double-Opt-in (Oktober 2026)
+
+Die Newsletter-Anmeldung war Single-Opt-in (`confirmed = true` sofort). In
+Deutschland braucht Werbung per E-Mail einen Einwilligungsnachweis, daher jetzt
+Double-Opt-in: `subscribeNewsletter` speichert unbestätigt (`confirmed = false`)
+und schickt über Resend (`sendTransactionalEmail`) eine Bestätigungs-Mail mit
+Link auf `/newsletter/bestaetigen/[token]` (`confirmation_token`); erst dort
+wird `confirmed = true` und `confirmed_at` gesetzt. Migration `0029` ergänzt
+`confirmation_token`, `confirmation_sent_at`, `confirmed_at`; bestehende
+Abonnenten bleiben bestätigt. Ohne `RESEND_API_KEY`/`RESEND_FROM_EMAIL` lehnt
+das Formular ehrlich ab (Status `unavailable`), statt Adressen ohne Nachweis zu
+speichern. Zwischen zwei Bestätigungs-Mails an dieselbe Adresse liegen
+mindestens 2 Minuten (Missbrauchsschutz). Früher abgemeldete Adressen
+(`confirmed = false`) durchlaufen beim erneuten Anmelden wieder die Bestätigung.
+Die Anmeldung wird erst nach der Bestätigung als Event gezählt.

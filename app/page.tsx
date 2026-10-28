@@ -250,7 +250,7 @@ export default async function Home({
 
       {/* Newsletter */}
       <section id="newsletter" className="scroll-mt-20 px-4 py-14 sm:px-6">
-        <NewsletterSignupForm status={newsletterStatus as "success" | "duplicate" | "error" | undefined} />
+        <NewsletterSignupForm status={newsletterStatus as "pending" | "duplicate" | "unavailable" | "error" | undefined} />
       </section>
     </div>
   );

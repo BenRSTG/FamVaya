@@ -210,3 +210,26 @@ export async function unsubscribeByToken(token: string): Promise<boolean> {
   if (error) throw error;
   return Boolean(data);
 }
+
+export type NewsletterConfirmResult = "confirmed" | "already_confirmed" | "invalid";
+
+export async function confirmSubscriptionByToken(token: string): Promise<NewsletterConfirmResult> {
+  // Kein gültiges UUID-Format -> Postgres würde mit einem Typfehler abbrechen.
+  if (!/^[0-9a-f-]{36}$/i.test(token)) return "invalid";
+  const supabase = createAdminClient();
+  const { data: row, error } = await supabase
+    .from("newsletter_subscribers")
+    .select("id, confirmed")
+    .eq("confirmation_token", token)
+    .maybeSingle();
+  if (error) throw error;
+  if (!row) return "invalid";
+  if (row.confirmed) return "already_confirmed";
+
+  const { error: updateError } = await supabase
+    .from("newsletter_subscribers")
+    .update({ confirmed: true, confirmed_at: new Date().toISOString() })
+    .eq("id", row.id);
+  if (updateError) throw updateError;
+  return "confirmed";
+}

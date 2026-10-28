@@ -62,3 +62,31 @@ export async function sendCampaignEmails(params: {
     }
   }
 }
+
+// Einzelne Transaktions-Mail (z. B. Double-Opt-in-Bestätigung) über
+// denselben Resend-Zugang wie der Kampagnenversand.
+export async function sendTransactionalEmail(params: {
+  to: string;
+  subject: string;
+  html: string;
+}): Promise<void> {
+  const { apiKey, fromEmail } = requireConfig();
+  const response = await fetch(`${RESEND_API_BASE}/emails`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      from: fromEmail,
+      to: params.to,
+      subject: params.subject,
+      html: params.html,
+    }),
+  });
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => null);
+    throw new Error(body?.message ?? `Resend-API-Fehler (HTTP ${response.status})`);
+  }
+}

@@ -82,3 +82,36 @@ export function renderCampaignEmail(input: RenderCampaignEmailInput): string {
   </body>
 </html>`;
 }
+
+export interface RenderConfirmationEmailInput {
+  confirmUrl: string;
+}
+
+// Double-Opt-in-Mail: bewusst ohne Abmelde-Link und ohne Werbeinhalt — sie
+// dient nur der Bestätigung der Anmeldung.
+export function renderConfirmationEmail(input: RenderConfirmationEmailInput): string {
+  return `<!DOCTYPE html>
+<html lang="de">
+  <head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /></head>
+  <body style="margin:0;padding:0;background:${BRAND_CREAM};font-family:Arial,Helvetica,sans-serif;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${BRAND_CREAM};padding:32px 16px;">
+      <tr><td align="center">
+        <table role="presentation" width="100%" style="max-width:560px;" cellpadding="0" cellspacing="0">
+          <tr><td style="padding-bottom:24px;text-align:center;">
+            <span style="font-size:24px;font-weight:700;color:${BRAND_TEAL};">Fam<span style="color:${BRAND_GREY};">Vaya</span></span>
+          </td></tr>
+          <tr><td style="background:#ffffff;border-radius:16px;padding:32px;">
+            <h1 style="margin:0 0 16px;font-size:22px;color:${BRAND_PETROL_DARK};">Bitte bestätigt eure Anmeldung</h1>
+            <div style="font-size:15px;line-height:1.6;color:${BRAND_PETROL_DARK};">
+              <p style="margin:0 0 12px;">Schön, dass ihr dabei sein wollt! Mit einem Klick bestätigt ihr eure Anmeldung zum FamVaya-Newsletter.</p>
+              <p style="margin:24px 0;"><a href="${input.confirmUrl}" style="display:inline-block;background:${BRAND_TEAL};color:#ffffff;text-decoration:none;padding:12px 24px;border-radius:8px;font-size:14px;font-weight:600;">Anmeldung bestätigen</a></p>
+              <p style="margin:0;font-size:13px;color:${BRAND_GREY};">Habt ihr euch nicht angemeldet? Dann ignoriert diese E-Mail einfach, ihr bekommt keine weiteren Nachrichten von uns.</p>
+            </div>
+          </td></tr>
+          <tr><td style="padding-top:24px;text-align:center;font-size:12px;color:${BRAND_GREY};">FamVaya</td></tr>
+        </table>
+      </td></tr>
+    </table>
+  </body>
+</html>`;
+}
