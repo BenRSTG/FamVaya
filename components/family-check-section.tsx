@@ -21,7 +21,7 @@ export function FamilyCheckSection({
   familyRating: number | null;
   maxChildren?: number | null;
   personallyTested?: boolean;
-  kind?: "default" | "micro_adventure";
+  kind?: "default" | "micro_adventure" | "activity";
 }) {
   if (familyRating == null && maxChildren === undefined && !personallyTested) return null;
 
@@ -66,7 +66,9 @@ export function FamilyCheckSection({
         <p className="mb-4 text-sm text-muted-foreground">
           {kind === "micro_adventure"
             ? "Der Score fließt aus einer redaktionellen Einschätzung von Eignung für mehrere Kinder, Altersmischung, Aufwand und Kosten, Wetter- und Jahreszeit-Flexibilität sowie Sicherheit und Aufsichtsbedarf."
-            : "Der Score fließt aus einer redaktionellen Einschätzung von Platz, getrennten Zimmern/Rückzugsmöglichkeiten, familientauglicher Ausstattung, Preis-Leistung und verfügbaren Rabatten für Großfamilien."}
+            : kind === "activity"
+              ? "Der Score fließt aus einer redaktionellen Einschätzung von Eignung für mehrere Kinder und Altersmischung, Kosten für Großfamilien, Praktikabilität vor Ort, Wetter- und Saison-Flexibilität sowie Übersichtlichkeit und Aufsichtsbedarf."
+              : "Der Score fließt aus einer redaktionellen Einschätzung von Platz, getrennten Zimmern/Rückzugsmöglichkeiten, familientauglicher Ausstattung, Preis-Leistung und verfügbaren Rabatten für Großfamilien."}
         </p>
       )}
 

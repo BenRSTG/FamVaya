@@ -5,6 +5,10 @@ Stand: 28.10.2026. Reihenfolge = grobe Priorität.
 ## Gerade in Arbeit
 - [ ] Familienaktivitäten anlegen (echte Einträge, ehrliche Angaben), danach Affiliate-Programme prüfen
 
+- [ ] Aktivitäten (30 Einträge, Entwürfe): Bilder ergänzen, Texte gegenlesen, Preise bei Zoo Hannover, Therme Erding, HANSA-PARK, Serengeti-Park, Wilhelma, ZOOM, Ozeaneum, Miniatur Wunderland, phaeno, Autostadt, Deutsches Museum, Spieleland, Tripsdrill, Fort Fun, Zoo Leipzig/Berlin selbst auf den Anbieter-Seiten prüfen und nachtragen
+- [ ] Aktivitäten: Familienscore (Ersteinschätzung) und "Kinderwagen"/"Barrierefrei"/"Eigenes Essen"-Häkchen vor Ort bzw. beim Anbieter prüfen
+- [ ] Aktivitäten: nach Gewerbeanmeldung Partnerprogramme prüfen (GetYourGuide, Tiqets, Awin-Parks) und Affiliate-Links im Admin eintragen
+
 ## Rechtliches und Organisation
 - [ ] **Gewerbe anmelden** (Gewerbeamt Cremlingen) bzw. mit Steuerberater klären – vor den ersten Affiliate-Einnahmen
 - [ ] **Zweiter Kontaktweg im Impressum** (Kontaktformular oder Telefonnummer)

@@ -174,6 +174,7 @@ export default async function ActivityDetailPage({
         <FamilyCheckSection
           familyRating={activity.family_rating}
           personallyTested={activity.personally_tested}
+          kind="activity"
         />
       </div>
 

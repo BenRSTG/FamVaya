@@ -1748,3 +1748,28 @@ Einzelpreisen). Was nicht belegt werden konnte (z. B. Zoo Hannover, Therme
 Erding, Preise Serengeti/HANSA-PARK), bleibt leer und ist im Text so benannt.
 Kein Familienscore, kein "persönlich getestet", keine Affiliate-URL: das folgt
 nach Gegenlesen bzw. Freischaltung eines Partnerprogramms.
+
+### Familienaktivitäten: vollständige Felder, Familienscore-Raster, Batch 2 (Oktober 2026)
+
+Jede Aktivität soll alle Felder der Detailseite füllen, soweit belegt: Region
+(Bundesländer als neue `regions`-Einträge), Kategorie (neu: "Museen &
+Erlebniswelten", "Natur & Abenteuer"), Dauer (redaktioneller Richtwert),
+Indoor/Outdoor/"bei jedem Wetter", Merkmale, Altersgruppen, Tags, Pros/Cons,
+SEO, Familienscore. Preise nur bei Beleg auf der Anbieter-Seite (Stand
+28.10.2026, `price_checked_at`); `example_total_price` nur dort, wo das
+Rechenbeispiel im Text steht (Hagenbeck: Tierpark, Zoo Osnabrück: Mindestpreis,
+Baumwipfelpfad). Merkmale/Häkchen nur bei Beleg oder bei großen, eindeutig
+ausgestatteten Zielen (Parkplatz, Gastronomie, Kinderwagen); "Barrierefrei" nur
+beim Baumwipfelpfad (Betreiber: barrierearm), "Eigenes Essen erlaubt" nirgends
+(nicht belegt). "Bei jedem Wetter geeignet" nur für Indoor-Ziele bzw. den
+überdachten Allwetterzoo; in Batch 1 war es bei Zoos/Parks fälschlich gesetzt
+(Korrektur in `aktivitaeten-batch-1-ergaenzung.sql`).
+
+Familienscore Aktivitäten: Summe aus fünf Kriterien à 0-20 — Eignung für
+mehrere Kinder/Altersmischung, Kosten für Großfamilien, Praktikabilität
+(Verpflegung, Kinderwagen, Planbarkeit), Wetter-/Saison-Flexibilität,
+Übersichtlichkeit/Aufsicht. Erste redaktionelle Einschätzung (60-83, Ø 70),
+keine Testbewertung; `FamilyCheckSection kind="activity"` erklärt das.
+Tag "Großfamilie" nur bei Score ab 75. Batch 2: 20 Ziele
+(`aktivitaeten-batch-2.sql`), alle SQL-Dateien wurden gegen eine lokale
+Postgres-Instanz (PGlite) mit allen Migrationen und dem Seed geprüft.
